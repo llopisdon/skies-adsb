@@ -66,8 +66,14 @@ window.addEventListener('dblclick', () => {
 })
 
 
-const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+const airCraftGeometry = new THREE.BufferGeometry()
+const airCraftVertices = new Float32Array([
+  0, 0, -3,
+  1.5, 0, 1,
+  -1.5, 0, 1
+])
+airCraftGeometry.setAttribute('position', new THREE.BufferAttribute(airCraftVertices, 3))
+const airCraftMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
 
 
 // axes helper
@@ -129,19 +135,16 @@ class Aircraft {
     this.ttl = 0
     this.screen_pos = null
 
-    this.mesh = new THREE.Mesh(geometry, material)
-
+    this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial)
     this.added = false
   }
 
   clear() {
+    console.log(`*** CLEAR -- ${this.hex}`)
     scene.remove(this.mesh)
   }
 
   update(data) {
-
-    let updatePos = false
-
     if (data[CALLSIGN] !== "") {
       this.callsign = data[CALLSIGN]
     }
@@ -169,6 +172,7 @@ class Aircraft {
 
     if (data[TRACK] !== "") {
       this.hdg = data[TRACK]
+      this.mesh.rotation.y = radians(-this.hdg)
     }
     if (data[GORUND_SPEED] !== "") {
       this.spd = data[GORUND_SPEED]
@@ -191,11 +195,12 @@ class Aircraft {
 
       // position is in world coordinates
       this.mesh.position.set(this.pos.x * SCALE, this.pos.y * SCALE, this.pos.z * SCALE)
+
     } else {
-      this.log()
+      //this.log()
     }
 
-    this.ttl = 10_000
+    this.ttl = 10
   }
 
   hasValidTelemetry() {
@@ -368,6 +373,9 @@ const miami_zones = {
 
     25.756313276633175, -80.13989345282312,
     25.76216194370716, -80.14845094861667,
+
+    25.76216194370716, -80.14845094861667,
+    25.76352841318556, -80.14845094861667,
   ],
   virginia_key: [
     25.75680278287766, -80.14822543312141,
@@ -853,8 +861,14 @@ function draw(deltaTime) {
     pop();
     */
 
-    ac.ttl -= deltaTime * 1000
-    if (ac.ttl <= 0) {
+    ac.ttl -= 100 * deltaTime
+
+    if (ac.hasValidTelemetry()) {
+      //console.log(ac.ttl)
+    }
+
+
+    if (ac.ttl < 0) {
       ac.clear()
       delete aircrafts[key]
     }
