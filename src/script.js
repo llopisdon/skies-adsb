@@ -75,11 +75,11 @@ const airCraftVertices = new Float32Array([
 airCraftGeometry.setAttribute('position', new THREE.BufferAttribute(airCraftVertices, 3))
 const airCraftMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
 
+const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
 
 // axes helper
 const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
-
 
 
 //
@@ -112,6 +112,9 @@ const SCALE = 1.0 / 300.0
 
 const aircrafts = {}
 
+
+
+
 class Aircraft {
   constructor() {
     this.hex = ""
@@ -136,7 +139,17 @@ class Aircraft {
     this.screen_pos = null
 
     this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial)
-    this.added = false
+    this.mesh.visible = false
+
+    this.heightLineGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, 0)
+    ])
+    this.heightLineGeometry.attributes.position.usage = THREE.DynamicDrawUsage
+    this.heightLinePos = this.heightLineGeometry.attributes.position
+    this.heightLineMesh = new THREE.Line(this.heightLineGeometry, airCraftHeightLineMaterial)
+    this.mesh.add(this.heightLineMesh)
+    scene.add(this.mesh)
   }
 
   clear() {
@@ -172,7 +185,7 @@ class Aircraft {
 
     if (data[TRACK] !== "") {
       this.hdg = data[TRACK]
-      this.mesh.rotation.y = radians(-this.hdg)
+      this.mesh.rotation.y = THREE.MathUtils.degToRad(-this.hdg)
     }
     if (data[GORUND_SPEED] !== "") {
       this.spd = data[GORUND_SPEED]
@@ -180,21 +193,23 @@ class Aircraft {
 
     if (this.hasValidTelemetry()) {
 
-      if (!this.added) {
-        this.added = true
-        scene.add(this.mesh)
+      if (!this.mesh.visible) {
+        this.mesh.visible = true
       }
       this.bearing = calcBearing(origin, this.pos)
       this.distance = calcSphericalDistance(origin, this.pos)
 
-      this.pos.x = this.distance * Math.cos(radians(90 - this.bearing))
-      this.pos.z = -this.distance * Math.sin(radians(90 - this.bearing))
+      this.pos.x = this.distance * Math.cos(THREE.MathUtils.degToRad(90 - this.bearing))
+      this.pos.z = -this.distance * Math.sin(THREE.MathUtils.degToRad(90 - this.bearing))
 
       // TODO port this
       //this.screen_pos = screenPosition([this.pos.x, this.pos.y, this.pos.z]);
 
       // position is in world coordinates
-      this.mesh.position.set(this.pos.x * SCALE, this.pos.y * SCALE, this.pos.z * SCALE)
+      const yPos = this.pos.y * SCALE
+      this.mesh.position.set(this.pos.x * SCALE, yPos, this.pos.z * SCALE)
+      this.heightLinePos.setY(1, -yPos)
+      this.heightLinePos.needsUpdate = true
 
     } else {
       //this.log()
@@ -215,11 +230,6 @@ class Aircraft {
     console.log(this.pos)
     console.log("################")
   }
-}
-
-
-function radians(deg) {
-  return deg * (Math.PI / 180)
 }
 
 
@@ -720,6 +730,42 @@ const miami_zones = {
   ]
 }
 
+
+const mia_poi = {
+  MIA: [
+    25.799740325918425, -80.28758238380416,
+  ],
+
+  HX51: [
+    25.502903180543875, -80.55383172752417,
+  ],
+
+
+  OPF: [
+    25.90416305, -80.273665572,
+  ],
+
+  B2121: [
+    25.797851473225546, -80.18387284800328,
+  ],
+
+  MEA: [
+    25.649205063859373, -80.42923599495592,
+  ],
+
+  HAFB: [
+    25.496127474507176, -80.39529010255902,
+  ],
+
+  HOME: [
+    25.766529, -80.256884,
+  ],
+
+};
+
+
+
+
 const miami_map = {}
 
 
@@ -734,23 +780,8 @@ navigator.geolocation.getCurrentPosition((pos) => {
   // TODO start websocket connection once geolocation has been updated
   // TODO update geometries once geolocation has been updated
 
-
   // const { x, y } = getXY(origin, { latitude: 25.799740325918425, longitude: -80.28758238380416 })
   // console.log(`mia: ${x} ${y}`)
-
-  // TODO update boundaries and POI projections
-
-  /*
-  for (let key in mia_ref_points) {
-    const ref_pt = mia_ref_points[key];
-    const { x, y } = getXY(origin, { latitude: ref_pt[0], longitude: ref_pt[1] });
-    mia_ref_points_map[key] = [];
-    mia_ref_points_map[key].push(x);
-    mia_ref_points_map[key].push(y);
-  }
-  */
-
-
 
   for (let key in miami_zones) {
     const zone = miami_zones[key]
@@ -760,7 +791,6 @@ navigator.geolocation.getCurrentPosition((pos) => {
       const { x, y } = getXY(origin, { lat: zone[i], lng: zone[i + 1] })
       points.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
     }
-
     let geometry = new THREE.BufferGeometry().setFromPoints(points)
     let lineSegments = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({
       color: new THREE.Color('#81efff')
@@ -768,7 +798,20 @@ navigator.geolocation.getCurrentPosition((pos) => {
     scene.add(lineSegments)
   }
 
-  //console.log(miami_map)
+
+  // fill('#ED225D');
+  // points of interest (poi)
+  const poiVertices = []
+  for (let key in mia_poi) {
+    const ref_pt = mia_poi[key];
+    console.log(ref_pt)
+    const { x, y } = getXY(origin, { lat: ref_pt[0], lng: ref_pt[1] });
+    poiVertices.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
+  }
+  const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
+  const poiMaterial = new THREE.PointsMaterial({ color: 'red' })
+  const poiMesh = new THREE.Points(poiGeometry, poiMaterial)
+  scene.add(poiMesh)
 
 }, (error) => {
   console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
@@ -938,8 +981,8 @@ function getXY(from, to) {
   const bearing = calcBearing(from, to)
   const d = calcSphericalDistance(from, to)
 
-  const x = d * Math.cos(radians(90 - bearing))
-  const y = -d * Math.sin(radians(90 - bearing))
+  const x = d * Math.cos(THREE.MathUtils.degToRad(90 - bearing))
+  const y = -d * Math.sin(THREE.MathUtils.degToRad(90 - bearing))
 
   return { x: x, y: y }
 }
