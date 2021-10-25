@@ -1,8 +1,9 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { Object3D } from 'three'
-
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+import * as DroidSansMonoRegularFontJson from 'three/examples/fonts/droid/droid_sans_mono_regular.typeface.json'
+import Stats from 'stats.js'
 
 const sizes = {
   width: window.innerWidth,
@@ -19,6 +20,8 @@ let MIA_distance = 0.0;
 let theta = 0.0;
 
 
+const droidSansMonoRegularFont = new FontLoader().parse(DroidSansMonoRegularFontJson)
+
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 10000)
 camera.position.z = 10
@@ -29,6 +32,11 @@ scene.add(camera)
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
+
+// stats
+const stats = new Stats()
+stats.showPanel(0)
+document.body.appendChild(stats.dom)
 
 // controls
 const controls = new OrbitControls(camera, renderer.domElement)
@@ -82,6 +90,8 @@ const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
 
 
+
+
 //
 // dump1090 ADB-S protocol 
 //
@@ -112,14 +122,16 @@ const SCALE = 1.0 / 300.0
 
 const aircrafts = {}
 
-
-
+const aircraftFontMaterial = new THREE.MeshBasicMaterial({
+  color: 0xff0000,
+  side: THREE.DoubleSide
+});
 
 class Aircraft {
   constructor() {
-    this.hex = ""
-    this.sqwk = ""
-    this.flight = ""
+    this.hex = undefined
+    this.sqwk = undefined
+    this.flight = undefined
     this.alt = undefined
     this.spd = undefined
     this.hdg = undefined
@@ -138,9 +150,11 @@ class Aircraft {
     this.ttl = 0
     this.screen_pos = null
 
+    // aircraft mesh
     this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial)
     this.mesh.visible = false
 
+    // aircraft height line
     this.heightLineGeometry = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, 0, 0)
@@ -149,6 +163,13 @@ class Aircraft {
     this.heightLinePos = this.heightLineGeometry.attributes.position
     this.heightLineMesh = new THREE.Line(this.heightLineGeometry, airCraftHeightLineMaterial)
     this.mesh.add(this.heightLineMesh)
+
+    // aircraft messages text
+    const textShapes = droidSansMonoRegularFont.generateShapes("", 1)
+    this.textGeometry = new THREE.ShapeGeometry(textShapes)
+    this.text = new THREE.Mesh(this.textGeometry, aircraftFontMaterial)
+    this.mesh.add(this.text)
+
     scene.add(this.mesh)
   }
 
@@ -210,6 +231,14 @@ class Aircraft {
       this.mesh.position.set(this.pos.x * SCALE, yPos, this.pos.z * SCALE)
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
+
+      const message = `${this.callsign || this.hex}\n${this.hdg}\n${this.spd}\n${this.alt}`
+      const shapes = droidSansMonoRegularFont.generateShapes(message, 1)
+      const geometry = new THREE.ShapeGeometry(shapes)
+      this.text.geometry.dispose()
+      this.text.geometry = geometry
+      this.text.needsUpdate = true
+
 
     } else {
       //this.log()
@@ -767,7 +796,7 @@ const mia_poi = {
 
 
 const miami_map = {}
-
+const poiVertices = []
 
 
 navigator.geolocation.getCurrentPosition((pos) => {
@@ -786,7 +815,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
   for (let key in miami_zones) {
     const zone = miami_zones[key]
     miami_map[key] = []
-    let points = [];
+    let points = []
     for (let i = 0; i < zone.length; i += 2) {
       const { x, y } = getXY(origin, { lat: zone[i], lng: zone[i + 1] })
       points.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
@@ -801,15 +830,30 @@ navigator.geolocation.getCurrentPosition((pos) => {
 
   // fill('#ED225D');
   // points of interest (poi)
-  const poiVertices = []
+
+  const labelMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide
+  });
+
   for (let key in mia_poi) {
-    const ref_pt = mia_poi[key];
-    console.log(ref_pt)
-    const { x, y } = getXY(origin, { lat: ref_pt[0], lng: ref_pt[1] });
+    const ref_pt = mia_poi[key]
+    console.log(`${key} -> ${ref_pt}`)
+    const { x, y } = getXY(origin, { lat: ref_pt[0], lng: ref_pt[1] })
     poiVertices.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
+    const shapes = droidSansMonoRegularFont.generateShapes(key, 0.75)
+    const labelGeometry = new THREE.ShapeGeometry(shapes)
+    labelGeometry.computeBoundingBox();
+    const xMid = - 0.5 * (labelGeometry.boundingBox.max.x - labelGeometry.boundingBox.min.x);
+    labelGeometry.translate(xMid, 0, 0)
+    const label = new THREE.Mesh(labelGeometry, labelMaterial)
+    label.position.x = x * SCALE
+    label.position.y = 1
+    label.position.z = y * SCALE
+    scene.add(label)
   }
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
-  const poiMaterial = new THREE.PointsMaterial({ color: 'red' })
+  const poiMaterial = new THREE.PointsMaterial({ color: 0xff0000 })
   const poiMesh = new THREE.Points(poiGeometry, poiMaterial)
   scene.add(poiMesh)
 
@@ -992,6 +1036,7 @@ function getXY(from, to) {
 let clock = new THREE.Clock()
 
 const tick = function () {
+  stats.begin()
 
   const elapsedTime = clock.getElapsedTime()
 
@@ -1002,6 +1047,8 @@ const tick = function () {
   draw(clock.getDelta())
 
   renderer.render(scene, camera)
+
+  stats.end()
 }
 
 tick()
