@@ -168,13 +168,14 @@ class Aircraft {
     const textShapes = droidSansMonoRegularFont.generateShapes("", 1)
     this.textGeometry = new THREE.ShapeGeometry(textShapes)
     this.text = new THREE.Mesh(this.textGeometry, aircraftFontMaterial)
-    this.mesh.add(this.text)
+    scene.add(this.text)
 
     scene.add(this.mesh)
   }
 
   clear() {
     console.log(`*** CLEAR -- ${this.hex}`)
+    scene.remove(this.text)
     scene.remove(this.mesh)
   }
 
@@ -227,8 +228,10 @@ class Aircraft {
       //this.screen_pos = screenPosition([this.pos.x, this.pos.y, this.pos.z]);
 
       // position is in world coordinates
+      const xPos = this.pos.x * SCALE
       const yPos = this.pos.y * SCALE
-      this.mesh.position.set(this.pos.x * SCALE, yPos, this.pos.z * SCALE)
+      const zPos = this.pos.z * SCALE
+      this.mesh.position.set(xPos, yPos, zPos)
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
 
@@ -237,6 +240,7 @@ class Aircraft {
       const geometry = new THREE.ShapeGeometry(shapes)
       this.text.geometry.dispose()
       this.text.geometry = geometry
+      this.text.position.set(xPos + 2, yPos - 2, zPos)
       this.text.needsUpdate = true
 
 
@@ -245,6 +249,10 @@ class Aircraft {
     }
 
     this.ttl = 10
+  }
+
+  updateText() {
+    this.text.rotation.y = Math.atan2((camera.position.x - this.text.position.x), (camera.position.z - this.text.position.z))
   }
 
   hasValidTelemetry() {
@@ -797,6 +805,7 @@ const mia_poi = {
 
 const miami_map = {}
 const poiVertices = []
+const poiLabels = []
 
 
 navigator.geolocation.getCurrentPosition((pos) => {
@@ -812,7 +821,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
   // const { x, y } = getXY(origin, { latitude: 25.799740325918425, longitude: -80.28758238380416 })
   // console.log(`mia: ${x} ${y}`)
 
-  for (let key in miami_zones) {
+  for (const key in miami_zones) {
     const zone = miami_zones[key]
     miami_map[key] = []
     let points = []
@@ -836,7 +845,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
     side: THREE.DoubleSide
   });
 
-  for (let key in mia_poi) {
+  for (const key in mia_poi) {
     const ref_pt = mia_poi[key]
     console.log(`${key} -> ${ref_pt}`)
     const { x, y } = getXY(origin, { lat: ref_pt[0], lng: ref_pt[1] })
@@ -850,6 +859,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
     label.position.x = x * SCALE
     label.position.y = 1
     label.position.z = y * SCALE
+    poiLabels.push(label)
     scene.add(label)
   }
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
@@ -954,12 +964,19 @@ function draw(deltaTime) {
       //console.log(ac.ttl)
     }
 
+    ac.updateText()
+
 
     if (ac.ttl < 0) {
       ac.clear()
       delete aircrafts[key]
     }
   }
+
+  for (const label of poiLabels) {
+    label.rotation.y = Math.atan2((camera.position.x - label.position.x), (camera.position.z - label.position.z))
+  }
+
 }
 
 
