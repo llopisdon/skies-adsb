@@ -1,9 +1,8 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
-import * as DroidSansMonoRegularFontJson from 'three/examples/fonts/droid/droid_sans_mono_regular.typeface.json'
 import Stats from 'stats.js'
+import { Text } from 'troika-three-text'
 
 const sizes = {
   width: window.innerWidth,
@@ -19,8 +18,6 @@ let MIA_distance = 0.0;
 
 let theta = 0.0;
 
-
-const droidSansMonoRegularFont = new FontLoader().parse(DroidSansMonoRegularFontJson)
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 10000)
@@ -122,11 +119,6 @@ const SCALE = 1.0 / 300.0
 
 const aircrafts = {}
 
-const aircraftFontMaterial = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
-  side: THREE.DoubleSide
-});
-
 class Aircraft {
   constructor() {
     this.hex = undefined
@@ -165,18 +157,25 @@ class Aircraft {
     this.mesh.add(this.heightLineMesh)
 
     // aircraft messages text
-    const textShapes = droidSansMonoRegularFont.generateShapes("", 1)
-    this.textGeometry = new THREE.ShapeGeometry(textShapes)
-    this.text = new THREE.Mesh(this.textGeometry, aircraftFontMaterial)
+    this.text = new Text()
+    this.text.text = ""
+    this.text.fontSize = 1
+    this.text.anchorX = -1
+    this.text.anchorY = 1
+    this.text.color = 0xED225D
+    this.text.font = "/Orbitron-VariableFont_wght.ttf"
     scene.add(this.text)
 
     scene.add(this.mesh)
   }
 
   clear() {
-    console.log(`*** CLEAR -- ${this.hex}`)
+    console.log(`*** CLEAR -- ${this.hex} | ${this.callsign}`)
     scene.remove(this.text)
+    this.text.dispose()
+    //this.myText.dispose()
     scene.remove(this.mesh)
+    //this.mesh.dispose()
   }
 
   update(data) {
@@ -235,14 +234,9 @@ class Aircraft {
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
 
-      const message = `${this.callsign || this.hex}\n${this.hdg}\n${this.spd}\n${this.alt}`
-      const shapes = droidSansMonoRegularFont.generateShapes(message, 1)
-      const geometry = new THREE.ShapeGeometry(shapes)
-      this.text.geometry.dispose()
-      this.text.geometry = geometry
-      this.text.position.set(xPos + 2, yPos - 2, zPos)
-      this.text.needsUpdate = true
-
+      this.text.text = `${this.callsign || this.hex}\n${this.hdg}\n${this.spd}\n${this.alt}`
+      this.text.position.set(xPos, yPos, zPos)
+      this.text.sync()
 
     } else {
       //this.log()
@@ -252,7 +246,10 @@ class Aircraft {
   }
 
   updateText() {
-    this.text.rotation.y = Math.atan2((camera.position.x - this.text.position.x), (camera.position.z - this.text.position.z))
+    this.text.rotation.y = Math.atan2(
+      (camera.position.x - this.text.position.x),
+      (camera.position.z - this.text.position.z)
+    )
   }
 
   hasValidTelemetry() {
@@ -840,25 +837,23 @@ navigator.geolocation.getCurrentPosition((pos) => {
   // fill('#ED225D');
   // points of interest (poi)
 
-  const labelMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    side: THREE.DoubleSide
-  });
-
   for (const key in mia_poi) {
     const ref_pt = mia_poi[key]
     console.log(`${key} -> ${ref_pt}`)
     const { x, y } = getXY(origin, { lat: ref_pt[0], lng: ref_pt[1] })
     poiVertices.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
-    const shapes = droidSansMonoRegularFont.generateShapes(key, 0.75)
-    const labelGeometry = new THREE.ShapeGeometry(shapes)
-    labelGeometry.computeBoundingBox();
-    const xMid = - 0.5 * (labelGeometry.boundingBox.max.x - labelGeometry.boundingBox.min.x);
-    labelGeometry.translate(xMid, 0, 0)
-    const label = new THREE.Mesh(labelGeometry, labelMaterial)
+
+    const label = new Text()
+    label.text = key
+    label.fontSize = 1
+    label.anchorX = 'center'
+    label.color = 0xED225D
+    label.font = "/Orbitron-VariableFont_wght.ttf"
+
     label.position.x = x * SCALE
-    label.position.y = 1
+    label.position.y = 1.75
     label.position.z = y * SCALE
+
     poiLabels.push(label)
     scene.add(label)
   }
