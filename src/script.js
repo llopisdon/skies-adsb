@@ -163,7 +163,7 @@ class Aircraft {
     this.text.anchorX = -1.5
     this.text.anchorY = 1
     this.text.color = 0xED225D
-    this.text.font = "/Orbitron-VariableFont_wght.ttf"
+    this.text.font = "./static/Orbitron-VariableFont_wght.ttf"
     scene.add(this.text)
 
     // aircraft ref point
@@ -856,7 +856,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
     label.fontSize = 1
     label.anchorX = 'center'
     label.color = 0xED225D
-    label.font = "/Orbitron-VariableFont_wght.ttf"
+    label.font = "./static/Orbitron-VariableFont_wght.ttf"
 
     label.position.x = x * SCALE
     label.position.y = 2
@@ -875,9 +875,9 @@ navigator.geolocation.getCurrentPosition((pos) => {
 })
 
 
-//const s = new WebSocket('wss://' + self.location.host + ':30006');
 //const s = new WebSocket('wss://raspberrypi.local:30006');
 const s = new WebSocket('ws://192.168.86.34:30006')
+//const s = new WebSocket('wss://' + self.location.host + ':30006')
 s.addEventListener('message', (event) => {
   const reader = new FileReader()
   reader.onload = () => {
