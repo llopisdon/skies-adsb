@@ -79,8 +79,9 @@ const airCraftVertices = new Float32Array([
 ])
 airCraftGeometry.setAttribute('position', new THREE.BufferAttribute(airCraftVertices, 3))
 const airCraftMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
-
 const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
+
+const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
 
 // axes helper
 const axesHelper = new THREE.AxesHelper()
@@ -140,7 +141,6 @@ class Aircraft {
     this.bearing = 0
     this.distance = 0.0
     this.ttl = 0
-    this.screen_pos = null
 
     // aircraft mesh
     this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial)
@@ -160,11 +160,21 @@ class Aircraft {
     this.text = new Text()
     this.text.text = ""
     this.text.fontSize = 1
-    this.text.anchorX = -1
+    this.text.anchorX = -1.5
     this.text.anchorY = 1
     this.text.color = 0xED225D
     this.text.font = "/Orbitron-VariableFont_wght.ttf"
     scene.add(this.text)
+
+    // aircraft ref point
+    this.refPoint = new THREE.Points(
+      new THREE.BufferGeometry().setFromPoints(
+        [new THREE.Vector3(0, 0.2, -1.75)]
+        //[new THREE.Vector3(0, 0.2, 0)]
+      ),
+      refPointMaterial
+    )
+    this.mesh.add(this.refPoint)
 
     scene.add(this.mesh)
   }
@@ -223,9 +233,6 @@ class Aircraft {
       this.pos.x = this.distance * Math.cos(THREE.MathUtils.degToRad(90 - this.bearing))
       this.pos.z = -this.distance * Math.sin(THREE.MathUtils.degToRad(90 - this.bearing))
 
-      // TODO port this
-      //this.screen_pos = screenPosition([this.pos.x, this.pos.y, this.pos.z]);
-
       // position is in world coordinates
       const xPos = this.pos.x * SCALE
       const yPos = this.pos.y * SCALE
@@ -246,10 +253,11 @@ class Aircraft {
   }
 
   updateText() {
-    this.text.rotation.y = Math.atan2(
-      (camera.position.x - this.text.position.x),
-      (camera.position.z - this.text.position.z)
-    )
+    // this.text.rotation.y = Math.atan2(
+    //   (camera.position.x - this.text.position.x),
+    //   (camera.position.z - this.text.position.z)
+    // )
+    this.text.lookAt(camera.position)
   }
 
   hasValidTelemetry() {
@@ -851,15 +859,15 @@ navigator.geolocation.getCurrentPosition((pos) => {
     label.font = "/Orbitron-VariableFont_wght.ttf"
 
     label.position.x = x * SCALE
-    label.position.y = 1.75
+    label.position.y = 2
     label.position.z = y * SCALE
 
     poiLabels.push(label)
     scene.add(label)
   }
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
-  const poiMaterial = new THREE.PointsMaterial({ color: 0xff0000 })
-  const poiMesh = new THREE.Points(poiGeometry, poiMaterial)
+
+  const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
   scene.add(poiMesh)
 
 }, (error) => {
@@ -969,7 +977,8 @@ function draw(deltaTime) {
   }
 
   for (const label of poiLabels) {
-    label.rotation.y = Math.atan2((camera.position.x - label.position.x), (camera.position.z - label.position.z))
+    //label.rotation.y = Math.atan2((camera.position.x - label.position.x), (camera.position.z - label.position.z))
+    label.lookAt(camera.position)
   }
 
 }
