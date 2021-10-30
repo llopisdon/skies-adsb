@@ -18,6 +18,11 @@ let MIA_distance = 0.0;
 
 let theta = 0.0;
 
+const pointer = new THREE.Vector2()
+pointer.x = undefined
+pointer.y = undefined
+let pointerDown = false
+const raycaster = new THREE.Raycaster()
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 10000)
@@ -35,6 +40,22 @@ const stats = new Stats()
 stats.showPanel(0)
 document.body.appendChild(stats.dom)
 
+
+//
+// aircraft info
+//
+const aircraftInfoDiv = document.createElement('div')
+aircraftInfoDiv.className = 'aircraftInfo'
+aircraftInfoDiv.id = 'aircraftInfo'
+aircraftInfoDiv.style.display = 'none'
+const aircraftInfoImage = document.createElement('img')
+const aircraftInfoText = document.createElement('p')
+aircraftInfoDiv.appendChild(aircraftInfoImage)
+aircraftInfoDiv.appendChild(aircraftInfoText)
+document.body.append(aircraftInfoDiv)
+
+
+
 // controls
 const controls = new OrbitControls(camera, renderer.domElement)
 
@@ -48,16 +69,24 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
+// single click listener to check for airplane intersections
+window.addEventListener('click', (event) => {
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  pointerDown = true
+  console.log(pointer, event)
+})
+
 // fullscreen toggle on double click event listener
 window.addEventListener('dblclick', () => {
   const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
 
   if (!fullscreenElement) {
-    if (renderer.domElement.requestFullscreen) {
-      renderer.domElement.requestFullscreen()
+    if (document.body.requestFullscreen) {
+      document.body.requestFullscreen()
     }
-    else if (renderer.domElement.webkitRequestFullscreen) {
-      renderer.domElement.webkitRequestFullscreen()
+    else if (document.body.webkitRequestFullscreen) {
+      document.body.webkitRequestFullscreen()
     }
   }
   else {
@@ -78,8 +107,11 @@ const airCraftVertices = new Float32Array([
   -1.5, 0, 1
 ])
 airCraftGeometry.setAttribute('position', new THREE.BufferAttribute(airCraftVertices, 3))
-const airCraftMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
+const airCraftSelectedColor = new THREE.Color(0xff0000)
+const airCraftColor = new THREE.Color(0x00ff00)
+const airCraftMaterial = new THREE.MeshBasicMaterial({ color: airCraftColor, side: THREE.DoubleSide })
 const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
+
 
 const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
 
@@ -142,8 +174,18 @@ class Aircraft {
     this.distance = 0.0
     this.ttl = 0
 
+    this.photoFuture = null
+    this.photo == null
+
+    this.flightInfoFuture = null
+    this.flightInfo = null
+
+
+    // aircraft group
+    this.group = new THREE.Group()
+
     // aircraft mesh
-    this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial)
+    this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial.clone())
     this.mesh.visible = false
 
     // aircraft height line
@@ -164,28 +206,27 @@ class Aircraft {
     this.text.anchorY = 1
     this.text.color = 0xED225D
     this.text.font = "./static/Orbitron-VariableFont_wght.ttf"
-    scene.add(this.text)
+    this.group.add(this.text)
 
     // aircraft ref point
     this.refPoint = new THREE.Points(
       new THREE.BufferGeometry().setFromPoints(
         [new THREE.Vector3(0, 0.2, -1.75)]
-        //[new THREE.Vector3(0, 0.2, 0)]
       ),
       refPointMaterial
     )
     this.mesh.add(this.refPoint)
 
-    scene.add(this.mesh)
+    this.group.add(this.mesh)
+
+    scene.add(this.group)
   }
 
   clear() {
     console.log(`*** CLEAR -- ${this.hex} | ${this.callsign}`)
     scene.remove(this.text)
     this.text.dispose()
-    //this.myText.dispose()
-    scene.remove(this.mesh)
-    //this.mesh.dispose()
+    scene.remove(this.group)
   }
 
   update(data) {
@@ -241,7 +282,7 @@ class Aircraft {
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
 
-      this.text.text = `${this.callsign || this.hex}\n${this.hdg}\n${this.spd}\n${this.alt}`
+      this.text.text = `${this.callsign || '-'}\n${this.hex}\n${this.hdg || '-'}\n${this.spd || '-'}\n${this.alt || '-'}`
       this.text.position.set(xPos, yPos, zPos)
       this.text.sync()
 
@@ -250,6 +291,78 @@ class Aircraft {
     }
 
     this.ttl = 10
+  }
+
+  fetchInfoAndShow() {
+    this.fetchPhoto()
+    this.fetchFlightInfoEx()
+  }
+
+  fetchPhoto() {
+
+    console.log('~~~~ FETCH PHOTO ~~~~')
+
+    aircraftInfoImage.src = '#'
+    aircraftInfoImage.style.display = 'none'
+
+    if (this.hex === undefined) {
+      console.log('aircraft not yet identified!')
+      return
+    }
+
+    if (this.photoFuture !== null) {
+      if (this.photo !== undefined) {
+        aircraftInfoImage.style.display = 'inline'
+        aircraftInfoImage.src = this.photo
+      }
+      return
+    }
+
+    const photoUrl = `https://api.planespotters.net/pub/photos/hex/${this.hex}`
+    console.log(`fetchPhoto -> ${photoUrl}`)
+    this.photoFuture = fetch(photoUrl)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        if (Array.isArray(data['photos']) && data['photos'].length > 0) {
+          const photo = data['photos'][0]
+          if ('thumbnail' in photo) {
+            this.photo = photo['thumbnail']['src']
+            aircraftInfoImage.src = this.photo
+            aircraftInfoImage.style.display = 'inline'
+            console.log(this.photo)
+          }
+        }
+        if (this.photo === undefined) {
+          aircraftInfoImage.src = '#'
+          aircraftInfoImage.style.display = 'none'
+        }
+      })
+  }
+
+  fetchFlightInfoEx() {
+
+    console.log("~~~ FETCH FLIGHT INFO ~~~")
+
+    if (this.callsign === undefined) {
+      aircraftInfoText.innerText = ""
+      return
+    }
+
+    if (this.flightInfoFuture != null) {
+      aircraftInfoText.innerText = this.flightInfo
+      console.log(this.flightInfo)
+      return
+    }
+
+    const url = `http://${self.location.host.split(':')[0]}:3000/flight/${this.callsign}`
+    this.flightInfoFuture = fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        this.flightInfo = JSON.stringify(data)
+        aircraftInfoText.innerText = this.flightInfo
+        console.log(this.flightInfo)
+      })
   }
 
   updateText() {
@@ -902,87 +1015,79 @@ s.addEventListener('message', (event) => {
 });
 
 
+let INTERSECTED = {
+  key: null,
+  mesh: null
+}
+
 function draw(deltaTime) {
 
+  raycaster.setFromCamera(pointer, camera)
+
+  let clearIntersected = INTERSECTED !== null
 
   //
   // aircraft
   //
 
-
   for (const key in aircrafts) {
+
     const ac = aircrafts[key];
-    // TODO
-    // draw height reference
-    /*
-    stroke(0, 0, 255);
-    line(ac.pos.x, 0, ac.pos.z, ac.pos.x, ac.pos.y, ac.pos.z);
-    push();
-    translate(ac.pos.x, ac.pos.y, ac.pos.z);
-    noFill();
-    stroke(0, 255, 0);
-    */
-
-    // TODO
-    // drawAircraft(ac.hdg);
-
-    // TODO
-    // draw aircraft info
-    /*
-    push();
-    translate(8, 0, 0);
-
-    fill('#ED225D');
-    //fill(128, 0, 0);
-    //fill('#d65a7e');
-    textFont(myFont);
-
-    textSize(14);
-
-    let callsign = "";
-    if (ac.callsign === "" || ac.callsign === undefined) {
-      callsign = `#${ac.hex}`;
-    } else {
-      callsign = `${ac.callsign}`;
-    }
-
-    translate(0, 18, 0);
-    text(callsign, 0, 0);
-
-    textSize(12);
-    translate(0, 12, 0);
-    text(ac.alt, 0, 0);
-    translate(0, 12, 0);
-    text(ac.hdg, 0, 0);
-    translate(0, 12, 0);
-    text(ac.bearing.toFixed(1), 0, 0);
-
-    pop();
-    pop();
-    */
-
-    ac.ttl -= 100 * deltaTime
-
-    if (ac.hasValidTelemetry()) {
-      //console.log(ac.ttl)
-    }
-
     ac.updateText()
 
+    if (pointer.x !== undefined && pointer.y !== undefined) {
 
+      const groupIntersect = raycaster.intersectObject(ac.group, true)
+
+      if (groupIntersect.length > 0) {
+
+        console.log("---------------")
+        console.log(groupIntersect)
+        console.log("---------------")
+        pointer.x = undefined
+        pointer.y = undefined
+
+        if (key !== INTERSECTED.key) {
+
+          if (INTERSECTED.key !== null) {
+            INTERSECTED.mesh.material.color = airCraftColor
+          }
+
+          INTERSECTED.key = key
+          INTERSECTED.mesh = ac.mesh
+          INTERSECTED.mesh.material.color = airCraftSelectedColor
+
+          ac.fetchInfoAndShow()
+
+          aircraftInfoDiv.style.display = 'block'
+
+          console.log(INTERSECTED)
+        }
+      }
+    }
+
+    ac.ttl -= 100 * deltaTime
     if (ac.ttl < 0) {
       ac.clear()
       delete aircrafts[key]
     }
   }
 
-  for (const label of poiLabels) {
-    //label.rotation.y = Math.atan2((camera.position.x - label.position.x), (camera.position.z - label.position.z))
-    label.lookAt(camera.position)
+  for (const poiLabel of poiLabels) {
+    poiLabel.lookAt(camera.position)
   }
 
+  if (pointer.x !== undefined && pointer.y !== undefined) {
+    if (INTERSECTED.key !== null) {
+      INTERSECTED.mesh.material.color = airCraftColor
+      INTERSECTED.key = null
+      INTERSECTED.mesh = null
+      aircraftInfoDiv.style.display = 'none'
+    }
+    pointer.x = undefined
+    pointer.y = undefined
+  }
 }
-
 
 
 
