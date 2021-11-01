@@ -8,22 +8,30 @@ body {
   overflow: hidden;
 }
 
-.aircraftInfo {
-  position: absolute;
-  top: 100px;
-  left: 10px;
-  width: 300px;
-  background-color: rgb(220, 214, 226);
-  overflow-wrap: break-word;
-  z-index: 100;
+
+img {
+  object-fit: cover;
+  border-radius: 8px;
 }
 
-.aircraftInfo:fullscreen {
+.hidden {
+  display: none;
+}
+
+.aircraftInfo-flex-container {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center;
+  background-color: #ffffffcc;
   position: absolute;
-  top: 100px;
-  left: 10px;
-  width: 300px;
-  background-color: rgb(220, 214, 226);
-  overflow-wrap: break-word;
-  z-index: 100;
+  right: 0px;
+  bottom: 0px;
+  border-radius: 8px;
+  justify-content: space-around;
+  margin: 16px;
+
+}
+
+.aircraftInfo-flex-container > div {
+  margin: 8px;
 }

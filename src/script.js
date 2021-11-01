@@ -47,17 +47,37 @@ document.body.appendChild(stats.dom)
 
 
 //
-// aircraft info
+// aircraft info HTML HUD
 //
+
+// main container
 const aircraftInfoDiv = document.createElement('div')
-aircraftInfoDiv.className = 'aircraftInfo'
+aircraftInfoDiv.className = 'hidden'
 aircraftInfoDiv.id = 'aircraftInfo'
-aircraftInfoDiv.style.display = 'none'
-const aircraftInfoImage = document.createElement('img')
-const aircraftInfoText = document.createElement('p')
-aircraftInfoDiv.appendChild(aircraftInfoImage)
-aircraftInfoDiv.appendChild(aircraftInfoText)
 document.body.append(aircraftInfoDiv)
+
+// left image container
+const aircraftImageDiv = document.createElement('div')
+const aircraftImage = document.createElement('img')
+const aircraftImageAuthor = document.createElement('p')
+aircraftImageDiv.appendChild(aircraftImage)
+aircraftImageDiv.appendChild(aircraftImageAuthor)
+aircraftInfoDiv.appendChild(aircraftImageDiv)
+
+// right flight info container
+const aircraftInfoFlightInfoDiv = document.createElement('div')
+const aircraftInfoFlightInfoCallsign = document.createElement('p')
+const aircraftInfoFlightInfoAirline = document.createElement('p')
+const aircraftInfoFlightInfoAircraftType = document.createElement('p')
+const aircraftInfoFlightInfoOrigin = document.createElement('p')
+const aircraftInfoFlightInfoDestination = document.createElement('p')
+
+aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoCallsign)
+aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoAirline)
+aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoAircraftType)
+aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoOrigin)
+aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoDestination)
+aircraftInfoDiv.appendChild(aircraftInfoFlightInfoDiv)
 
 
 
@@ -155,7 +175,12 @@ const SCALE = 1.0 / 300.0
 
 // MIA: 25.799740325918425, -80.28758238380416
 
+const NOT_AVAILABLE = 'n/a'
+
 const aircrafts = {}
+
+const aircraftPhotos = {}
+
 
 class Aircraft {
   constructor() {
@@ -307,8 +332,7 @@ class Aircraft {
 
     console.log('~~~~ FETCH PHOTO ~~~~')
 
-    aircraftInfoImage.src = '#'
-    aircraftInfoImage.style.display = 'none'
+    this.clearPhoto()
 
     if (this.hex === undefined) {
       console.log('aircraft not yet identified!')
@@ -317,8 +341,13 @@ class Aircraft {
 
     if (this.photoFuture !== null) {
       if (this.photo !== undefined) {
-        aircraftInfoImage.style.display = 'inline'
-        aircraftInfoImage.src = this.photo
+        this.showPhoto()
+      } else {
+        const aircraftTypeKey = this.getAircraftTypeKey()
+        if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
+          this.photo = aircraftPhotos[aircraftTypeKey]
+          this.showPhoto()
+        }
       }
       return
     }
@@ -332,31 +361,47 @@ class Aircraft {
         if (Array.isArray(data['photos']) && data['photos'].length > 0) {
           const photo = data['photos'][0]
           if ('thumbnail' in photo) {
-            this.photo = photo['thumbnail']['src']
-            aircraftInfoImage.src = this.photo
-            aircraftInfoImage.style.display = 'inline'
+            this.photo = photo
             console.log(this.photo)
+            this.showPhoto()
           }
         }
         if (this.photo === undefined) {
-          aircraftInfoImage.src = '#'
-          aircraftInfoImage.style.display = 'none'
+          const aircraftTypeKey = this.getAircraftTypeKey()
+          if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
+            this.photo = aircraftPhotos[aircraftTypeKey]
+            this.showPhoto()
+          } else {
+            this.clearPhoto()
+          }
         }
       })
+  }
+
+  clearPhoto() {
+    aircraftImage.src = '#'
+    aircraftImage.style.display = 'none'
+    aircraftImageAuthor.innerText = ''
+  }
+
+  showPhoto() {
+    aircraftImage.src = this.photo['thumbnail']['src']
+    aircraftImage.style.display = 'inline'
+    aircraftImageAuthor.innerText = this.photo['photographer'] || ''
   }
 
   fetchFlightInfoEx() {
 
     console.log("~~~ FETCH FLIGHT INFO ~~~")
+    this.clearFlightInfo()
 
     if (this.callsign === undefined) {
-      aircraftInfoText.innerText = ""
+      console.log("aircraft has no callsign yet!")
       return
     }
 
     if (this.flightInfoFuture != null) {
-      aircraftInfoText.innerText = this.flightInfo
-      console.log(this.flightInfo)
+      this.showFlightInfo()
       return
     }
 
@@ -364,10 +409,44 @@ class Aircraft {
     this.flightInfoFuture = fetch(url)
       .then(response => response.json())
       .then(data => {
-        this.flightInfo = JSON.stringify(data)
-        aircraftInfoText.innerText = this.flightInfo
-        console.log(this.flightInfo)
+        this.flightInfo = data
+        const aircraftTypeKey = this.getAircraftTypeKey()
+        const hasPhoto = aircraftTypeKey in aircraftPhotos
+        if (!hasPhoto && aircraftTypeKey !== undefined && this.photo !== undefined) {
+          aircraftPhotos[aircraftTypeKey] = this.photo
+        }
+        this.showFlightInfo()
       })
+  }
+
+
+  getAircraftTypeKey() {
+    if (this.flightInfo == null || this.flightInfo === undefined) return
+    const aircraftType = ('type' in this.flightInfo) ? this.flightInfo['type'] : undefined
+    const aircraftManufacturer = ('manufacturer' in this.flightInfo) ? this.flightInfo['manufacturer'] : undefined
+    if (aircraftType !== undefined && aircraftManufacturer !== undefined) {
+      return `${aircraftManufacturer}#${aircraftType}`
+    } else {
+      return undefined
+    }
+  }
+
+
+  clearFlightInfo() {
+    aircraftInfoFlightInfoCallsign.innerText = NOT_AVAILABLE
+    aircraftInfoFlightInfoAirline.innerText = NOT_AVAILABLE
+    aircraftInfoFlightInfoAircraftType.innerText = NOT_AVAILABLE
+    aircraftInfoFlightInfoOrigin.innerText = `Origin: ${NOT_AVAILABLE}`
+    aircraftInfoFlightInfoDestination.innerText = `Dest: ${NOT_AVAILABLE}`
+  }
+
+  showFlightInfo() {
+    console.log(this.flightInfo)
+    aircraftInfoFlightInfoCallsign.innerText = `${this.flightInfo['ident'] || NOT_AVAILABLE}`
+    aircraftInfoFlightInfoAirline.innerText = `${this.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${this.flightInfo['airline'] || NOT_AVAILABLE}`
+    aircraftInfoFlightInfoAircraftType.innerText = `${this.flightInfo['type'] || NOT_AVAILABLE} | ${this.flightInfo['manufacturer'] || NOT_AVAILABLE}`
+    aircraftInfoFlightInfoOrigin.innerText = `Origin: ${this.flightInfo['origin'] || NOT_AVAILABLE}, ${this.flightInfo['originName'] || NOT_AVAILABLE}`
+    aircraftInfoFlightInfoDestination.innerText = `Dest: ${this.flightInfo['destination'] || NOT_AVAILABLE}, ${this.flightInfo['destinationName'] || NOT_AVAILABLE}`
   }
 
   updateText() {
@@ -521,7 +600,7 @@ function draw(deltaTime) {
 
           ac.fetchInfoAndShow()
 
-          aircraftInfoDiv.style.display = 'block'
+          aircraftInfoDiv.className = "aircraftInfo-flex-container"
 
           console.log(INTERSECTED)
         }
@@ -544,7 +623,7 @@ function draw(deltaTime) {
       INTERSECTED.mesh.material.color = airCraftColor
       INTERSECTED.key = null
       INTERSECTED.mesh = null
-      aircraftInfoDiv.style.display = 'none'
+      aircraftInfoDiv.className = 'hidden'
     }
     pointer.x = undefined
     pointer.y = undefined
