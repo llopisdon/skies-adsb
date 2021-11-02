@@ -474,6 +474,17 @@ navigator.geolocation.getCurrentPosition((pos) => {
   origin.lat = pos.coords.latitude
   origin.lng = pos.coords.longitude
 
+  initGroundPlaneBoundariesAndPOI()
+
+}, (error) => {
+  console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
+
+  // TODO add fallback lat/lng
+  initGroundPlaneBoundariesAndPOI()
+
+})
+
+function initGroundPlaneBoundariesAndPOI() {
   // TODO start websocket connection once geolocation has been updated
   // TODO update geometries once geolocation has been updated
 
@@ -523,10 +534,7 @@ navigator.geolocation.getCurrentPosition((pos) => {
 
   const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
   scene.add(poiMesh)
-
-}, (error) => {
-  console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
-})
+}
 
 
 //const s = new WebSocket('wss://raspberrypi.local:30006');
