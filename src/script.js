@@ -36,9 +36,11 @@ scene.add(camera)
 
 
 // renderer
-const renderer = new THREE.WebGLRenderer()
+const canvas = document.querySelector('canvas.webgl')
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas
+})
 renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement)
 
 // stats
 const stats = new Stats()
@@ -50,35 +52,21 @@ document.body.appendChild(stats.dom)
 // aircraft info HTML HUD
 //
 
-// main container
-const aircraftInfoDiv = document.createElement('div')
-aircraftInfoDiv.className = 'hidden'
-aircraftInfoDiv.id = 'aircraftInfo'
-document.body.append(aircraftInfoDiv)
+const HUD = {
+  container: document.getElementById('hud'),
+  photo: document.getElementById('photo'),
+  photographer: document.getElementById('photographer'),
+  callsign: document.getElementById('callsign'),
+  airline: document.getElementById('airline'),
+  aircraftType: document.getElementById('aircraftType'),
+  origin: document.getElementById('origin'),
+  destination: document.getElementById('destination'),
+  heading: document.getElementById('heading'),
+  groundSpeed: document.getElementById('groundSpeed'),
+  altitude: document.getElementById('altitude'),
+}
 
-// left image container
-const aircraftImageDiv = document.createElement('div')
-const aircraftImage = document.createElement('img')
-const aircraftImageAuthor = document.createElement('p')
-aircraftImageDiv.appendChild(aircraftImage)
-aircraftImageDiv.appendChild(aircraftImageAuthor)
-aircraftInfoDiv.appendChild(aircraftImageDiv)
-
-// right flight info container
-const aircraftInfoFlightInfoDiv = document.createElement('div')
-const aircraftInfoFlightInfoCallsign = document.createElement('p')
-const aircraftInfoFlightInfoAirline = document.createElement('p')
-const aircraftInfoFlightInfoAircraftType = document.createElement('p')
-const aircraftInfoFlightInfoOrigin = document.createElement('p')
-const aircraftInfoFlightInfoDestination = document.createElement('p')
-
-aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoCallsign)
-aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoAirline)
-aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoAircraftType)
-aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoOrigin)
-aircraftInfoFlightInfoDiv.appendChild(aircraftInfoFlightInfoDestination)
-aircraftInfoDiv.appendChild(aircraftInfoFlightInfoDiv)
-
+//console.log(HUD)
 
 
 // controls
@@ -321,6 +309,12 @@ class Aircraft {
     }
 
     this.ttl = 10
+
+    if (this.hex === INTERSECTED.key) {
+      HUD.heading.innerText = `Heading: ${this.hdg || NOT_AVAILABLE}`
+      HUD.groundSpeed.innerText = `Ground Speed: ${this.spd || NOT_AVAILABLE}`
+      HUD.altitude.innerText = `Altitude: ${this.alt || NOT_AVAILABLE}`
+    }
   }
 
   fetchInfoAndShow() {
@@ -379,15 +373,15 @@ class Aircraft {
   }
 
   clearPhoto() {
-    aircraftImage.src = '#'
-    aircraftImage.style.display = 'none'
-    aircraftImageAuthor.innerText = ''
+    HUD.photo.src = '#'
+    HUD.photo.style.display = 'none'
+    HUD.photographer.innerText = ''
   }
 
   showPhoto() {
-    aircraftImage.src = this.photo['thumbnail']['src']
-    aircraftImage.style.display = 'inline'
-    aircraftImageAuthor.innerText = this.photo['photographer'] || ''
+    HUD.photo.src = this.photo['thumbnail']['src']
+    HUD.photo.style.display = 'inline'
+    HUD.photographer.innerText = this.photo['photographer'] || ''
   }
 
   fetchFlightInfoEx() {
@@ -433,20 +427,23 @@ class Aircraft {
 
 
   clearFlightInfo() {
-    aircraftInfoFlightInfoCallsign.innerText = NOT_AVAILABLE
-    aircraftInfoFlightInfoAirline.innerText = NOT_AVAILABLE
-    aircraftInfoFlightInfoAircraftType.innerText = NOT_AVAILABLE
-    aircraftInfoFlightInfoOrigin.innerText = `Origin: ${NOT_AVAILABLE}`
-    aircraftInfoFlightInfoDestination.innerText = `Dest: ${NOT_AVAILABLE}`
+    HUD.callsign.innerText = NOT_AVAILABLE
+    HUD.airline.innerText = NOT_AVAILABLE
+    HUD.aircraftType.innerText = NOT_AVAILABLE
+    HUD.origin.innerText = `Origin: ${NOT_AVAILABLE}`
+    HUD.destination.innerText = `Dest: ${NOT_AVAILABLE}`
+    HUD.heading.innerText = NOT_AVAILABLE
+    HUD.groundSpeed.innerText = NOT_AVAILABLE
+    HUD.altitude.innerText = NOT_AVAILABLE
   }
 
   showFlightInfo() {
     console.log(this.flightInfo)
-    aircraftInfoFlightInfoCallsign.innerText = `${this.flightInfo['ident'] || NOT_AVAILABLE}`
-    aircraftInfoFlightInfoAirline.innerText = `${this.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${this.flightInfo['airline'] || NOT_AVAILABLE}`
-    aircraftInfoFlightInfoAircraftType.innerText = `${this.flightInfo['type'] || NOT_AVAILABLE} | ${this.flightInfo['manufacturer'] || NOT_AVAILABLE}`
-    aircraftInfoFlightInfoOrigin.innerText = `Origin: ${this.flightInfo['origin'] || NOT_AVAILABLE}, ${this.flightInfo['originName'] || NOT_AVAILABLE}`
-    aircraftInfoFlightInfoDestination.innerText = `Dest: ${this.flightInfo['destination'] || NOT_AVAILABLE}, ${this.flightInfo['destinationName'] || NOT_AVAILABLE}`
+    HUD.callsign.innerText = `${this.flightInfo['ident'] || NOT_AVAILABLE}`
+    HUD.airline.innerText = `${this.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${this.flightInfo['airline'] || NOT_AVAILABLE}`
+    HUD.aircraftType.innerText = `${this.flightInfo['type'] || NOT_AVAILABLE} | ${this.flightInfo['manufacturer'] || NOT_AVAILABLE}`
+    HUD.origin.innerText = `Origin: ${this.flightInfo['origin'] || NOT_AVAILABLE}, ${this.flightInfo['originName'] || NOT_AVAILABLE}`
+    HUD.destination.innerText = `Dest: ${this.flightInfo['destination'] || NOT_AVAILABLE}, ${this.flightInfo['destinationName'] || NOT_AVAILABLE}`
   }
 
   updateText() {
@@ -608,7 +605,7 @@ function draw(deltaTime) {
 
           ac.fetchInfoAndShow()
 
-          aircraftInfoDiv.className = "aircraftInfo-flex-container"
+          HUD.container.className = "aircraftInfo-flex-container"
 
           console.log(INTERSECTED)
         }
@@ -631,7 +628,7 @@ function draw(deltaTime) {
       INTERSECTED.mesh.material.color = airCraftColor
       INTERSECTED.key = null
       INTERSECTED.mesh = null
-      aircraftInfoDiv.className = 'hidden'
+      HUD.container.className = 'hidden'
     }
     pointer.x = undefined
     pointer.y = undefined
