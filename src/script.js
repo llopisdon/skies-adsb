@@ -19,9 +19,7 @@ const origin = {
   lng: 0
 }
 
-let MIA_distance = 0.0;
-
-let theta = 0.0;
+let simulationPaused = false
 
 const pointer = new THREE.Vector2()
 pointer.x = undefined
@@ -72,46 +70,6 @@ const HUD = {
 // controls
 const controls = new OrbitControls(camera, renderer.domElement)
 
-// window resize event listeners
-window.addEventListener('resize', () => {
-  sizes.width = window.innerWidth
-  sizes.height = window.innerHeight
-  camera.aspect = sizes.width / sizes.height
-  camera.updateProjectionMatrix()
-  renderer.setSize(sizes.width, sizes.height)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-})
-
-// single click listener to check for airplane intersections
-window.addEventListener('click', (event) => {
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-  pointerDown = true
-  console.log(pointer, event)
-})
-
-// fullscreen toggle on double click event listener
-window.addEventListener('dblclick', () => {
-  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
-
-  if (!fullscreenElement) {
-    if (document.body.requestFullscreen) {
-      document.body.requestFullscreen()
-    }
-    else if (document.body.webkitRequestFullscreen) {
-      document.body.webkitRequestFullscreen()
-    }
-  }
-  else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen()
-    }
-    else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen()
-    }
-  }
-})
-
 
 const airCraftGeometry = new THREE.BufferGeometry()
 const airCraftVertices = new Float32Array([
@@ -131,7 +89,6 @@ const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff }
 // axes helper
 const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
-
 
 
 
@@ -538,11 +495,16 @@ function initGroundPlaneBoundariesAndPOI() {
 const s = new WebSocket('ws://192.168.86.34:30006')
 //const s = new WebSocket('wss://' + self.location.host + ':30006')
 s.addEventListener('message', (event) => {
+
+  if (simulationPaused) {
+    return
+  }
+
   const reader = new FileReader()
   reader.onload = () => {
     const result = reader.result
 
-    // TODO parse SBS data here...
+    // parse SBS data here...
 
     let data = result.split(",")
     let hexIdent = data[HEX_IDENT]
@@ -703,6 +665,67 @@ function getXY(from, to) {
   return { x: x, y: y }
 }
 
+
+// window resize event listeners
+window.addEventListener('resize', () => {
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+// single click listener to check for airplane intersections
+window.addEventListener('click', (event) => {
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  pointerDown = true
+  console.log(pointer, event)
+})
+
+// fullscreen toggle on double click event listener
+window.addEventListener('dblclick', () => {
+  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+
+  if (!fullscreenElement) {
+    if (document.body.requestFullscreen) {
+      document.body.requestFullscreen()
+    }
+    else if (document.body.webkitRequestFullscreen) {
+      document.body.webkitRequestFullscreen()
+    }
+  }
+  else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen()
+    }
+    else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
+    }
+  }
+})
+
+// handle page visibility
+// https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+
+function handleVisibilityChange() {
+  if (document.visibilityState === "hidden") {
+    console.log("pause simulation...")
+    simulationPaused = true
+  } else {
+    console.log("start simulation...")
+    simulationPaused = false
+  }
+}
+
+document.addEventListener("visibilitychange", handleVisibilityChange, false);
+
+
+
+//
+// tick
+//
 
 // Clock
 let clock = new THREE.Clock()
