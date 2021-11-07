@@ -433,6 +433,13 @@ navigator.geolocation.getCurrentPosition((pos) => {
 }, (error) => {
   console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
 
+
+  origin.lat = MAPS.mia_poi['HOME'][0]
+  origin.lng = MAPS.mia_poi['HOME'][1]
+
+  console.log(`fallback location - HOME: ${MAPS.mia_poi['HOME']}`)
+
+
   // TODO add fallback lat/lng
   initGroundPlaneBoundariesAndPOI()
 
