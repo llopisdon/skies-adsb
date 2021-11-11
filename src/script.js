@@ -5,7 +5,7 @@ import Stats from 'stats.js'
 import { Text } from 'troika-three-text'
 import * as MAPS from './maps.js'
 
-const miami_map = {}
+const sofla_map = {}
 const poiVertices = []
 const poiLabels = []
 
@@ -432,17 +432,11 @@ navigator.geolocation.getCurrentPosition((pos) => {
 
 }, (error) => {
   console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
-
-
   origin.lat = MAPS.mia_poi['HOME'][0]
   origin.lng = MAPS.mia_poi['HOME'][1]
-
   console.log(`fallback location - HOME: ${MAPS.mia_poi['HOME']}`)
 
-
-  // TODO add fallback lat/lng
   initGroundPlaneBoundariesAndPOI()
-
 })
 
 function initGroundPlaneBoundariesAndPOI() {
@@ -452,17 +446,23 @@ function initGroundPlaneBoundariesAndPOI() {
   // const { x, y } = getXY(origin, { latitude: 25.799740325918425, longitude: -80.28758238380416 })
   // console.log(`mia: ${x} ${y}`)
 
-  for (const key in MAPS.miami_zones) {
-    const zone = MAPS.miami_zones[key]
-    miami_map[key] = []
+  for (const key in MAPS.sofla_zones) {
+    console.log(`loading ground plane for: ${key}`);
+    const zone = MAPS.sofla_zones[key]
+    sofla_map[key] = []
     let points = []
     for (let i = 0; i < zone.length; i += 2) {
       const { x, y } = getXY(origin, { lat: zone[i], lng: zone[i + 1] })
-      points.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
+      points.push(new THREE.Vector2(x * SCALE, y * SCALE))
     }
-    let geometry = new THREE.BufferGeometry().setFromPoints(points)
-    let lineSegments = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({
-      color: new THREE.Color('#81efff')
+
+    let shape = new THREE.Shape(points)
+    let geometry = new THREE.ShapeGeometry(shape)
+    geometry.rotateX(Math.PI / 2)
+    let edges = new THREE.EdgesGeometry(geometry)
+    let lineSegments = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+      color: new THREE.Color('#81efff'),
+      linewidth: 2
     }))
     scene.add(lineSegments)
   }
