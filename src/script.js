@@ -330,15 +330,14 @@ class Aircraft {
   }
 
   clearPhoto() {
-    HUD.photo.src = '#'
-    HUD.photo.style.display = 'none'
-    HUD.photographer.innerText = ''
+    HUD.photo.src = './static/airliner.jpg'
+    HUD.photographer.innerText = 'No Photo'
   }
 
   showPhoto() {
     HUD.photo.src = this.photo['thumbnail']['src']
     HUD.photo.style.display = 'inline'
-    HUD.photographer.innerText = this.photo['photographer'] || ''
+    HUD.photographer.innerText = this.photo['photographer']
   }
 
   fetchFlightInfoEx() {
@@ -356,7 +355,7 @@ class Aircraft {
       return
     }
 
-    const url = `http://${self.location.host.split(':')[0]}:5000/flight/${this.callsign}`
+    const url = `http://${self.location.host.split(':')[0]}:5000/flightinfo/${this.callsign}`
     this.flightInfoFuture = fetch(url)
       .then(response => response.json())
       .then(data => {
