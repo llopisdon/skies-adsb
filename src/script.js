@@ -19,12 +19,15 @@ const origin = {
   lng: 0
 }
 
+function isLandscape() {
+  return sizes.width > sizes.height && sizes.height < 576
+}
+
 let simulationPaused = false
 
 const pointer = new THREE.Vector2()
 pointer.x = undefined
 pointer.y = undefined
-let pointerDown = false
 const raycaster = new THREE.Raycaster()
 
 const scene = new THREE.Scene()
@@ -50,25 +53,50 @@ document.body.appendChild(stats.dom)
 // aircraft info HTML HUD
 //
 
-const HUD = {
-  container: document.getElementById('hud'),
-  photo: document.getElementById('photo'),
-  photographer: document.getElementById('photographer'),
-  callsign: document.getElementById('callsign'),
-  airline: document.getElementById('airline'),
-  aircraftType: document.getElementById('aircraftType'),
-  origin: document.getElementById('origin'),
-  destination: document.getElementById('destination'),
-  heading: document.getElementById('heading'),
-  groundSpeed: document.getElementById('groundSpeed'),
-  altitude: document.getElementById('altitude'),
+const HUD_P = {
+  container: document.getElementById('p-hud'),
+  photo: document.getElementById('p-photo'),
+  photographer: document.getElementById('p-photographer'),
+  callsign: document.getElementById('p-callsign'),
+  airline: document.getElementById('p-airline'),
+  aircraftType: document.getElementById('p-aircraftType'),
+  origin: document.getElementById('p-origin'),
+  destination: document.getElementById('p-destination'),
+  telemetry: document.getElementById('p-telemetry'),
+}
+const HUD_L = {
+  container: document.getElementById('l-hud'),
+  photo: document.getElementById('l-photo'),
+  photographer: document.getElementById('l-photographer'),
+  callsign: document.getElementById('l-callsign'),
+  airline: document.getElementById('l-airline'),
+  aircraftType: document.getElementById('l-aircraftType'),
+  origin: document.getElementById('l-origin'),
+  destination: document.getElementById('l-destination'),
+  telemetry: document.getElementById('l-telemetry'),
 }
 
-//console.log(HUD)
+let HUD = undefined
 
 
 // controls
 const controls = new OrbitControls(camera, renderer.domElement)
+//
+// track if mouse click causes camera changes via OrbitControls
+// used to help toggle display of HUD and prevent the HUD
+// from toggling while user pans the camera around using a mouse
+// see:
+// https://www.html5rocks.com/en/mobile/touchandmouse/
+//
+let isClickDueToOrbitControlsInteraction = false
+controls.addEventListener('change', (event) => {
+  isClickDueToOrbitControlsInteraction = true
+})
+controls.addEventListener('start', (event) => {
+  if (isClickDueToOrbitControlsInteraction) {
+    isClickDueToOrbitControlsInteraction = false
+  }
+})
 
 
 const airCraftGeometry = new THREE.BufferGeometry()
@@ -268,9 +296,8 @@ class Aircraft {
     this.ttl = 10
 
     if (this.hex === INTERSECTED.key) {
-      HUD.heading.innerText = `Heading: ${this.hdg || NOT_AVAILABLE}`
-      HUD.groundSpeed.innerText = `Ground Speed: ${this.spd || NOT_AVAILABLE}`
-      HUD.altitude.innerText = `Altitude: ${this.alt || NOT_AVAILABLE}`
+      if (HUD === undefined) return
+      HUD.telemetry.innerText = `H: ${this.hdg || NOT_AVAILABLE} | GSPD: ${this.spd || NOT_AVAILABLE} | ALT: ${this.alt || NOT_AVAILABLE}`
     }
   }
 
@@ -330,11 +357,13 @@ class Aircraft {
   }
 
   clearPhoto() {
+    if (HUD === undefined) return
     HUD.photo.src = './static/airliner.jpg'
     HUD.photographer.innerText = 'No Photo'
   }
 
   showPhoto() {
+    if (HUD === undefined) return
     HUD.photo.src = this.photo['thumbnail']['src']
     HUD.photo.style.display = 'inline'
     HUD.photographer.innerText = this.photo['photographer']
@@ -383,17 +412,17 @@ class Aircraft {
 
 
   clearFlightInfo() {
+    if (HUD === undefined) return
     HUD.callsign.innerText = NOT_AVAILABLE
     HUD.airline.innerText = NOT_AVAILABLE
     HUD.aircraftType.innerText = NOT_AVAILABLE
     HUD.origin.innerText = `Origin: ${NOT_AVAILABLE}`
     HUD.destination.innerText = `Dest: ${NOT_AVAILABLE}`
-    HUD.heading.innerText = NOT_AVAILABLE
-    HUD.groundSpeed.innerText = NOT_AVAILABLE
-    HUD.altitude.innerText = NOT_AVAILABLE
+    HUD.telemetry.innerText = `H: ${NOT_AVAILABLE} | GSPD: ${NOT_AVAILABLE} | ALT: ${NOT_AVAILABLE}`
   }
 
   showFlightInfo() {
+    if (HUD === undefined) return
     console.log(this.flightInfo)
     HUD.callsign.innerText = `${this.flightInfo['ident'] || NOT_AVAILABLE}`
     HUD.airline.innerText = `${this.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${this.flightInfo['airline'] || NOT_AVAILABLE}`
@@ -538,8 +567,6 @@ function draw(deltaTime) {
 
   raycaster.setFromCamera(pointer, camera)
 
-  let clearIntersected = INTERSECTED !== null
-
   //
   // aircraft
   //
@@ -556,12 +583,15 @@ function draw(deltaTime) {
       if (groupIntersect.length > 0) {
 
         console.log("---------------")
+        console.log(`key: ${key}`)
+        console.log(ac)
         console.log(groupIntersect)
+        console.log(`hasValidTelemetry: ${ac.hasValidTelemetry()}`)
         console.log("---------------")
         pointer.x = undefined
         pointer.y = undefined
 
-        if (key !== INTERSECTED.key) {
+        if (ac.hasValidTelemetry() && key !== INTERSECTED.key) {
 
           if (INTERSECTED.key !== null) {
             INTERSECTED.mesh.material.color = airCraftColor
@@ -571,9 +601,15 @@ function draw(deltaTime) {
           INTERSECTED.mesh = ac.mesh
           INTERSECTED.mesh.material.color = airCraftSelectedColor
 
-          ac.fetchInfoAndShow()
+          hideHUD()
+          if (isLandscape()) {
+            HUD = HUD_L
+          } else {
+            HUD = HUD_P
+          }
+          showHUD()
 
-          HUD.container.className = "aircraftInfo-flex-container"
+          ac.fetchInfoAndShow()
 
           console.log(INTERSECTED)
         }
@@ -592,15 +628,31 @@ function draw(deltaTime) {
   }
 
   if (pointer.x !== undefined && pointer.y !== undefined) {
-    if (INTERSECTED.key !== null) {
-      INTERSECTED.mesh.material.color = airCraftColor
-      INTERSECTED.key = null
-      INTERSECTED.mesh = null
-      HUD.container.className = 'hidden'
-    }
+    deselectAirCraftAndHideHUD()
     pointer.x = undefined
     pointer.y = undefined
   }
+}
+
+
+function deselectAirCraftAndHideHUD() {
+  if (INTERSECTED.key !== null) {
+    INTERSECTED.mesh.material.color = airCraftColor
+    INTERSECTED.key = null
+    INTERSECTED.mesh = null
+    hideHUD()
+  }
+}
+
+function hideHUD() {
+  if (HUD === undefined) return
+  HUD.container.className = "hidden"
+  HUD = undefined
+}
+
+function showHUD() {
+  if (HUD === undefined) return
+  HUD.container.className = ""
 }
 
 
@@ -676,22 +728,62 @@ function getXY(from, to) {
 window.addEventListener('resize', () => {
   sizes.width = window.innerWidth
   sizes.height = window.innerHeight
+
+  console.log(`window resize - w: ${sizes.width} h: ${sizes.height}`)
+
   camera.aspect = sizes.width / sizes.height
   camera.updateProjectionMatrix()
   renderer.setSize(sizes.width, sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+  deselectAirCraftAndHideHUD()
 })
+
+window.addEventListener('mouseup', (event) => {
+  console.log('🐁🐁🐁🐁 up!')
+})
+
+window.addEventListener('mousedown', (event) => {
+  console.log('🐁🐁🐁🐁 down!')
+})
+
+window.addEventListener('touchstart', (event) => {
+  console.log('🖕🖕🖕🖕 touch start!')
+})
+
+window.addEventListener('touchend', (event) => {
+  console.log('🖕🖕🖕🖕 touch end')
+})
+
+window.addEventListener('touchmove', (event) => {
+  console.log('🖕🖕🖕🖕 touch move')
+  event.preventDefault()
+})
+
 
 // single click listener to check for airplane intersections
 window.addEventListener('click', (event) => {
+  if (event.pointerType === 'touch') {
+    console.log(`🖕🖕🖕🖕 touch -- CLICK`)
+  } else if (event.pointerType === 'mouse') {
+    console.log('🐁🐁🐁🐁 -- CLICK')
+
+    if (isClickDueToOrbitControlsInteraction) {
+      isClickDueToOrbitControlsInteraction = false
+      console.log(`😭😭😭😭 -- mouse click due to orbitControlsInteraction !!!`)
+      return
+    }
+
+  }
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-  pointerDown = true
-  console.log(pointer, event)
+  console.log(`click`, pointer, event)
 })
 
 // fullscreen toggle on double click event listener
-window.addEventListener('dblclick', () => {
+const fullscreenButton = document.getElementById("fullscreen_button")
+console.log(fullscreenButton)
+fullscreenButton.addEventListener('click', () => {
   const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
 
   if (!fullscreenElement) {
@@ -726,7 +818,6 @@ function handleVisibilityChange() {
 }
 
 document.addEventListener("visibilitychange", handleVisibilityChange, false);
-
 
 
 //

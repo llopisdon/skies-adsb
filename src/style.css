@@ -8,30 +8,63 @@ body {
   overflow: hidden;
 }
 
-
-img {
-  object-fit: cover;
-  border-radius: 8px;
-}
-
 .hidden {
   display: none;
 }
 
-.aircraftInfo-flex-container {
-  display: flex;
-  flex-wrap: wrap; 
-  justify-content: center;
-  background-color: #ffffffcc;
+#nav {
   position: absolute;
-  right: 0px;
-  bottom: 0px;
-  border-radius: 8px;
-  justify-content: space-around;
-  margin: 16px;
-
+  top: 0;
+  right: 0;
+  width: 100px;
+  background-color: #ffffff11;
+  padding: 8px;
+  margin: 8px;
+  overscroll-behavior: contain;
 }
 
-.aircraftInfo-flex-container > div {
+#p-hud {
+  position: absolute; 
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  transition-timing-function: linear;
+  overscroll-behavior: contain;
+}
+
+#l-hud {
+  position: absolute; 
+  bottom: 0; 
+  right: 0; 
+  width: 500px;
   margin: 8px;
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  transition-timing-function: linear;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 576px) {
+  #p-hud {
+    position: absolute; 
+    bottom: 0; 
+    right: 0; 
+    width: 320px;
+    animation-name: fadeIn;
+    animation-duration: 1s;
+    transition-timing-function: linear;
+    overscroll-behavior: contain;
+  }
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
