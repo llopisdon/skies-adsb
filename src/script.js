@@ -91,6 +91,7 @@ const controls = new OrbitControls(camera, renderer.domElement)
 let isClickDueToOrbitControlsInteraction = false
 controls.addEventListener('change', (event) => {
   isClickDueToOrbitControlsInteraction = true
+  light.position.copy(camera.position)
 })
 controls.addEventListener('start', (event) => {
   if (isClickDueToOrbitControlsInteraction) {
@@ -98,17 +99,35 @@ controls.addEventListener('start', (event) => {
   }
 })
 
-
 const airCraftGeometry = new THREE.BufferGeometry()
-const airCraftVertices = new Float32Array([
-  0, 0, -3,
-  1.5, 0, 1,
-  -1.5, 0, 1
+airCraftGeometry.setFromPoints([
+  // top
+  new THREE.Vector3(0, 0, -3), // a
+  new THREE.Vector3(-1.5, 1, 1), // b
+  new THREE.Vector3(1.5, 1, 1), // c
+
+  // back
+  new THREE.Vector3(0, -1, 1), // d
+  new THREE.Vector3(1.5, 1, 1), // b
+  new THREE.Vector3(-1.5, 1, 1), // c
+
+  // left
+  new THREE.Vector3(0, -1, 1), // d
+  new THREE.Vector3(-1.5, 1, 1), // c
+  new THREE.Vector3(0, 0, -3), // a
+
+  // right
+  new THREE.Vector3(0, -1, 1), // d
+  new THREE.Vector3(0, 0, -3), // a
+  new THREE.Vector3(1.5, 1, 1), // c
 ])
-airCraftGeometry.setAttribute('position', new THREE.BufferAttribute(airCraftVertices, 3))
+airCraftGeometry.computeVertexNormals()
+
 const airCraftSelectedColor = new THREE.Color(0xff0000)
 const airCraftColor = new THREE.Color(0x00ff00)
-const airCraftMaterial = new THREE.MeshBasicMaterial({ color: airCraftColor, side: THREE.DoubleSide })
+const airCraftMaterial = new THREE.MeshLambertMaterial({
+  color: airCraftColor,
+})
 const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
 
 
@@ -118,6 +137,13 @@ const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff }
 const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
 
+// scene lighting
+const amientLight = new THREE.AmbientLight(0x4c4c4c)
+scene.add(amientLight)
+
+const light = new THREE.DirectionalLight(0xffffff, 1)
+light.position.copy(camera.position)
+scene.add(light)
 
 
 //
@@ -214,7 +240,7 @@ class Aircraft {
     // aircraft ref point
     this.refPoint = new THREE.Points(
       new THREE.BufferGeometry().setFromPoints(
-        [new THREE.Vector3(0, 0.2, -1.75)]
+        [new THREE.Vector3(0, 0, -3.25)]
       ),
       refPointMaterial
     )
