@@ -6,6 +6,7 @@ body {
 html,
 body {
   overflow: hidden;
+  color: #444;
 }
 
 .hidden {
@@ -20,21 +21,19 @@ body {
   background-color: #ffffff11;
   padding: 8px;
   margin: 8px;
-  overscroll-behavior: contain;
 }
 
-#p-hud {
+#portrait-hud {
   position: absolute; 
   bottom: 0;
   right: 0;
   width: 100%;
   animation-name: fadeIn;
   animation-duration: 1s;
-  transition-timing-function: linear;
-  overscroll-behavior: contain;
+  transition-timing-function: linear;  
 }
 
-#l-hud {
+#landscape-hud {
   position: absolute; 
   bottom: 0; 
   right: 0; 
@@ -43,19 +42,27 @@ body {
   animation-name: fadeIn;
   animation-duration: 1s;
   transition-timing-function: linear;
-  overscroll-behavior: contain;
 }
 
+.aircraftPhoto {
+  width: 200px;
+  height: 112px;
+}
+
+.aircraftHUDBackground {
+  background-color: #ffffffcc;
+}
+
+
 @media (min-width: 576px) {
-  #p-hud {
+  #portrait-hud {
     position: absolute; 
     bottom: 0; 
     right: 0; 
     width: 320px;
     animation-name: fadeIn;
     animation-duration: 1s;
-    transition-timing-function: linear;
-    overscroll-behavior: contain;
+    transition-timing-function: linear;    
   }
 }
 

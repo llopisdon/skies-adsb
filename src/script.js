@@ -53,29 +53,23 @@ document.body.appendChild(stats.dom)
 // aircraft info HTML HUD
 //
 
-const HUD_P = {
-  container: document.getElementById('p-hud'),
-  photo: document.getElementById('p-photo'),
-  photographer: document.getElementById('p-photographer'),
-  callsign: document.getElementById('p-callsign'),
-  airline: document.getElementById('p-airline'),
-  aircraftType: document.getElementById('p-aircraftType'),
-  origin: document.getElementById('p-origin'),
-  destination: document.getElementById('p-destination'),
-  telemetry: document.getElementById('p-telemetry'),
-}
-const HUD_L = {
-  container: document.getElementById('l-hud'),
-  photo: document.getElementById('l-photo'),
-  photographer: document.getElementById('l-photographer'),
-  callsign: document.getElementById('l-callsign'),
-  airline: document.getElementById('l-airline'),
-  aircraftType: document.getElementById('l-aircraftType'),
-  origin: document.getElementById('l-origin'),
-  destination: document.getElementById('l-destination'),
-  telemetry: document.getElementById('l-telemetry'),
+function getHUD(hudId) {
+  const container = document.getElementById(hudId)
+  return {
+    container: container,
+    photo: container.querySelector("#photo"),
+    photographer: container.querySelector("#photographer"),
+    callsign: container.querySelector("#callsign"),
+    airline: container.querySelector("#airline"),
+    aircraftType: container.querySelector("#aircraftType"),
+    origin: container.querySelector("#origin"),
+    destination: container.querySelector("#destination"),
+    telemetry: container.querySelector("#telemetry"),
+  }
 }
 
+const HUD_P = getHUD("portrait-hud")
+const HUD_L = getHUD("landscape-hud")
 let HUD = undefined
 
 
@@ -92,6 +86,7 @@ let isClickDueToOrbitControlsInteraction = false
 controls.addEventListener('change', (event) => {
   isClickDueToOrbitControlsInteraction = true
   light.position.copy(camera.position)
+  light.target.position.copy(controls.target)
 })
 controls.addEventListener('start', (event) => {
   if (isClickDueToOrbitControlsInteraction) {
@@ -144,6 +139,7 @@ scene.add(amientLight)
 const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.copy(camera.position)
 scene.add(light)
+scene.add(light.target)
 
 
 //
@@ -385,14 +381,14 @@ class Aircraft {
   clearPhoto() {
     if (HUD === undefined) return
     HUD.photo.src = './static/airliner.jpg'
-    HUD.photographer.innerText = 'No Photo'
+    HUD.photographer.innerText = `Photographer: ${NOT_AVAILABLE}`
   }
 
   showPhoto() {
     if (HUD === undefined) return
     HUD.photo.src = this.photo['thumbnail']['src']
     HUD.photo.style.display = 'inline'
-    HUD.photographer.innerText = this.photo['photographer']
+    HUD.photographer.innerText = `Photographer: ${this.photo['photographer'] || NOT_AVAILABLE}`
   }
 
   fetchFlightInfoEx() {
@@ -452,7 +448,7 @@ class Aircraft {
     console.log(this.flightInfo)
     HUD.callsign.innerText = `${this.flightInfo['ident'] || NOT_AVAILABLE}`
     HUD.airline.innerText = `${this.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${this.flightInfo['airline'] || NOT_AVAILABLE}`
-    HUD.aircraftType.innerText = `${this.flightInfo['type'] || NOT_AVAILABLE} | ${this.flightInfo['manufacturer'] || NOT_AVAILABLE}`
+    HUD.aircraftType.innerText = `Type: ${this.flightInfo['type'] || NOT_AVAILABLE} | ${this.flightInfo['manufacturer'] || NOT_AVAILABLE}`
     HUD.origin.innerText = `Origin: ${this.flightInfo['origin'] || NOT_AVAILABLE}, ${this.flightInfo['originName'] || NOT_AVAILABLE}`
     HUD.destination.innerText = `Dest: ${this.flightInfo['destination'] || NOT_AVAILABLE}, ${this.flightInfo['destinationName'] || NOT_AVAILABLE}`
   }
