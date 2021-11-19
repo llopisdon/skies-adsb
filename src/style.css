@@ -27,10 +27,7 @@ body {
   position: absolute; 
   bottom: 0;
   right: 0;
-  width: 100%;
-  animation-name: fadeIn;
-  animation-duration: 1s;
-  transition-timing-function: linear;  
+  width: 100%;    
 }
 
 #landscape-hud {
@@ -38,10 +35,7 @@ body {
   bottom: 0; 
   right: 0; 
   width: 500px;
-  margin: 8px;
-  animation-name: fadeIn;
-  animation-duration: 1s;
-  transition-timing-function: linear;
+  margin: 8px;    
 }
 
 .aircraftPhoto {
@@ -60,10 +54,20 @@ body {
     bottom: 0; 
     right: 0; 
     width: 320px;
-    animation-name: fadeIn;
-    animation-duration: 1s;
-    transition-timing-function: linear;    
   }
+}
+
+.show {
+  animation-name: fadeIn;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+  transition-timing-function: linear; 
+}
+
+.hide {
+  animation-name: fadeOut;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
 }
 
 
@@ -73,5 +77,14 @@ body {
   }
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }

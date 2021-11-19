@@ -4,24 +4,15 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'stats.js'
 import { Text } from 'troika-three-text'
 import * as MAPS from './maps.js'
+import * as UTILS from './utils.js'
+import { HUD } from './HUD.js'
+import * as AIRCRAFT from './aircraft.js'
+import * as ADSB from './ADSB.js'
 
 const sofla_map = {}
 const poiVertices = []
 const poiLabels = []
 
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight
-}
-
-const origin = {
-  lat: 0,
-  lng: 0
-}
-
-function isLandscape() {
-  return sizes.width > sizes.height && sizes.height < 576
-}
 
 let simulationPaused = false
 
@@ -31,7 +22,7 @@ pointer.y = undefined
 const raycaster = new THREE.Raycaster()
 
 const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 10000)
+const camera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
 camera.position.z = 10
 scene.add(camera)
 
@@ -48,29 +39,6 @@ const stats = new Stats()
 stats.showPanel(0)
 document.body.appendChild(stats.dom)
 
-
-//
-// aircraft info HTML HUD
-//
-
-function getHUD(hudId) {
-  const container = document.getElementById(hudId)
-  return {
-    container: container,
-    photo: container.querySelector("#photo"),
-    photographer: container.querySelector("#photographer"),
-    callsign: container.querySelector("#callsign"),
-    airline: container.querySelector("#airline"),
-    aircraftType: container.querySelector("#aircraftType"),
-    origin: container.querySelector("#origin"),
-    destination: container.querySelector("#destination"),
-    telemetry: container.querySelector("#telemetry"),
-  }
-}
-
-const HUD_P = getHUD("portrait-hud")
-const HUD_L = getHUD("landscape-hud")
-let HUD = undefined
 
 
 // controls
@@ -94,39 +62,8 @@ controls.addEventListener('start', (event) => {
   }
 })
 
-const airCraftGeometry = new THREE.BufferGeometry()
-airCraftGeometry.setFromPoints([
-  // top
-  new THREE.Vector3(0, 0, -3), // a
-  new THREE.Vector3(-1.5, 1, 1), // b
-  new THREE.Vector3(1.5, 1, 1), // c
-
-  // back
-  new THREE.Vector3(0, -1, 1), // d
-  new THREE.Vector3(1.5, 1, 1), // b
-  new THREE.Vector3(-1.5, 1, 1), // c
-
-  // left
-  new THREE.Vector3(0, -1, 1), // d
-  new THREE.Vector3(-1.5, 1, 1), // c
-  new THREE.Vector3(0, 0, -3), // a
-
-  // right
-  new THREE.Vector3(0, -1, 1), // d
-  new THREE.Vector3(0, 0, -3), // a
-  new THREE.Vector3(1.5, 1, 1), // c
-])
-airCraftGeometry.computeVertexNormals()
-
-const airCraftSelectedColor = new THREE.Color(0xff0000)
-const airCraftColor = new THREE.Color(0x00ff00)
-const airCraftMaterial = new THREE.MeshLambertMaterial({
-  color: airCraftColor,
-})
-const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
 
 
-const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
 
 // axes helper
 const axesHelper = new THREE.AxesHelper()
@@ -142,352 +79,31 @@ scene.add(light)
 scene.add(light.target)
 
 
-//
-// dump1090 ADB-S protocol 
-//
 
-const MSG_TYPE = 0
-const TRAMISSION_TYPE = 1
-const AIRCRAFT_ID = 3
-const HEX_IDENT = 4
-const FLIGHT_ID = 5
-const CALLSIGN = 10
-const ALTITUDE = 11
-const GORUND_SPEED = 12
-const TRACK = 13
-const LATITUDE = 14
-const LONGITUDE = 15
-const SQUAWK = 17
-const IS_ON_GROUND = 21
-
-//
-// ADB-S sends back data in meters and all of the distance,
-// heading, and bearing calculations are in meters
-// for display purposes. For right now the scale
-// of 1 unit for ever 50 meters seems to look good. 
-//
-const SCALE = 1.0 / 300.0
 
 // MIA: 25.799740325918425, -80.28758238380416
 
-const NOT_AVAILABLE = 'n/a'
-
-const aircrafts = {}
-
-const aircraftPhotos = {}
 
 
-class Aircraft {
-  constructor() {
-    this.hex = undefined
-    this.sqwk = undefined
-    this.flight = undefined
-    this.alt = undefined
-    this.spd = undefined
-    this.hdg = undefined
-    this.pos = {
-      x: undefined,
-      y: undefined,
-      z: undefined,
-      lat: undefined,
-      lng: undefined,
-    }
-    this.rssi = 0.0
-    this.msgs = 0
-    this.is_on_ground = false
-    this.bearing = 0
-    this.distance = 0.0
-    this.ttl = 0
-
-    this.photoFuture = null
-    this.photo == null
-
-    this.flightInfoFuture = null
-    this.flightInfo = null
-
-
-    // aircraft group
-    this.group = new THREE.Group()
-
-    // aircraft mesh
-    this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial.clone())
-    this.mesh.visible = false
-
-    // aircraft height line
-    this.heightLineGeometry = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, 0, 0)
-    ])
-    this.heightLineGeometry.attributes.position.usage = THREE.DynamicDrawUsage
-    this.heightLinePos = this.heightLineGeometry.attributes.position
-    this.heightLineMesh = new THREE.Line(this.heightLineGeometry, airCraftHeightLineMaterial)
-    this.mesh.add(this.heightLineMesh)
-
-    // aircraft messages text
-    this.text = new Text()
-    this.text.text = ""
-    this.text.fontSize = 1
-    this.text.anchorX = -1.5
-    this.text.anchorY = 1
-    this.text.color = 0xED225D
-    this.text.font = "./static/Orbitron-VariableFont_wght.ttf"
-    this.group.add(this.text)
-
-    // aircraft ref point
-    this.refPoint = new THREE.Points(
-      new THREE.BufferGeometry().setFromPoints(
-        [new THREE.Vector3(0, 0, -3.25)]
-      ),
-      refPointMaterial
-    )
-    this.mesh.add(this.refPoint)
-
-    this.group.add(this.mesh)
-
-    scene.add(this.group)
-  }
-
-  clear() {
-    console.log(`*** CLEAR -- ${this.hex} | ${this.callsign}`)
-    scene.remove(this.text)
-    this.text.dispose()
-    scene.remove(this.group)
-  }
-
-  update(data) {
-    if (data[CALLSIGN] !== "") {
-      this.callsign = data[CALLSIGN]
-    }
-
-    if (data[ALTITUDE] !== "") {
-      this.alt = Number(data[ALTITUDE])
-      this.pos.y = this.alt
-    }
-
-    if (data[LATITUDE] !== "") {
-      this.pos.lat = Number(data[LATITUDE])
-    }
-
-    if (data[LONGITUDE] !== "") {
-      this.pos.lng = Number(data[LONGITUDE])
-    }
-
-    if (data[SQUAWK] !== "") {
-      this.sqwk = data[SQUAWK]
-    }
-
-    if (data[IS_ON_GROUND] !== "") {
-      this.isOnGround = data[IS_ON_GROUND]
-    }
-
-    if (data[TRACK] !== "") {
-      this.hdg = data[TRACK]
-      this.mesh.rotation.y = THREE.MathUtils.degToRad(-this.hdg)
-    }
-    if (data[GORUND_SPEED] !== "") {
-      this.spd = data[GORUND_SPEED]
-    }
-
-    if (this.hasValidTelemetry()) {
-
-      if (!this.mesh.visible) {
-        this.mesh.visible = true
-      }
-      this.bearing = calcBearing(origin, this.pos)
-      this.distance = calcSphericalDistance(origin, this.pos)
-
-      this.pos.x = this.distance * Math.cos(THREE.MathUtils.degToRad(90 - this.bearing))
-      this.pos.z = -this.distance * Math.sin(THREE.MathUtils.degToRad(90 - this.bearing))
-
-      // position is in world coordinates
-      const xPos = this.pos.x * SCALE
-      const yPos = this.pos.y * SCALE
-      const zPos = this.pos.z * SCALE
-      this.mesh.position.set(xPos, yPos, zPos)
-      this.heightLinePos.setY(1, -yPos)
-      this.heightLinePos.needsUpdate = true
-
-      this.text.text = `${this.callsign || '-'}\n${this.hex}\n${this.hdg || '-'}\n${this.spd || '-'}\n${this.alt || '-'}`
-      this.text.position.set(xPos, yPos, zPos)
-      this.text.sync()
-
-    } else {
-      //this.log()
-    }
-
-    this.ttl = 10
-
-    if (this.hex === INTERSECTED.key) {
-      if (HUD === undefined) return
-      HUD.telemetry.innerText = `H: ${this.hdg || NOT_AVAILABLE} | GSPD: ${this.spd || NOT_AVAILABLE} | ALT: ${this.alt || NOT_AVAILABLE}`
-    }
-  }
-
-  fetchInfoAndShow() {
-    this.fetchPhoto()
-    this.fetchFlightInfoEx()
-  }
-
-  fetchPhoto() {
-
-    console.log('~~~~ FETCH PHOTO ~~~~')
-
-    this.clearPhoto()
-
-    if (this.hex === undefined) {
-      console.log('aircraft not yet identified!')
-      return
-    }
-
-    if (this.photoFuture !== null) {
-      if (this.photo !== undefined) {
-        this.showPhoto()
-      } else {
-        const aircraftTypeKey = this.getAircraftTypeKey()
-        if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
-          this.photo = aircraftPhotos[aircraftTypeKey]
-          this.showPhoto()
-        }
-      }
-      return
-    }
-
-    const photoUrl = `https://api.planespotters.net/pub/photos/hex/${this.hex}`
-    console.log(`fetchPhoto -> ${photoUrl}`)
-    this.photoFuture = fetch(photoUrl)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data)
-        if (Array.isArray(data['photos']) && data['photos'].length > 0) {
-          const photo = data['photos'][0]
-          if ('thumbnail' in photo) {
-            this.photo = photo
-            console.log(this.photo)
-            this.showPhoto()
-          }
-        }
-        if (this.photo === undefined) {
-          const aircraftTypeKey = this.getAircraftTypeKey()
-          if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
-            this.photo = aircraftPhotos[aircraftTypeKey]
-            this.showPhoto()
-          } else {
-            this.clearPhoto()
-          }
-        }
-      })
-  }
-
-  clearPhoto() {
-    if (HUD === undefined) return
-    HUD.photo.src = './static/airliner.jpg'
-    HUD.photographer.innerText = `Photographer: ${NOT_AVAILABLE}`
-  }
-
-  showPhoto() {
-    if (HUD === undefined) return
-    HUD.photo.src = this.photo['thumbnail']['src']
-    HUD.photo.style.display = 'inline'
-    HUD.photographer.innerText = `Photographer: ${this.photo['photographer'] || NOT_AVAILABLE}`
-  }
-
-  fetchFlightInfoEx() {
-
-    console.log("~~~ FETCH FLIGHT INFO ~~~")
-    this.clearFlightInfo()
-
-    if (this.callsign === undefined) {
-      console.log("aircraft has no callsign yet!")
-      return
-    }
-
-    if (this.flightInfoFuture != null) {
-      this.showFlightInfo()
-      return
-    }
-
-    const url = `http://${self.location.host.split(':')[0]}:5000/flightinfo/${this.callsign}`
-    this.flightInfoFuture = fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        this.flightInfo = data
-        const aircraftTypeKey = this.getAircraftTypeKey()
-        const hasPhoto = aircraftTypeKey in aircraftPhotos
-        if (!hasPhoto && aircraftTypeKey !== undefined && this.photo !== undefined) {
-          aircraftPhotos[aircraftTypeKey] = this.photo
-        }
-        this.showFlightInfo()
-      })
-  }
-
-
-  getAircraftTypeKey() {
-    if (this.flightInfo == null || this.flightInfo === undefined) return
-    const aircraftType = ('type' in this.flightInfo) ? this.flightInfo['type'] : undefined
-    const aircraftManufacturer = ('manufacturer' in this.flightInfo) ? this.flightInfo['manufacturer'] : undefined
-    if (aircraftType !== undefined && aircraftManufacturer !== undefined) {
-      return `${aircraftManufacturer}#${aircraftType}`
-    } else {
-      return undefined
-    }
-  }
-
-
-  clearFlightInfo() {
-    if (HUD === undefined) return
-    HUD.callsign.innerText = NOT_AVAILABLE
-    HUD.airline.innerText = NOT_AVAILABLE
-    HUD.aircraftType.innerText = NOT_AVAILABLE
-    HUD.origin.innerText = `Origin: ${NOT_AVAILABLE}`
-    HUD.destination.innerText = `Dest: ${NOT_AVAILABLE}`
-    HUD.telemetry.innerText = `H: ${NOT_AVAILABLE} | GSPD: ${NOT_AVAILABLE} | ALT: ${NOT_AVAILABLE}`
-  }
-
-  showFlightInfo() {
-    if (HUD === undefined) return
-    console.log(this.flightInfo)
-    HUD.callsign.innerText = `${this.flightInfo['ident'] || NOT_AVAILABLE}`
-    HUD.airline.innerText = `${this.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${this.flightInfo['airline'] || NOT_AVAILABLE}`
-    HUD.aircraftType.innerText = `Type: ${this.flightInfo['type'] || NOT_AVAILABLE} | ${this.flightInfo['manufacturer'] || NOT_AVAILABLE}`
-    HUD.origin.innerText = `Origin: ${this.flightInfo['origin'] || NOT_AVAILABLE}, ${this.flightInfo['originName'] || NOT_AVAILABLE}`
-    HUD.destination.innerText = `Dest: ${this.flightInfo['destination'] || NOT_AVAILABLE}, ${this.flightInfo['destinationName'] || NOT_AVAILABLE}`
-  }
-
-  updateText() {
-    this.text.lookAt(camera.position)
-  }
-
-  hasValidTelemetry() {
-    return (typeof this.pos.y !== 'undefined')
-      && (typeof this.pos.lat !== 'undefined')
-      && (typeof this.pos.lng !== 'undefined')
-  }
-
-  log() {
-    console.log("================")
-    console.log(`hex: ${this.hex} | sqwk: ${this.sqwk} | cs: ${this.callsign} | alt: ${this.alt} | spd: ${this.spd} | hdg: ${this.hdg} | lat: ${this.pos.lat} | lng: ${this.pos.lng} | brng: ${this.bearing} | dist: ${this.distance}`)
-    console.log(this.pos)
-    console.log("################")
-  }
-}
 
 navigator.geolocation.getCurrentPosition((pos) => {
 
   console.log(`ORIGIN lat: ${pos.coords.latitude} lng: ${pos.coords.longitude}`)
 
-  origin.lat = pos.coords.latitude
-  origin.lng = pos.coords.longitude
+  UTILS.origin.lat = pos.coords.latitude
+  UTILS.origin.lng = pos.coords.longitude
 
   initGroundPlaneBoundariesAndPOI()
 
 }, (error) => {
   console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
-  origin.lat = MAPS.mia_poi['HOME'][0]
-  origin.lng = MAPS.mia_poi['HOME'][1]
+  UTILS.origin.lat = MAPS.mia_poi['HOME'][0]
+  UTILS.origin.lng = MAPS.mia_poi['HOME'][1]
   console.log(`fallback location - HOME: ${MAPS.mia_poi['HOME']}`)
 
   initGroundPlaneBoundariesAndPOI()
 })
+
 
 function initGroundPlaneBoundariesAndPOI() {
   // TODO start websocket connection once geolocation has been updated
@@ -502,8 +118,8 @@ function initGroundPlaneBoundariesAndPOI() {
     sofla_map[key] = []
     let points = []
     for (let i = 0; i < zone.length; i += 2) {
-      const { x, y } = getXY(origin, { lat: zone[i], lng: zone[i + 1] })
-      points.push(new THREE.Vector2(x * SCALE, y * SCALE))
+      const { x, y } = UTILS.getXY(UTILS.origin, { lat: zone[i], lng: zone[i + 1] })
+      points.push(new THREE.Vector2(x * UTILS.SCALE, y * UTILS.SCALE))
     }
 
     let shape = new THREE.Shape(points)
@@ -524,8 +140,8 @@ function initGroundPlaneBoundariesAndPOI() {
   for (const key in MAPS.mia_poi) {
     const ref_pt = MAPS.mia_poi[key]
     console.log(`${key} -> ${ref_pt}`)
-    const { x, y } = getXY(origin, { lat: ref_pt[0], lng: ref_pt[1] })
-    poiVertices.push(new THREE.Vector3(x * SCALE, 0, y * SCALE))
+    const { x, y } = UTILS.getXY(UTILS.origin, { lat: ref_pt[0], lng: ref_pt[1] })
+    poiVertices.push(new THREE.Vector3(x * UTILS.SCALE, 0, y * UTILS.SCALE))
 
     const label = new Text()
     label.text = key
@@ -534,16 +150,16 @@ function initGroundPlaneBoundariesAndPOI() {
     label.color = 0xED225D
     label.font = "./static/Orbitron-VariableFont_wght.ttf"
 
-    label.position.x = x * SCALE
+    label.position.x = x * UTILS.SCALE
     label.position.y = 2
-    label.position.z = y * SCALE
+    label.position.z = y * UTILS.SCALE
 
     poiLabels.push(label)
     scene.add(label)
   }
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
 
-  const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
+  const poiMesh = new THREE.Points(poiGeometry, UTILS.refPointMaterial)
   scene.add(poiMesh)
 }
 
@@ -564,15 +180,15 @@ s.addEventListener('message', (event) => {
     // parse SBS data here...
 
     let data = result.split(",")
-    let hexIdent = data[HEX_IDENT]
+    let hexIdent = data[ADSB.HEX_IDENT]
 
-    if (!(hexIdent in aircrafts)) {
-      const aircraft = new Aircraft()
+    if (!(hexIdent in AIRCRAFT.aircrafts)) {
+      const aircraft = new AIRCRAFT.Aircraft(scene)
       aircraft.hex = hexIdent
-      aircrafts[hexIdent] = aircraft
+      AIRCRAFT.aircrafts[hexIdent] = aircraft
     }
 
-    aircrafts[hexIdent].update(data)
+    AIRCRAFT.aircrafts[hexIdent].update(data)
 
     //aircrafts[hexIdent].log()
   }
@@ -580,10 +196,6 @@ s.addEventListener('message', (event) => {
 });
 
 
-let INTERSECTED = {
-  key: null,
-  mesh: null
-}
 
 function draw(deltaTime) {
 
@@ -593,10 +205,10 @@ function draw(deltaTime) {
   // aircraft
   //
 
-  for (const key in aircrafts) {
+  for (const key in AIRCRAFT.aircrafts) {
 
-    const ac = aircrafts[key];
-    ac.updateText()
+    const ac = AIRCRAFT.aircrafts[key];
+    ac.updateText(camera.position)
 
     if (pointer.x !== undefined && pointer.y !== undefined) {
 
@@ -613,35 +225,29 @@ function draw(deltaTime) {
         pointer.x = undefined
         pointer.y = undefined
 
-        if (ac.hasValidTelemetry() && key !== INTERSECTED.key) {
+        if (ac.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
-          if (INTERSECTED.key !== null) {
-            INTERSECTED.mesh.material.color = airCraftColor
+          if (UTILS.INTERSECTED.key !== null) {
+            UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
           }
 
-          INTERSECTED.key = key
-          INTERSECTED.mesh = ac.mesh
-          INTERSECTED.mesh.material.color = airCraftSelectedColor
+          UTILS.INTERSECTED.key = key
+          UTILS.INTERSECTED.mesh = ac.mesh
+          UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
 
-          hideHUD()
-          if (isLandscape()) {
-            HUD = HUD_L
-          } else {
-            HUD = HUD_P
-          }
-          showHUD()
+          UTILS._HUD.reset()
+          UTILS._HUD.show()
+          ac.fetchInfo()
 
-          ac.fetchInfoAndShow()
-
-          console.log(INTERSECTED)
+          console.log(UTILS.INTERSECTED)
         }
       }
     }
 
     ac.ttl -= 100 * deltaTime
     if (ac.ttl < 0) {
-      ac.clear()
-      delete aircrafts[key]
+      ac.clear(scene)
+      delete AIRCRAFT.aircrafts[key]
     }
   }
 
@@ -656,146 +262,39 @@ function draw(deltaTime) {
   }
 }
 
-
-function deselectAirCraftAndHideHUD() {
-  if (INTERSECTED.key !== null) {
-    INTERSECTED.mesh.material.color = airCraftColor
-    INTERSECTED.key = null
-    INTERSECTED.mesh = null
-    hideHUD()
+function deselectAirCraftAndHideHUD(animate = true) {
+  if (UTILS.INTERSECTED.key !== null) {
+    UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
+    UTILS.INTERSECTED.key = null
+    UTILS.INTERSECTED.mesh = null
+    UTILS._HUD.hide(animate)
   }
-}
-
-function hideHUD() {
-  if (HUD === undefined) return
-  HUD.container.className = "hidden"
-  HUD = undefined
-}
-
-function showHUD() {
-  if (HUD === undefined) return
-  HUD.container.className = ""
-}
-
-
-
-//
-// haversine/spherical distance and bearing calculations
-// source: https://www.movable-type.co.uk/scripts/latlong.html
-//
-
-function calcHaversineDistance(from, to) {
-  const lat1 = from.lat
-  const lng1 = from.lng
-  const lat2 = to.lat
-  const lng2 = to.lng
-
-  const R = 6371e3 // metres
-  const φ1 = lat1 * Math.PI / 180 // φ, λ in radians
-  const φ2 = lat2 * Math.PI / 180
-  const Δφ = (lat2 - lat1) * Math.PI / 180
-  const Δλ = (lng2 - lng1) * Math.PI / 180
-  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) *
-    Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  const d = R * c // in metres
-
-  return d
-}
-
-function calcSphericalDistance(from, to) {
-  const lat1 = from.lat
-  const lng1 = from.lng
-  const lat2 = to.lat
-  const lng2 = to.lng
-
-  const φ1 = lat1 * Math.PI / 180
-  const φ2 = lat2 * Math.PI / 180
-  const Δλ = (lng2 - lng1) * Math.PI / 180
-  const R = 6371e3
-  const d = Math.acos(Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ)) * R
-
-  return d
-}
-
-function calcBearing(from, to) {
-  const φ1 = from.lat
-  const λ1 = from.lng
-  const φ2 = to.lat
-  const λ2 = to.lng
-
-  const y = Math.sin(λ2 - λ1) * Math.cos(φ2)
-  const x = Math.cos(φ1) * Math.sin(φ2) -
-    Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1)
-
-  const θ = Math.atan2(y, x)
-  const brng = (θ * 180 / Math.PI + 360) % 360 // in degrees
-
-  return brng
-}
-
-function getXY(from, to) {
-  const bearing = calcBearing(from, to)
-  const d = calcSphericalDistance(from, to)
-
-  const x = d * Math.cos(THREE.MathUtils.degToRad(90 - bearing))
-  const y = -d * Math.sin(THREE.MathUtils.degToRad(90 - bearing))
-
-  return { x: x, y: y }
 }
 
 
 // window resize event listeners
 window.addEventListener('resize', () => {
-  sizes.width = window.innerWidth
-  sizes.height = window.innerHeight
+  UTILS.sizes.width = window.innerWidth
+  UTILS.sizes.height = window.innerHeight
 
-  console.log(`window resize - w: ${sizes.width} h: ${sizes.height}`)
+  console.log(`window resize - w: ${UTILS.sizes.width} h: ${UTILS.sizes.height}`)
 
-  camera.aspect = sizes.width / sizes.height
+  camera.aspect = UTILS.sizes.width / UTILS.sizes.height
   camera.updateProjectionMatrix()
-  renderer.setSize(sizes.width, sizes.height)
+  renderer.setSize(UTILS.sizes.width, UTILS.sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-  deselectAirCraftAndHideHUD()
-})
+  deselectAirCraftAndHideHUD({ animate: false })
 
-window.addEventListener('mouseup', (event) => {
-  console.log('🐁🐁🐁🐁 up!')
-})
-
-window.addEventListener('mousedown', (event) => {
-  console.log('🐁🐁🐁🐁 down!')
-})
-
-window.addEventListener('touchstart', (event) => {
-  console.log('🖕🖕🖕🖕 touch start!')
-})
-
-window.addEventListener('touchend', (event) => {
-  console.log('🖕🖕🖕🖕 touch end')
-})
-
-window.addEventListener('touchmove', (event) => {
-  console.log('🖕🖕🖕🖕 touch move')
-  event.preventDefault()
+  UTILS._HUD.toggleOrientation(UTILS.isLandscape())
 })
 
 
 // single click listener to check for airplane intersections
 window.addEventListener('click', (event) => {
-  if (event.pointerType === 'touch') {
-    console.log(`🖕🖕🖕🖕 touch -- CLICK`)
-  } else if (event.pointerType === 'mouse') {
-    console.log('🐁🐁🐁🐁 -- CLICK')
-
-    if (isClickDueToOrbitControlsInteraction) {
-      isClickDueToOrbitControlsInteraction = false
-      console.log(`😭😭😭😭 -- mouse click due to orbitControlsInteraction !!!`)
-      return
-    }
-
+  if (event.pointerType === 'mouse' && isClickDueToOrbitControlsInteraction) {
+    isClickDueToOrbitControlsInteraction = false
+    return
   }
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
