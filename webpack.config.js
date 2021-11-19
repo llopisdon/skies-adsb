@@ -2,6 +2,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const CopyPlugin = require("copy-webpack-plugin")
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const path = require("path")
+const Dotenv = require("dotenv-webpack")
 
 module.exports = {
   entry: {
@@ -11,6 +12,9 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   plugins: [
+
+    new Dotenv(),
+
     new CleanWebpackPlugin({
       verbose: true
     }),

@@ -13,7 +13,6 @@ const sofla_map = {}
 const poiVertices = []
 const poiLabels = []
 
-
 let simulationPaused = false
 
 const pointer = new THREE.Vector2()
@@ -63,8 +62,6 @@ controls.addEventListener('start', (event) => {
 })
 
 
-
-
 // axes helper
 const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
@@ -77,13 +74,6 @@ const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.copy(camera.position)
 scene.add(light)
 scene.add(light.target)
-
-
-
-
-// MIA: 25.799740325918425, -80.28758238380416
-
-
 
 
 navigator.geolocation.getCurrentPosition((pos) => {
@@ -164,9 +154,7 @@ function initGroundPlaneBoundariesAndPOI() {
 }
 
 
-//const s = new WebSocket('wss://raspberrypi.local:30006');
-const s = new WebSocket('ws://192.168.86.34:30006')
-//const s = new WebSocket('wss://' + self.location.host + ':30006')
+const s = new WebSocket(UTILS.DATA_HOSTS["adsb"])
 s.addEventListener('message', (event) => {
 
   if (simulationPaused) {

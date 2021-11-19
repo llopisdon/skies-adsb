@@ -1,6 +1,18 @@
 import * as THREE from 'three'
 import { HUD } from './HUD.js'
 
+export const DATA_HOSTS = {
+  "adsb": `ws://${(process.env.NODE_ENV === "development")
+    ? process.env.SKIES_ADSB_HOST_DEV
+    : process.env.SKIES_ADSB_HOST}`,
+  "flightinfo": `http://${(process.env.NODE_ENV === "development")
+    ? process.env.SKIES_FLASK_HOST_DEV
+    : process.env.SKIES_FLASK_HOST}/flightinfo`,
+  "photos": "https://api.planespotters.net/pub/photos/hex"
+}
+
+console.log(DATA_HOSTS)
+
 //
 // ADB-S sends back data in meters and all of the distance,
 // heading, and bearing calculations are in meters

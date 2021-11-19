@@ -236,7 +236,7 @@ export class Aircraft {
       return
     }
 
-    const photoUrl = `https://api.planespotters.net/pub/photos/hex/${this.hex}`
+    const photoUrl = `${UTILS.DATA_HOSTS["photos"]}/${this.hex}`
     console.log(`fetchPhoto -> ${photoUrl}`)
     this.photoFuture = fetch(photoUrl)
       .then(response => response.json())
@@ -276,7 +276,7 @@ export class Aircraft {
       return
     }
 
-    const url = `http://${self.location.host.split(':')[0]}:5000/flightinfo/${this.callsign}`
+    const url = `${UTILS.DATA_HOSTS["flightinfo"]}/${this.callsign}`
     this.flightInfoFuture = fetch(url)
       .then(response => response.json())
       .then(data => {
