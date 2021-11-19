@@ -2,7 +2,7 @@
 // aircraft info HTML HUD
 //
 
-const HUD_DEFAULT_PHOTO = './static/airliner.jpg'
+const HUD_DEFAULT_PHOTO = './static/aircraft.jpg'
 const NOT_AVAILABLE = 'n/a'
 
 function getHUD(hudId) {
@@ -41,8 +41,6 @@ const HUD_P = getHUD("portrait-hud")
 setupAnimationEventListeners(HUD_P)
 const HUD_L = getHUD("landscape-hud")
 setupAnimationEventListeners(HUD_L)
-
-
 
 
 export class HUD {
