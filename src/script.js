@@ -223,8 +223,8 @@ function draw(deltaTime) {
           UTILS.INTERSECTED.mesh = ac.mesh
           UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
 
-          UTILS._HUD.reset()
-          UTILS._HUD.show()
+          HUD.reset()
+          HUD.show()
           ac.fetchInfo()
 
           console.log(UTILS.INTERSECTED)
@@ -255,7 +255,7 @@ function deselectAirCraftAndHideHUD(animate = true) {
     UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null
-    UTILS._HUD.hide(animate)
+    HUD.hide(animate)
   }
 }
 
@@ -274,7 +274,7 @@ window.addEventListener('resize', () => {
 
   deselectAirCraftAndHideHUD({ animate: false })
 
-  UTILS._HUD.toggleOrientation(UTILS.isLandscape())
+  HUD.toggleOrientation(UTILS.isLandscape())
 })
 
 

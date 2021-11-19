@@ -181,7 +181,7 @@ export class Aircraft {
       this.text.sync()
 
       if (this.hex === UTILS.INTERSECTED.key) {
-        UTILS._HUD.updateTelemetry(this)
+        HUD.updateTelemetry(this)
       }
     }
 
@@ -225,12 +225,12 @@ export class Aircraft {
 
     if (this.photoFuture !== null) {
       if (this.photo !== undefined) {
-        UTILS._HUD.showPhoto(this)
+        HUD.showPhoto(this)
       } else {
         const aircraftTypeKey = this.getAircraftTypeKey()
         if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
           this.photo = aircraftPhotos[aircraftTypeKey]
-          UTILS._HUD.showPhoto(this)
+          HUD.showPhoto(this)
         }
       }
       return
@@ -247,16 +247,16 @@ export class Aircraft {
           if ('thumbnail' in photo) {
             this.photo = photo
             console.log(this.photo)
-            UTILS._HUD.showPhoto(this)
+            HUD.showPhoto(this)
           }
         }
         if (this.photo === undefined) {
           const aircraftTypeKey = this.getAircraftTypeKey()
           if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
             this.photo = aircraftPhotos[aircraftTypeKey]
-            UTILS._HUD.showPhoto(this)
+            HUD.showPhoto(this)
           } else {
-            UTILS._HUD.clearPhoto()
+            HUD.clearPhoto()
           }
         }
       })
@@ -272,7 +272,7 @@ export class Aircraft {
     }
 
     if (this.flightInfoFuture != null) {
-      UTILS._HUD.showAircraftInfo(this)
+      HUD.showAircraftInfo(this)
       return
     }
 
@@ -286,7 +286,7 @@ export class Aircraft {
         if (!hasPhoto && aircraftTypeKey !== undefined && this.photo !== undefined) {
           aircraftPhotos[aircraftTypeKey] = this.photo
         }
-        UTILS._HUD.showAircraftInfo(this)
+        HUD.showAircraftInfo(this)
       })
   }
 

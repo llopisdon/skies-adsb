@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { HUD } from './HUD.js'
 
 export const DATA_HOSTS = {
   "adsb": `ws://${(process.env.NODE_ENV === "development")
@@ -44,9 +43,6 @@ export function isLandscape() {
   return sizes.width > sizes.height && sizes.height < 576
 }
 
-// HUD
-export const _HUD = new HUD(isLandscape())
-console.log(_HUD)
 
 
 //

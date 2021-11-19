@@ -1,3 +1,5 @@
+import * as UTILS from './utils.js'
+
 //
 // aircraft info HTML HUD
 //
@@ -43,7 +45,7 @@ const HUD_L = getHUD("landscape-hud")
 setupAnimationEventListeners(HUD_L)
 
 
-export class HUD {
+class _HUD {
 
   constructor(landscape = false) {
     this.hud = undefined
@@ -122,3 +124,8 @@ export class HUD {
     this.hud.container.classList.add('show')
   }
 }
+
+// HUD
+export const HUD = new _HUD(UTILS.isLandscape())
+console.log(HUD)
+
