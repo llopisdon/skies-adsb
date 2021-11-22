@@ -33,16 +33,21 @@ airCraftGeometry.setFromPoints([
 airCraftGeometry.computeVertexNormals()
 
 export const airCraftSelectedColor = new THREE.Color(0xff0000)
-export const airCraftColor = new THREE.Color(0x00ff00)
+export const airCraftColor = new THREE.Color(0xffba2f)
+//export const airCraftColor = new THREE.Color(0x25C9AE)
 
 const airCraftMaterial = new THREE.MeshLambertMaterial({
   color: airCraftColor,
 })
 const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
 
+const blackColor = new THREE.Color(0x444444)
+const whiteColor = new THREE.Color(0xffffff)
 
+const redNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff0000 })
+const greenNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 })
 
-
+const AIRCRAFT_TTL = 10.0
 
 
 export class Aircraft {
@@ -65,7 +70,7 @@ export class Aircraft {
     this.is_on_ground = false
     this.bearing = 0
     this.distance = 0.0
-    this.ttl = 0
+    this.timestamp = 0
 
     this.photoFuture = null
     this.photo == null
@@ -101,14 +106,38 @@ export class Aircraft {
     this.text.font = "./static/Orbitron-VariableFont_wght.ttf"
     this.group.add(this.text)
 
-    // aircraft ref point
-    this.refPoint = new THREE.Points(
+    // lights
+    this.redNavigationLight = new THREE.Points(
       new THREE.BufferGeometry().setFromPoints(
-        [new THREE.Vector3(0, 0, -3.25)]
+        [new THREE.Vector3(-1.75, 1, 1.05)]
       ),
-      UTILS.refPointMaterial
+      redNavigationLightMaterial
     )
-    this.mesh.add(this.refPoint)
+    this.mesh.add(this.redNavigationLight)
+
+    this.greenNavigationLight = new THREE.Points(
+      new THREE.BufferGeometry().setFromPoints(
+        [new THREE.Vector3(1.75, 1, 1.05)]
+      ),
+      greenNavigationLightMaterial
+    )
+    this.mesh.add(this.greenNavigationLight)
+
+    this.strobeLight = new THREE.Points(
+      new THREE.BufferGeometry().setFromPoints(
+        [new THREE.Vector3(0, -1.25, 1)]
+      ),
+      new THREE.PointsMaterial({ size: 0.5, color: blackColor })
+    )
+    this.mesh.add(this.strobeLight)
+
+    this.strobeLightTop = new THREE.Points(
+      new THREE.BufferGeometry().setFromPoints(
+        [new THREE.Vector3(0, 1.25, 1)]
+      ),
+      new THREE.PointsMaterial({ size: 0.5, color: blackColor })
+    )
+    this.mesh.add(this.strobeLightTop)
 
     this.group.add(this.mesh)
 
@@ -122,7 +151,7 @@ export class Aircraft {
     scene.remove(this.group)
   }
 
-  update(data) {
+  update(data, elapsedTime) {
     if (data[ADSB.CALLSIGN] !== "") {
       this.callsign = data[ADSB.CALLSIGN]
     }
@@ -185,7 +214,26 @@ export class Aircraft {
       }
     }
 
-    this.ttl = 10
+    // after each update reset timestamp
+    this.timestamp = elapsedTime
+  }
+
+  draw(scene, elapsedTime, cameraPosition) {
+    this.updateText(cameraPosition)
+
+    // animate strobe light
+    const alpha = Math.sin(elapsedTime * 6.0) * 0.5 + 0.5
+    this.strobeLight.material.color.copy(blackColor).lerp(whiteColor, alpha)
+    this.strobeLight.material.needsUpdate = true
+    this.strobeLightTop.material.color.copy(blackColor).lerp(whiteColor, alpha)
+    this.strobeLightTop.material.needsUpdate = true
+
+    const ttl = elapsedTime - this.timestamp
+
+    if (ttl > AIRCRAFT_TTL) {
+      this.clear(scene)
+      delete aircrafts[this.hex]
+    }
   }
 
   getAircraftTypeKey() {

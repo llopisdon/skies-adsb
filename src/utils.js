@@ -13,12 +13,14 @@ export const DATA_HOSTS = {
 console.log(DATA_HOSTS)
 
 //
-// ADB-S sends back data in meters and all of the distance,
-// heading, and bearing calculations are in meters
-// for display purposes. For right now the scale
-// of 1 unit for ever 50 meters seems to look good. 
+// ADS-B sends back speed, velocity changes, and altitude in knots and feet.
 //
-export const SCALE = 1.0 / 300.0
+// For display purposes all of the distance, heading, and bearing calculations
+// are calculted in meters using the ADS-B lat/long data.
+//
+// For right now the scale of 1 unit for ever 50 meters seems to look good. 
+//
+export const SCALE = 1.0 / 50.0
 
 
 export const sizes = {
@@ -37,12 +39,9 @@ export const INTERSECTED = {
 }
 
 
-export const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
-
 export function isLandscape() {
   return sizes.width > sizes.height && sizes.height < 576
 }
-
 
 
 //

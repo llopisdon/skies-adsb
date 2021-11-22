@@ -38,6 +38,8 @@ const stats = new Stats()
 stats.showPanel(0)
 document.body.appendChild(stats.dom)
 
+// Clock
+let clock = new THREE.Clock()
 
 
 // controls
@@ -75,6 +77,11 @@ light.position.copy(camera.position)
 scene.add(light)
 scene.add(light.target)
 
+const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
+const TEXT_COLOR = new THREE.Color(0xed225d)
+const MAP_COLOR = new THREE.Color(0x81efff)
+
+const TEXT_FONT = "./static/Orbitron-VariableFont_wght.ttf"
 
 navigator.geolocation.getCurrentPosition((pos) => {
 
@@ -96,11 +103,9 @@ navigator.geolocation.getCurrentPosition((pos) => {
 
 
 function initGroundPlaneBoundariesAndPOI() {
+
   // TODO start websocket connection once geolocation has been updated
   // TODO update geometries once geolocation has been updated
-
-  // const { x, y } = getXY(origin, { latitude: 25.799740325918425, longitude: -80.28758238380416 })
-  // console.log(`mia: ${x} ${y}`)
 
   for (const key in MAPS.sofla_zones) {
     console.log(`loading ground plane for: ${key}`);
@@ -117,15 +122,11 @@ function initGroundPlaneBoundariesAndPOI() {
     geometry.rotateX(Math.PI / 2)
     let edges = new THREE.EdgesGeometry(geometry)
     let lineSegments = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
-      color: new THREE.Color('#81efff'),
+      color: MAP_COLOR,
       linewidth: 2
     }))
     scene.add(lineSegments)
   }
-
-
-  // fill('#ED225D');
-  // points of interest (poi)
 
   for (const key in MAPS.mia_poi) {
     const ref_pt = MAPS.mia_poi[key]
@@ -137,8 +138,8 @@ function initGroundPlaneBoundariesAndPOI() {
     label.text = key
     label.fontSize = 1
     label.anchorX = 'center'
-    label.color = 0xED225D
-    label.font = "./static/Orbitron-VariableFont_wght.ttf"
+    label.color = new THREE.Color(TEXT_COLOR)
+    label.font = TEXT_FONT
 
     label.position.x = x * UTILS.SCALE
     label.position.y = 2
@@ -149,7 +150,7 @@ function initGroundPlaneBoundariesAndPOI() {
   }
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
 
-  const poiMesh = new THREE.Points(poiGeometry, UTILS.refPointMaterial)
+  const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
   scene.add(poiMesh)
 }
 
@@ -176,7 +177,7 @@ s.addEventListener('message', (event) => {
       AIRCRAFT.aircrafts[hexIdent] = aircraft
     }
 
-    AIRCRAFT.aircrafts[hexIdent].update(data)
+    AIRCRAFT.aircrafts[hexIdent].update(data, clock.getElapsedTime())
 
     //aircrafts[hexIdent].log()
   }
@@ -185,7 +186,7 @@ s.addEventListener('message', (event) => {
 
 
 
-function draw(deltaTime) {
+function draw(elapsedTime, deltaTime) {
 
   raycaster.setFromCamera(pointer, camera)
 
@@ -196,7 +197,8 @@ function draw(deltaTime) {
   for (const key in AIRCRAFT.aircrafts) {
 
     const ac = AIRCRAFT.aircrafts[key];
-    ac.updateText(camera.position)
+
+    ac.draw(scene, elapsedTime, camera.position)
 
     if (pointer.x !== undefined && pointer.y !== undefined) {
 
@@ -230,12 +232,6 @@ function draw(deltaTime) {
           console.log(UTILS.INTERSECTED)
         }
       }
-    }
-
-    ac.ttl -= 100 * deltaTime
-    if (ac.ttl < 0) {
-      ac.clear(scene)
-      delete AIRCRAFT.aircrafts[key]
     }
   }
 
@@ -333,19 +329,18 @@ document.addEventListener("visibilitychange", handleVisibilityChange, false);
 // tick
 //
 
-// Clock
-let clock = new THREE.Clock()
 
 const tick = function () {
   stats.begin()
 
   const elapsedTime = clock.getElapsedTime()
+  const deltaTime = clock.getDelta()
 
   requestAnimationFrame(tick)
 
   controls.update()
 
-  draw(clock.getDelta())
+  draw(elapsedTime, deltaTime)
 
   renderer.render(scene, camera)
 
