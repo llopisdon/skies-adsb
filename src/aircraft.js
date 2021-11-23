@@ -33,11 +33,14 @@ airCraftGeometry.setFromPoints([
 airCraftGeometry.computeVertexNormals()
 
 export const airCraftSelectedColor = new THREE.Color(0xff0000)
-export const airCraftColor = new THREE.Color(0xffba2f)
+//export const airCraftColor = new THREE.Color(0xffba2f)
 //export const airCraftColor = new THREE.Color(0x25C9AE)
+export const airCraftColor = new THREE.Color(0x00ff00)
 
 const airCraftMaterial = new THREE.MeshLambertMaterial({
   color: airCraftColor,
+  // wireframe: true,
+  // wireframeLinewidth: 2
 })
 const airCraftHeightLineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff })
 
