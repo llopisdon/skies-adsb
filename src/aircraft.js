@@ -208,7 +208,11 @@ export class Aircraft {
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
 
-      this.text.text = `${this.callsign || '-'}\n${this.hex}\n${this.hdg || '-'}\n${this.spd || '-'}\n${this.alt || '-'}`
+      const heading = (this.hdg !== undefined) ? this.hdg + '°' : '-'
+      const groundSpeed = (this.hdg !== undefined) ? this.spd + ' kt' : '-'
+      const altitude = (this.alt !== undefined) ? this.alt + "'" : '-'
+
+      this.text.text = `${this.callsign || '-'}\n${this.hex}\n${heading}\n${groundSpeed}\n${altitude}`
       this.text.position.set(xPos, yPos, zPos)
       this.text.sync()
 
