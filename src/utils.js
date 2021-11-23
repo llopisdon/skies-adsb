@@ -18,9 +18,9 @@ console.log(DATA_HOSTS)
 // For display purposes all of the distance, heading, and bearing calculations
 // are calculted in meters using the ADS-B lat/long data.
 //
-// For right now the scale of 1 unit for ever 50 meters seems to look good. 
+// For right now the scale of 1 unit for ever 250 meters seems to look good. 
 //
-export const SCALE = 1.0 / 50.0
+export const SCALE = 1.0 / 250.0
 
 
 export const sizes = {
