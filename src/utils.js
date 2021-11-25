@@ -50,16 +50,11 @@ export function isLandscape() {
 //
 
 export function calcHaversineDistance(from, to) {
-  const lat1 = from.lat
-  const lng1 = from.lng
-  const lat2 = to.lat
-  const lng2 = to.lng
-
   const R = 6371e3 // metres
-  const φ1 = lat1 * Math.PI / 180 // φ, λ in radians
-  const φ2 = lat2 * Math.PI / 180
-  const Δφ = (lat2 - lat1) * Math.PI / 180
-  const Δλ = (lng2 - lng1) * Math.PI / 180
+  const φ1 = from.lat * Math.PI / 180 // φ, λ in radians
+  const φ2 = to.lat * Math.PI / 180
+  const Δφ = (to.lat - from.lat) * Math.PI / 180
+  const Δλ = (to.lng - from.lng) * Math.PI / 180
   const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
     Math.cos(φ1) * Math.cos(φ2) *
     Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
@@ -70,14 +65,9 @@ export function calcHaversineDistance(from, to) {
 }
 
 export function calcSphericalDistance(from, to) {
-  const lat1 = from.lat
-  const lng1 = from.lng
-  const lat2 = to.lat
-  const lng2 = to.lng
-
-  const φ1 = lat1 * Math.PI / 180
-  const φ2 = lat2 * Math.PI / 180
-  const Δλ = (lng2 - lng1) * Math.PI / 180
+  const φ1 = from.lat * Math.PI / 180
+  const φ2 = to.lat * Math.PI / 180
+  const Δλ = (to.lng - from.lng) * Math.PI / 180
   const R = 6371e3
   const d = Math.acos(Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ)) * R
 
