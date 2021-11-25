@@ -2,18 +2,17 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'stats.js'
-import { Text } from 'troika-three-text'
 import * as MAPS from './maps.js'
 import * as UTILS from './utils.js'
 import { HUD } from './HUD.js'
 import * as AIRCRAFT from './aircraft.js'
 import * as ADSB from './ADSB.js'
 
-const sofla_map = {}
-const poiVertices = []
-const poiLabels = []
+//
+// globals
+//
 
-let animationRequestID = -1
+let animationFrameRequestId = -1
 
 const pointer = new THREE.Vector2()
 pointer.x = undefined
@@ -24,7 +23,6 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
 camera.position.z = 10
 scene.add(camera)
-
 
 // renderer
 const canvas = document.querySelector('canvas.webgl')
@@ -77,84 +75,27 @@ light.position.copy(camera.position)
 scene.add(light)
 scene.add(light.target)
 
-const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
-const TEXT_COLOR = new THREE.Color(0xed225d)
-const MAP_COLOR = new THREE.Color(0x81efff)
 
-const TEXT_FONT = "./static/Orbitron-VariableFont_wght.ttf"
-
+//
+// use geolocation to find origin for rendering POV
+//
 navigator.geolocation.getCurrentPosition((pos) => {
-
   console.log(`ORIGIN lat: ${pos.coords.latitude} lng: ${pos.coords.longitude}`)
-
   UTILS.origin.lat = pos.coords.latitude
   UTILS.origin.lng = pos.coords.longitude
-
-  initGroundPlaneBoundariesAndPOI()
+  MAPS.initGroundPlaneBoundariesAndPOI(scene)
 
 }, (error) => {
   console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
-  UTILS.origin.lat = MAPS.mia_poi['HOME'][0]
-  UTILS.origin.lng = MAPS.mia_poi['HOME'][1]
-  console.log(`fallback location - HOME: ${MAPS.mia_poi['HOME']}`)
-
-  initGroundPlaneBoundariesAndPOI()
+  MAPS.setFallbackOrigin(UTILS.origin)
+  console.log(`fallback location - HOME: ${UTILS.origin}`)
+  MAPS.initGroundPlaneBoundariesAndPOI(scene)
 })
 
 
-function initGroundPlaneBoundariesAndPOI() {
-
-  // TODO start websocket connection once geolocation has been updated
-  // TODO update geometries once geolocation has been updated
-
-  for (const key in MAPS.sofla_zones) {
-    console.log(`loading ground plane for: ${key}`);
-    const zone = MAPS.sofla_zones[key]
-    sofla_map[key] = []
-    let points = []
-    for (let i = 0; i < zone.length; i += 2) {
-      const { x, y } = UTILS.getXY(UTILS.origin, { lat: zone[i], lng: zone[i + 1] })
-      points.push(new THREE.Vector2(x * UTILS.SCALE, y * UTILS.SCALE))
-    }
-
-    let shape = new THREE.Shape(points)
-    let geometry = new THREE.ShapeGeometry(shape)
-    geometry.rotateX(Math.PI / 2)
-    let edges = new THREE.EdgesGeometry(geometry)
-    let lineSegments = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
-      color: MAP_COLOR,
-      linewidth: 2
-    }))
-    scene.add(lineSegments)
-  }
-
-  for (const key in MAPS.mia_poi) {
-    const ref_pt = MAPS.mia_poi[key]
-    console.log(`${key} -> ${ref_pt}`)
-    const { x, y } = UTILS.getXY(UTILS.origin, { lat: ref_pt[0], lng: ref_pt[1] })
-    poiVertices.push(new THREE.Vector3(x * UTILS.SCALE, 0, y * UTILS.SCALE))
-
-    const label = new Text()
-    label.text = key
-    label.fontSize = 1
-    label.anchorX = 'center'
-    label.color = new THREE.Color(TEXT_COLOR)
-    label.font = TEXT_FONT
-
-    label.position.x = x * UTILS.SCALE
-    label.position.y = 2
-    label.position.z = y * UTILS.SCALE
-
-    poiLabels.push(label)
-    scene.add(label)
-  }
-  const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
-
-  const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
-  scene.add(poiMesh)
-}
-
-
+//
+// websocket
+//
 const websocket = new WebSocket(UTILS.DATA_HOSTS["adsb"])
 
 const handleADSBMessage = (event) => {
@@ -174,7 +115,6 @@ const handleADSBMessage = (event) => {
     }
 
     AIRCRAFT.aircrafts[hexIdent].update(data, clock.getElapsedTime())
-
     //aircrafts[hexIdent].log()
   }
   reader.readAsText(event.data)
@@ -183,8 +123,9 @@ const handleADSBMessage = (event) => {
 websocket.addEventListener('message', handleADSBMessage);
 
 
-
-
+//
+// draw
+//
 function draw(elapsedTime, deltaTime) {
 
   raycaster.setFromCamera(pointer, camera)
@@ -234,7 +175,7 @@ function draw(elapsedTime, deltaTime) {
     }
   }
 
-  for (const poiLabel of poiLabels) {
+  for (const poiLabel of MAPS.poiLabels) {
     poiLabel.lookAt(camera.position)
   }
 
@@ -254,8 +195,9 @@ function deselectAirCraftAndHideHUD(animate = true) {
   }
 }
 
-
+//
 // window resize event listeners
+//
 window.addEventListener('resize', () => {
   UTILS.sizes.width = window.innerWidth
   UTILS.sizes.height = window.innerHeight
@@ -272,8 +214,9 @@ window.addEventListener('resize', () => {
   HUD.toggleOrientation(UTILS.isLandscape())
 })
 
-
+//
 // single click listener to check for airplane intersections
+//
 window.addEventListener('click', (event) => {
   if (event.pointerType === 'mouse' && isClickDueToOrbitControlsInteraction) {
     isClickDueToOrbitControlsInteraction = false
@@ -284,7 +227,9 @@ window.addEventListener('click', (event) => {
   console.log(`click`, pointer, event)
 })
 
+//
 // fullscreen toggle on double click event listener
+//
 const fullscreenButton = document.getElementById("fullscreen_button")
 console.log(fullscreenButton)
 fullscreenButton.addEventListener('click', () => {
@@ -308,18 +253,19 @@ fullscreenButton.addEventListener('click', () => {
   }
 })
 
+//
 // handle page visibility
 // https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
-
+//
 function handleVisibilityChange() {
   if (document.visibilityState === "hidden") {
     console.log("pause simulation...")
     websocket.removeEventListener('message', handleADSBMessage)
-    window.cancelAnimationFrame(animationRequestID)
+    window.cancelAnimationFrame(animationFrameRequestId)
   } else {
     console.log("resume simulation...")
     websocket.addEventListener('message', handleADSBMessage)
-    animationRequestID = window.requestAnimationFrame(tick)
+    animationFrameRequestId = window.requestAnimationFrame(tick)
   }
 }
 
@@ -336,7 +282,7 @@ const tick = function () {
   const elapsedTime = clock.getElapsedTime()
   const deltaTime = clock.getDelta()
 
-  animationRequestID = requestAnimationFrame(tick)
+  animationFrameRequestId = requestAnimationFrame(tick)
 
   controls.update()
 
