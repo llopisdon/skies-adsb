@@ -13,7 +13,7 @@ const sofla_map = {}
 const poiVertices = []
 const poiLabels = []
 
-let simulationPaused = false
+let animationRequestID = -1
 
 const pointer = new THREE.Vector2()
 pointer.x = undefined
@@ -155,13 +155,9 @@ function initGroundPlaneBoundariesAndPOI() {
 }
 
 
-const s = new WebSocket(UTILS.DATA_HOSTS["adsb"])
-s.addEventListener('message', (event) => {
+const websocket = new WebSocket(UTILS.DATA_HOSTS["adsb"])
 
-  if (simulationPaused) {
-    return
-  }
-
+const handleADSBMessage = (event) => {
   const reader = new FileReader()
   reader.onload = () => {
     const result = reader.result
@@ -182,7 +178,10 @@ s.addEventListener('message', (event) => {
     //aircrafts[hexIdent].log()
   }
   reader.readAsText(event.data)
-});
+}
+
+websocket.addEventListener('message', handleADSBMessage);
+
 
 
 
@@ -315,20 +314,21 @@ fullscreenButton.addEventListener('click', () => {
 function handleVisibilityChange() {
   if (document.visibilityState === "hidden") {
     console.log("pause simulation...")
-    simulationPaused = true
+    websocket.removeEventListener('message', handleADSBMessage)
+    window.cancelAnimationFrame(animationRequestID)
   } else {
-    console.log("start simulation...")
-    simulationPaused = false
+    console.log("resume simulation...")
+    websocket.addEventListener('message', handleADSBMessage)
+    animationRequestID = window.requestAnimationFrame(tick)
   }
 }
 
-document.addEventListener("visibilitychange", handleVisibilityChange, false);
+document.addEventListener('visibilitychange', handleVisibilityChange, false);
 
 
 //
 // tick
 //
-
 
 const tick = function () {
   stats.begin()
@@ -336,7 +336,7 @@ const tick = function () {
   const elapsedTime = clock.getElapsedTime()
   const deltaTime = clock.getDelta()
 
-  requestAnimationFrame(tick)
+  animationRequestID = requestAnimationFrame(tick)
 
   controls.update()
 
