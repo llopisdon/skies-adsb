@@ -7,6 +7,7 @@ html,
 body {
   overflow: hidden;
   color: #444;
+  height: 100%;
 }
 
 .hidden {
@@ -21,13 +22,15 @@ body {
   background-color: #ffffff11;
   padding: 8px;
   margin: 8px;
+  z-index: 100;
 }
 
 #portrait-hud {
   position: absolute; 
   bottom: 0;
   right: 0;
-  width: 100%;    
+  width: 100%;
+  z-index: 100;
 }
 
 #landscape-hud {
@@ -35,7 +38,8 @@ body {
   bottom: 0; 
   right: 0; 
   width: 500px;
-  margin: 8px;    
+  margin: 8px;
+  z-index: 100; 
 }
 
 .aircraftPhoto {
@@ -54,6 +58,7 @@ body {
     bottom: 0; 
     right: 0; 
     width: 320px;
+    z-index: 100;
   }
 }
 

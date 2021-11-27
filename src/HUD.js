@@ -102,9 +102,9 @@ class _HUD {
 
   updateTelemetry(aircraft) {
     if (this.hud === undefined) return
-    const heading = (aircraft.hdg !== undefined) ? aircraft.hdg + '°' : NOT_AVAILABLE
-    const groundSpeed = (aircraft.spd !== undefined) ? aircraft.spd + ' kt' : NOT_AVAILABLE
-    const altitude = (aircraft.alt !== undefined) ? aircraft.alt + "'" : NOT_AVAILABLE
+    const heading = (aircraft?.hdg) ? aircraft.hdg + '°' : NOT_AVAILABLE
+    const groundSpeed = (aircraft?.spd) ? aircraft.spd + ' kt' : NOT_AVAILABLE
+    const altitude = (aircraft?.alt) ? aircraft.alt + "'" : NOT_AVAILABLE
     this.hud.telemetry.innerText = `H: ${heading} | GSPD: ${groundSpeed} | ALT: ${altitude}`
   }
 

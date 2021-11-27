@@ -140,7 +140,7 @@ function draw(elapsedTime, deltaTime) {
 
     ac.draw(scene, elapsedTime, camera.position)
 
-    if (pointer.x !== undefined && pointer.y !== undefined) {
+    if (pointer?.x && pointer?.y) {
 
       const groupIntersect = raycaster.intersectObject(ac.group, true)
 
@@ -157,7 +157,7 @@ function draw(elapsedTime, deltaTime) {
 
         if (ac.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
-          if (UTILS.INTERSECTED.key !== null) {
+          if (UTILS.INTERSECTED?.key) {
             UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
           }
 
@@ -179,7 +179,7 @@ function draw(elapsedTime, deltaTime) {
     poiLabel.lookAt(camera.position)
   }
 
-  if (pointer.x !== undefined && pointer.y !== undefined) {
+  if (pointer?.x && pointer?.y) {
     deselectAirCraftAndHideHUD()
     pointer.x = undefined
     pointer.y = undefined
@@ -187,7 +187,7 @@ function draw(elapsedTime, deltaTime) {
 }
 
 function deselectAirCraftAndHideHUD(animate = true) {
-  if (UTILS.INTERSECTED.key !== null) {
+  if (UTILS.INTERSECTED?.key) {
     UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null

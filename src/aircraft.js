@@ -208,9 +208,9 @@ export class Aircraft {
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
 
-      const heading = (this.hdg !== undefined) ? this.hdg + '°' : '-'
-      const groundSpeed = (this.hdg !== undefined) ? this.spd + ' kt' : '-'
-      const altitude = (this.alt !== undefined) ? this.alt + "'" : '-'
+      const heading = (this?.hdg) ? this.hdg + '°' : '-'
+      const groundSpeed = (this?.hdg) ? this.spd + ' kt' : '-'
+      const altitude = (this?.alt) ? this.alt + "'" : '-'
 
       this.text.text = `${this.callsign || '-'}\n${this.hex}\n${heading}\n${groundSpeed}\n${altitude}`
       this.text.position.set(xPos, yPos, zPos)
@@ -244,7 +244,7 @@ export class Aircraft {
   }
 
   getAircraftTypeKey() {
-    if (this.flightInfo == null || this.flightInfo === undefined) return
+    if (this?.flightInfo === undefined) return
     const aircraftType = ('type' in this.flightInfo) ? this.flightInfo['type'] : undefined
     const aircraftManufacturer = ('manufacturer' in this.flightInfo) ? this.flightInfo['manufacturer'] : undefined
     if (aircraftType !== undefined && aircraftManufacturer !== undefined) {
@@ -259,9 +259,7 @@ export class Aircraft {
   }
 
   hasValidTelemetry() {
-    return (typeof this.pos.y !== 'undefined')
-      && (typeof this.pos.lat !== 'undefined')
-      && (typeof this.pos.lng !== 'undefined')
+    return this.pos?.y !== undefined && this.pos?.lat !== undefined && this.pos?.lng !== undefined
   }
 
   fetchInfo() {
@@ -273,13 +271,13 @@ export class Aircraft {
 
     console.log('~~~~ FETCH PHOTO ~~~~')
 
-    if (this.hex === undefined) {
+    if (this?.hex === undefined) {
       console.log('aircraft not yet identified!')
       return
     }
 
-    if (this.photoFuture !== null) {
-      if (this.photo !== undefined) {
+    if (this?.photoFuture) {
+      if (this?.photo) {
         HUD.showPhoto(this)
       } else {
         const aircraftTypeKey = this.getAircraftTypeKey()
@@ -326,7 +324,7 @@ export class Aircraft {
       return
     }
 
-    if (this.flightInfoFuture != null) {
+    if (this?.flightInfoFuture) {
       HUD.showAircraftInfo(this)
       return
     }
@@ -338,7 +336,7 @@ export class Aircraft {
         this.flightInfo = data
         const aircraftTypeKey = this.getAircraftTypeKey()
         const hasPhoto = aircraftTypeKey in aircraftPhotos
-        if (!hasPhoto && aircraftTypeKey !== undefined && this.photo !== undefined) {
+        if (!hasPhoto && aircraftTypeKey !== undefined && this?.photo) {
           aircraftPhotos[aircraftTypeKey] = this.photo
         }
         HUD.showAircraftInfo(this)
