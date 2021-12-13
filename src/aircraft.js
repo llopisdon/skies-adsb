@@ -157,6 +157,9 @@ export class Aircraft {
   update(data, elapsedTime) {
     if (data[ADSB.CALLSIGN] !== "") {
       this.callsign = data[ADSB.CALLSIGN]
+      if (this.hex === UTILS.INTERSECTED.key) {
+        this.fetchInfo()
+      }
     }
 
     if (data[ADSB.ALTITUDE] !== "") {
@@ -239,6 +242,11 @@ export class Aircraft {
 
     if (ttl > AIRCRAFT_TTL) {
       this.clear(scene)
+
+      if (this.hex === UTILS.INTERSECTED.key) {
+        HUD.hide()
+      }
+
       delete aircrafts[this.hex]
     }
   }

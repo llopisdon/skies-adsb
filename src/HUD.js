@@ -19,6 +19,7 @@ function getHUD(hudId) {
     origin: container.querySelector("#origin"),
     destination: container.querySelector("#destination"),
     telemetry: container.querySelector("#telemetry"),
+    spinner: container.querySelector("#spinner"),
   }
 }
 
@@ -87,6 +88,7 @@ class _HUD {
     this.hud.origin.innerText = `Origin: ${NOT_AVAILABLE}`
     this.hud.destination.innerText = `Dest: ${NOT_AVAILABLE}`
     this.hud.telemetry.innerText = `H: ${NOT_AVAILABLE} | GSPD: ${NOT_AVAILABLE} | ALT: ${NOT_AVAILABLE}`
+    this.hud.spinner.className = 'spinner'
   }
 
   showAircraftInfo(aircraft) {
@@ -97,7 +99,7 @@ class _HUD {
     this.hud.aircraftType.innerText = `Type: ${aircraft.flightInfo['type'] || NOT_AVAILABLE} | ${aircraft.flightInfo['manufacturer'] || NOT_AVAILABLE}`
     this.hud.origin.innerText = `Origin: ${aircraft.flightInfo['origin'] || NOT_AVAILABLE}, ${aircraft.flightInfo['originName'] || NOT_AVAILABLE}`
     this.hud.destination.innerText = `Dest: ${aircraft.flightInfo['destination'] || NOT_AVAILABLE}, ${aircraft.flightInfo['destinationName'] || NOT_AVAILABLE}`
-
+    this.hud.spinner.className = 'hidden'
   }
 
   updateTelemetry(aircraft) {
