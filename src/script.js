@@ -217,7 +217,17 @@ window.addEventListener('resize', () => {
 //
 // single click listener to check for airplane intersections
 //
+
+let hasTouchEndEvent = false
+
 window.addEventListener('click', (event) => {
+
+  if (hasTouchEndEvent) {
+    hasTouchEndEvent = false
+    return
+  }
+
+
   if (event.pointerType === 'mouse' && isClickDueToOrbitControlsInteraction) {
     isClickDueToOrbitControlsInteraction = false
     return
@@ -226,6 +236,24 @@ window.addEventListener('click', (event) => {
   pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
   console.log(`click`, pointer, event)
 })
+
+
+window.addEventListener('touchend', (event) => {
+
+  console.log(event)
+
+  if (isClickDueToOrbitControlsInteraction) {
+    isClickDueToOrbitControlsInteraction = false
+    return
+  }
+
+  hasTouchEndEvent = true
+
+  pointer.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
+  pointer.y = - (event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
+  console.log(`touchend`, pointer, event)
+})
+
 
 //
 // fullscreen toggle on double click event listener
