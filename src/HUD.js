@@ -30,7 +30,7 @@ function setupAnimationEventListeners(hud) {
 
     if (hud.container.classList.contains('show')) {
       hud.container.classList.remove('show')
-      hud.container.className = ""
+      hud.container.className = "position-absolute bottom-0 end-0"
     }
 
     if (hud.container.classList.contains('hide')) {
@@ -88,7 +88,7 @@ class _HUD {
     this.hud.origin.innerText = `Origin: ${NOT_AVAILABLE}`
     this.hud.destination.innerText = `Dest: ${NOT_AVAILABLE}`
     this.hud.telemetry.innerText = `H: ${NOT_AVAILABLE} | GSPD: ${NOT_AVAILABLE} | ALT: ${NOT_AVAILABLE}`
-    this.hud.spinner.className = 'spinner'
+    this.hud.spinner.className = 'position-absolute top-50 start-50 translate-middle'
   }
 
   showAircraftInfo(aircraft) {
@@ -117,15 +117,17 @@ class _HUD {
     if (animate) {
       this.hud.container.classList.add('hide')
     } else {
-      this.hud.container.className = "hidden"
+      this.hud.container.classList.remove('show')
+      this.hud.container.classList.add('hidden')
     }
   }
 
   show() {
-    if (this.hud === undefined || this.hud.container.classList.contains('show') || !this.hud.container.classList.contains('hidden')) {
+    if (this.hud === undefined || this.hud.container.classList.contains('show')) {
       return
     }
-    this.hud.container.classList.remove('hidden')
+
+    this.hud.container.className = "position-absolute bottom-0 end-0"
     this.hud.container.classList.add('show')
   }
 }
