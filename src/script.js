@@ -128,6 +128,8 @@ websocket.addEventListener('message', handleADSBMessage);
 //
 function draw(elapsedTime, deltaTime) {
 
+  HUD.update()
+
   raycaster.setFromCamera(pointer, camera)
 
   //
@@ -136,42 +138,49 @@ function draw(elapsedTime, deltaTime) {
 
   for (const key in AIRCRAFT.aircrafts) {
 
-    const ac = AIRCRAFT.aircrafts[key];
+    const aircraft = AIRCRAFT.aircrafts[key];
 
-    ac.draw(scene, elapsedTime, camera.position)
+    const aircraftHasExpired = aircraft.draw(scene, elapsedTime, camera.position)
 
     if (pointer?.x && pointer?.y) {
 
-      const groupIntersect = raycaster.intersectObject(ac.group, true)
+      const groupIntersect = raycaster.intersectObject(aircraft.group, true)
 
       if (groupIntersect.length > 0) {
 
         console.log("---------------")
         console.log(`key: ${key}`)
-        console.log(ac)
+        console.log(aircraft)
         console.log(groupIntersect)
-        console.log(`hasValidTelemetry: ${ac.hasValidTelemetry()}`)
+        console.log(`hasValidTelemetry: ${aircraft.hasValidTelemetry()}`)
         console.log("---------------")
         pointer.x = undefined
         pointer.y = undefined
 
-        if (ac.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
+        if (aircraft.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
           if (UTILS.INTERSECTED?.key) {
             UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
           }
 
           UTILS.INTERSECTED.key = key
-          UTILS.INTERSECTED.mesh = ac.mesh
+          UTILS.INTERSECTED.mesh = aircraft.mesh
           UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
 
-          HUD.reset()
-          HUD.show()
-          ac.fetchInfo()
+          console.log("!!! INTERSECT !!!")
+
+          HUD.show(aircraft)
 
           console.log(UTILS.INTERSECTED)
         }
       }
+    }
+
+    if (aircraftHasExpired) {
+      if (aircraft.hex === UTILS.INTERSECTED.key) {
+        HUD.hide()
+      }
+      aircraft.remove(scene)
     }
   }
 

@@ -1,12 +1,9 @@
 import * as THREE from 'three'
 import { Text } from 'troika-three-text'
-import { HUD } from './HUD.js'
 import * as UTILS from './utils.js'
 import * as ADSB from './ADSB.js'
 
 export const aircrafts = {}
-
-export const aircraftPhotos = {}
 
 const airCraftGeometry = new THREE.BufferGeometry()
 airCraftGeometry.setFromPoints([
@@ -147,19 +144,17 @@ export class Aircraft {
     scene.add(this.group)
   }
 
-  clear(scene) {
+  remove(scene) {
     console.log(`*** CLEAR -- ${this.hex} | ${this.callsign}`)
     scene.remove(this.text)
     this.text.dispose()
     scene.remove(this.group)
+    delete aircrafts[this.hex]
   }
 
   update(data, elapsedTime) {
     if (data[ADSB.CALLSIGN] !== "") {
       this.callsign = data[ADSB.CALLSIGN]
-      if (this.hex === UTILS.INTERSECTED.key) {
-        this.fetchInfo()
-      }
     }
 
     if (data[ADSB.ALTITUDE] !== "") {
@@ -218,10 +213,6 @@ export class Aircraft {
       this.text.text = `${this.callsign || '-'}\n${this.hex}\n${heading}\n${groundSpeed}\n${altitude}`
       this.text.position.set(xPos, yPos, zPos)
       this.text.sync()
-
-      if (this.hex === UTILS.INTERSECTED.key) {
-        HUD.updateTelemetry(this)
-      }
     }
 
     // after each update reset timestamp
@@ -240,21 +231,13 @@ export class Aircraft {
 
     const ttl = elapsedTime - this.timestamp
 
-    if (ttl > AIRCRAFT_TTL) {
-      this.clear(scene)
-
-      if (this.hex === UTILS.INTERSECTED.key) {
-        HUD.hide()
-      }
-
-      delete aircrafts[this.hex]
-    }
+    return ttl > AIRCRAFT_TTL
   }
 
   getAircraftTypeKey() {
-    if (this?.flightInfo === undefined) return
-    const aircraftType = ('type' in this.flightInfo) ? this.flightInfo['type'] : undefined
-    const aircraftManufacturer = ('manufacturer' in this.flightInfo) ? this.flightInfo['manufacturer'] : undefined
+    if (this?.flightInfo === undefined || this?.flightInfo === null) return
+    const aircraftType = ('type' in this?.flightInfo) ? this.flightInfo['type'] : undefined
+    const aircraftManufacturer = ('manufacturer' in this?.flightInfo) ? this.flightInfo['manufacturer'] : undefined
     if (aircraftType !== undefined && aircraftManufacturer !== undefined) {
       return `${aircraftManufacturer}#${aircraftType}`
     } else {
@@ -268,87 +251,6 @@ export class Aircraft {
 
   hasValidTelemetry() {
     return this.pos?.y !== undefined && this.pos?.lat !== undefined && this.pos?.lng !== undefined
-  }
-
-  fetchInfo() {
-    this._fetchPhoto()
-    this._fetchFlightInfoEx()
-  }
-
-  _fetchPhoto() {
-
-    console.log('~~~~ FETCH PHOTO ~~~~')
-
-    if (this?.hex === undefined) {
-      console.log('aircraft not yet identified!')
-      return
-    }
-
-    if (this?.photoFuture) {
-      if (this?.photo) {
-        HUD.showPhoto(this)
-      } else {
-        const aircraftTypeKey = this.getAircraftTypeKey()
-        if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
-          this.photo = aircraftPhotos[aircraftTypeKey]
-          HUD.showPhoto(this)
-        }
-      }
-      return
-    }
-
-    const photoUrl = `${UTILS.DATA_HOSTS["photos"]}/${this.hex}`
-    console.log(`fetchPhoto -> ${photoUrl}`)
-    this.photoFuture = fetch(photoUrl)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data)
-        if (Array.isArray(data['photos']) && data['photos'].length > 0) {
-          const photo = data['photos'][0]
-          if ('thumbnail' in photo) {
-            this.photo = photo
-            console.log(this.photo)
-            HUD.showPhoto(this)
-          }
-        }
-        if (this.photo === undefined) {
-          const aircraftTypeKey = this.getAircraftTypeKey()
-          if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
-            this.photo = aircraftPhotos[aircraftTypeKey]
-            HUD.showPhoto(this)
-          } else {
-            HUD.clearPhoto()
-          }
-        }
-      })
-  }
-
-  _fetchFlightInfoEx() {
-
-    console.log("~~~ FETCH FLIGHT INFO ~~~")
-
-    if (this.callsign === undefined) {
-      console.log("aircraft has no callsign yet!")
-      return
-    }
-
-    if (this?.flightInfoFuture) {
-      HUD.showAircraftInfo(this)
-      return
-    }
-
-    const url = `${UTILS.DATA_HOSTS["flightinfo"]}/${this.callsign}`
-    this.flightInfoFuture = fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        this.flightInfo = data
-        const aircraftTypeKey = this.getAircraftTypeKey()
-        const hasPhoto = aircraftTypeKey in aircraftPhotos
-        if (!hasPhoto && aircraftTypeKey !== undefined && this?.photo) {
-          aircraftPhotos[aircraftTypeKey] = this.photo
-        }
-        HUD.showAircraftInfo(this)
-      })
   }
 
   _log() {
