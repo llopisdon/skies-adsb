@@ -3,6 +3,8 @@ const CopyPlugin = require("copy-webpack-plugin")
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+
 
 module.exports = {
   entry: {
@@ -12,6 +14,8 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   plugins: [
+
+    new FaviconsWebpackPlugin(),
 
     new Dotenv(),
 
