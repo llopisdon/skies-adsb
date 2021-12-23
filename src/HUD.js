@@ -126,7 +126,7 @@ class _HUD {
     if (this.hud === undefined || this.hud.container.classList.contains('show')) {
       return
     }
-
+    this.hud.container.style.visibility = "visible"
     this.hud.container.className = "position-absolute bottom-0 end-0"
     this.hud.container.classList.add('show')
   }

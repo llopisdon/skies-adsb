@@ -27,4 +27,6 @@ https://fonts.google.com/specimen/Orbitron
 To manage build environment variables
 https://www.npmjs.com/package/dotenv-webpack
 
+favicons-webpack-plugin
+https://www.npmjs.com/package/favicons-webpack-plugin
 
