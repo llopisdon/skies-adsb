@@ -49,6 +49,7 @@ const controls = new OrbitControls(camera, renderer.domElement)
 // see:
 // https://www.html5rocks.com/en/mobile/touchandmouse/
 //
+let numOrbitControlsActive = 0
 let isClickDueToOrbitControlsInteraction = false
 controls.addEventListener('change', (event) => {
   isClickDueToOrbitControlsInteraction = true
@@ -56,9 +57,12 @@ controls.addEventListener('change', (event) => {
   light.target.position.copy(controls.target)
 })
 controls.addEventListener('start', (event) => {
-  if (isClickDueToOrbitControlsInteraction) {
-    isClickDueToOrbitControlsInteraction = false
-  }
+  console.log("[orbitcontrols - start ...]")
+  numOrbitControlsActive++
+})
+controls.addEventListener('end', (event) => {
+  console.log("[orbitcontrols - end ...]")
+  numOrbitControlsActive--
 })
 
 
@@ -230,17 +234,20 @@ window.addEventListener('resize', () => {
 let hasTouchEndEvent = false
 
 window.addEventListener('click', (event) => {
-
   if (hasTouchEndEvent) {
     hasTouchEndEvent = false
     return
   }
 
+  if (event.pointerType === 'mouse' && numOrbitControlsActive > 0) {
+    return
+  }
 
-  if (event.pointerType === 'mouse' && isClickDueToOrbitControlsInteraction) {
+  if (isClickDueToOrbitControlsInteraction) {
     isClickDueToOrbitControlsInteraction = false
     return
   }
+
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
   console.log(`click`, pointer, event)
@@ -248,8 +255,9 @@ window.addEventListener('click', (event) => {
 
 
 window.addEventListener('touchend', (event) => {
-
-  console.log(event)
+  if (numOrbitControlsActive > 0) {
+    return
+  }
 
   if (isClickDueToOrbitControlsInteraction) {
     isClickDueToOrbitControlsInteraction = false
