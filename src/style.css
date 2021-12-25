@@ -16,13 +16,17 @@ body {
 
 #nav {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 15px;
+  right: 15px;
   width: 100px;
-  background-color: #ffffff11;
+  border-radius: 30px;
+  background-color: rgb(0 0 0 / 15%);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
   padding: 8px;
   margin: 8px;
-  z-index: 100;
+  z-index: 1;
 }
 
 #portrait-hud {
