@@ -15,7 +15,9 @@ module.exports = {
   },
   plugins: [
 
-    new FaviconsWebpackPlugin(),
+    new FaviconsWebpackPlugin({
+      manifest: './src/manifest.json'
+    }),
 
     new Dotenv(),
 
