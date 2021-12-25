@@ -57,11 +57,9 @@ controls.addEventListener('change', (event) => {
   light.target.position.copy(controls.target)
 })
 controls.addEventListener('start', (event) => {
-  console.log("[orbitcontrols - start ...]")
   numOrbitControlsActive++
 })
 controls.addEventListener('end', (event) => {
-  console.log("[orbitcontrols - end ...]")
   numOrbitControlsActive--
 })
 
@@ -95,36 +93,6 @@ navigator.geolocation.getCurrentPosition((pos) => {
   console.log(`fallback location - HOME: ${UTILS.origin}`)
   MAPS.initGroundPlaneBoundariesAndPOI(scene)
 })
-
-
-//
-// websocket
-//
-const websocket = new WebSocket(UTILS.DATA_HOSTS["adsb"])
-
-const handleADSBMessage = (event) => {
-  const reader = new FileReader()
-  reader.onload = () => {
-    const result = reader.result
-
-    // parse SBS data here...
-
-    let data = result.split(",")
-    let hexIdent = data[ADSB.HEX_IDENT]
-
-    if (!(hexIdent in AIRCRAFT.aircrafts)) {
-      const aircraft = new AIRCRAFT.Aircraft(scene)
-      aircraft.hex = hexIdent
-      AIRCRAFT.aircrafts[hexIdent] = aircraft
-    }
-
-    AIRCRAFT.aircrafts[hexIdent].update(data, clock.getElapsedTime())
-    //aircrafts[hexIdent].log()
-  }
-  reader.readAsText(event.data)
-}
-
-websocket.addEventListener('message', handleADSBMessage);
 
 
 //
@@ -314,17 +282,22 @@ fullscreenButton.addEventListener('click', () => {
 function handleVisibilityChange() {
   if (document.visibilityState === "hidden") {
     console.log("pause simulation...")
-    websocket.removeEventListener('message', handleADSBMessage)
+    ADSB.close()
     window.cancelAnimationFrame(animationFrameRequestId)
   } else {
     console.log("resume simulation...")
-    websocket.addEventListener('message', handleADSBMessage)
+    ADSB.start(scene, clock)
     animationFrameRequestId = window.requestAnimationFrame(tick)
   }
 }
-
 document.addEventListener('visibilitychange', handleVisibilityChange, false);
 
+
+//
+// Starting parsing ADSB messages
+//
+
+ADSB.start(scene, clock)
 
 //
 // tick
