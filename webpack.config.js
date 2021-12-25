@@ -45,10 +45,24 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: ["style-loader"]
       },
       {
-        test: /\.svg$/,
+        test: /\.css$/,
+        loader: "css-loader",
+        options: {
+          url: {
+            filter: (url, resourcePath) => {
+              if (url.includes(".svg")) {
+                return false
+              }
+              return true
+            }
+          }
+        }
+      },
+      {
+        test: /\.svg$/i,
         use: ["svg-url-loader"]
       }
     ]

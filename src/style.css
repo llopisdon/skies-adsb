@@ -18,15 +18,36 @@ body {
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 100px;
+  width: 120px;
   border-radius: 30px;
   background-color: rgb(0 0 0 / 15%);
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  padding: 8px;
-  margin: 8px;
   z-index: 1;
+  gap: 8px;
+}
+
+#nav button {
+    width: 30px;
+    height: 30px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    margin: 8px 0px;      
+}
+
+#home {
+  background-image: url('static/house-door-fill.svg');
+}
+#full-screen {
+   background-image: url('static/fullscreen.svg');
+}
+
+button {
+  outline: none;
 }
 
 #portrait-hud {
@@ -46,7 +67,7 @@ body {
 }
 
 .aircraftHUDBackground {
-  background-color: #ffffffcc;
+  background-color: rgba(255, 255, 255, 0.75);
 }
 
 

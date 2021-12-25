@@ -273,9 +273,18 @@ window.addEventListener('touchend', (event) => {
 
 
 //
+// home - reset orbit controls to initial pos + look-at
+//
+const homeButton = document.getElementById("home")
+console.log(homeButton)
+homeButton.addEventListener('click', () => {
+  controls.reset()
+})
+
+//
 // fullscreen toggle on double click event listener
 //
-const fullscreenButton = document.getElementById("fullscreen_button")
+const fullscreenButton = document.getElementById("full-screen")
 console.log(fullscreenButton)
 fullscreenButton.addEventListener('click', () => {
   const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
