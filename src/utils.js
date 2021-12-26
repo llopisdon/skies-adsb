@@ -35,7 +35,8 @@ export const origin = {
 
 export const INTERSECTED = {
   key: null,
-  mesh: null
+  mesh: null,
+  aircraft: null,
 }
 
 

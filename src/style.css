@@ -18,7 +18,7 @@ body {
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 120px;
+  width: 180px;
   border-radius: 30px;
   background-color: rgb(0 0 0 / 15%);
   display: flex;
@@ -36,11 +36,14 @@ body {
     border: 0;
     background-color: transparent;
     cursor: pointer;
-    margin: 8px 0px;      
+    margin: 8px 8px;      
 }
 
 #home {
-  background-image: url('static/house-door-fill.svg');
+  background-image: url('static/house.svg');
+}
+#camera {
+  background-image: url('static/camera.svg');
 }
 #full-screen {
    background-image: url('static/fullscreen.svg');

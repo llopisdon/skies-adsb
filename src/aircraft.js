@@ -52,18 +52,18 @@ const AIRCRAFT_TTL = 10.0
 
 export class Aircraft {
   constructor(scene) {
-    this.hex = undefined
-    this.sqwk = undefined
-    this.flight = undefined
-    this.alt = undefined
-    this.spd = undefined
-    this.hdg = undefined
+    this.hex = null
+    this.sqwk = null
+    this.flight = null
+    this.alt = null
+    this.spd = null
+    this.hdg = null
     this.pos = {
-      x: undefined,
-      y: undefined,
-      z: undefined,
-      lat: undefined,
-      lng: undefined,
+      x: null,
+      y: null,
+      z: null,
+      lat: null,
+      lng: null,
     }
     this.rssi = 0.0
     this.msgs = 0
@@ -106,6 +106,11 @@ export class Aircraft {
     this.text.font = "./static/Orbitron-VariableFont_wght.ttf"
     this.group.add(this.text)
 
+    // follow camera
+    this.followCam = new THREE.Object3D()
+    this.followCam.position.set(0, 4, 6)
+    this.mesh.add(this.followCam)
+
     // lights
     this.redNavigationLight = new THREE.Points(
       new THREE.BufferGeometry().setFromPoints(
@@ -138,6 +143,7 @@ export class Aircraft {
       new THREE.PointsMaterial({ size: 0.5, color: blackColor })
     )
     this.mesh.add(this.strobeLightTop)
+
 
     this.group.add(this.mesh)
 
@@ -202,7 +208,7 @@ export class Aircraft {
       const xPos = this.pos.x * UTILS.SCALE
       const yPos = this.pos.y * UTILS.SCALE
       const zPos = this.pos.z * UTILS.SCALE
-      this.mesh.position.set(xPos, yPos, zPos)
+
       this.heightLinePos.setY(1, -yPos)
       this.heightLinePos.needsUpdate = true
 
@@ -211,8 +217,9 @@ export class Aircraft {
       const altitude = (this?.alt) ? this.alt + "'" : '-'
 
       this.text.text = `${this.callsign || '-'}\n${this.hex}\n${heading}\n${groundSpeed}\n${altitude}`
-      this.text.position.set(xPos, yPos, zPos)
       this.text.sync()
+
+      this.group.position.set(xPos, yPos, zPos)
     }
 
     // after each update reset timestamp
@@ -235,10 +242,10 @@ export class Aircraft {
   }
 
   getAircraftTypeKey() {
-    if (this?.flightInfo === undefined || this?.flightInfo === null) return
-    const aircraftType = ('type' in this?.flightInfo) ? this.flightInfo['type'] : undefined
-    const aircraftManufacturer = ('manufacturer' in this?.flightInfo) ? this.flightInfo['manufacturer'] : undefined
-    if (aircraftType !== undefined && aircraftManufacturer !== undefined) {
+    if (!this?.flightInfo) return
+    const aircraftType = this?.flightInfo?.['type']
+    const aircraftManufacturer = this?.flightInfo?.['manufacturer']
+    if (aircraftType && aircraftManufacturer) {
       return `${aircraftManufacturer}#${aircraftType}`
     } else {
       return undefined
@@ -250,7 +257,7 @@ export class Aircraft {
   }
 
   hasValidTelemetry() {
-    return this.pos?.y !== undefined && this.pos?.lat !== undefined && this.pos?.lng !== undefined
+    return this.pos?.y && this.pos?.lat && this.pos?.lng
   }
 
   _log() {

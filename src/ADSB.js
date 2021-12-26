@@ -24,9 +24,9 @@ export const IS_ON_GROUND = 21
 //
 // websocket - handles ADSB messages coming from RTL-SDR/RPI
 //
-let websocket = undefined
-let scene = undefined
-let clock = undefined
+let websocket = null
+let scene = null
+let clock = null
 
 const handleADSBMessage = (event) => {
   const reader = new FileReader()

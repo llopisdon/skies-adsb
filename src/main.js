@@ -15,14 +15,10 @@ import * as ADSB from './ADSB.js'
 let animationFrameRequestId = -1
 
 const pointer = new THREE.Vector2()
-pointer.x = undefined
-pointer.y = undefined
 const raycaster = new THREE.Raycaster()
 
+// scene
 const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
-camera.position.z = 10
-scene.add(camera)
 
 // renderer
 const canvas = document.querySelector('canvas.webgl')
@@ -38,6 +34,11 @@ document.body.appendChild(stats.dom)
 
 // Clock
 let clock = new THREE.Clock()
+
+// camera
+const camera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
+camera.position.z = 10
+scene.add(camera)
 
 
 // controls
@@ -126,18 +127,19 @@ function draw(elapsedTime, deltaTime) {
         console.log(groupIntersect)
         console.log(`hasValidTelemetry: ${aircraft.hasValidTelemetry()}`)
         console.log("---------------")
-        pointer.x = undefined
-        pointer.y = undefined
+        pointer.set(null, null)
 
         if (aircraft.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
           if (UTILS.INTERSECTED?.key) {
+            isFollowCamAttached = false
             UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
           }
 
           UTILS.INTERSECTED.key = key
           UTILS.INTERSECTED.mesh = aircraft.mesh
           UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
+          UTILS.INTERSECTED.aircraft = aircraft
 
           console.log("!!! INTERSECT !!!")
 
@@ -162,8 +164,7 @@ function draw(elapsedTime, deltaTime) {
 
   if (pointer?.x && pointer?.y) {
     deselectAirCraftAndHideHUD()
-    pointer.x = undefined
-    pointer.y = undefined
+    pointer.set(null, null)
   }
 }
 
@@ -172,6 +173,8 @@ function deselectAirCraftAndHideHUD(animate = true) {
     UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null
+    UTILS.INTERSECTED.aircraft = null
+    isFollowCamAttached = false
     HUD.hide(animate)
   }
 }
@@ -199,11 +202,22 @@ window.addEventListener('resize', () => {
 // single click listener to check for airplane intersections
 //
 
-let hasTouchEndEvent = false
+let ignoreTouchEndEvent = false
 
 window.addEventListener('click', (event) => {
-  if (hasTouchEndEvent) {
-    hasTouchEndEvent = false
+
+  console.log(`[click..]`)
+
+  const clientX = event.clientX;
+  const clientY = event.clientY;
+
+  if (isClientXYInNavContainer(clientX, clientY)) {
+    console.log("[click in nav container!!!]")
+    return
+  }
+
+  if (ignoreTouchEndEvent) {
+    ignoreTouchEndEvent = false
     return
   }
 
@@ -216,13 +230,24 @@ window.addEventListener('click', (event) => {
     return
   }
 
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  pointer.set(
+    (clientX / window.innerWidth) * 2 - 1,
+    -(clientY / window.innerHeight) * 2 + 1
+  )
   console.log(`click`, pointer, event)
 })
 
 
 window.addEventListener('touchend', (event) => {
+
+  const clientX = event.changedTouches[0].clientX
+  const clientY = event.changedTouches[0].clientY
+
+  if (isClientXYInNavContainer(clientX, clientY)) {
+    console.log("[touchend in nav container!!!]")
+    return
+  }
+
   if (numOrbitControlsActive > 0) {
     return
   }
@@ -232,12 +257,20 @@ window.addEventListener('touchend', (event) => {
     return
   }
 
-  hasTouchEndEvent = true
+  ignoreTouchEndEvent = true
 
-  pointer.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
-  pointer.y = - (event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
+  pointer.set(
+    (clientX / window.innerWidth) * 2 - 1,
+    -(clientY / window.innerHeight) * 2 + 1
+  )
   console.log(`touchend`, pointer, event)
 })
+
+const navContainer = document.getElementById("nav")
+function isClientXYInNavContainer(clientX, clientY) {
+  const navRect = navContainer.getBoundingClientRect()
+  return (clientX >= navRect.left) && (clientY <= navRect.bottom)
+}
 
 
 //
@@ -246,8 +279,60 @@ window.addEventListener('touchend', (event) => {
 const homeButton = document.getElementById("home")
 console.log(homeButton)
 homeButton.addEventListener('click', () => {
+  cameraMode = CAMERA_GHOST
+  controls.enabled = true
   controls.reset()
 })
+
+//
+// camera - toggle between orbit control camera and follow camera
+//
+
+const CAMERA_GHOST = "ghost"
+const CAMERA_FOLLOW = "follow"
+
+let cameraMode = CAMERA_GHOST
+
+const cameraButton = document.getElementById("camera")
+cameraButton.addEventListener('click', () => {
+  if (UTILS.INTERSECTED?.aircraft) {
+    console.log("INTERSECTED AIRCRAFT: ")
+    console.log(UTILS.INTERSECTED?.aircraft)
+    cameraMode = CAMERA_FOLLOW
+    controls.enabled = false
+  } else {
+    cameraMode = CAMERA_GHOST
+    controls.enabled = true
+  }
+  console.log(`toggle camera... -> ${cameraMode}`)
+})
+
+let isFollowCamAttached = false
+
+function updateCamera() {
+  if (cameraMode == "follow" && UTILS.INTERSECTED?.aircraft) {
+    const aircraft = UTILS.INTERSECTED?.aircraft
+
+    const followCamPos = aircraft.followCam.getWorldPosition(new THREE.Vector3())
+
+    if (!isFollowCamAttached) {
+      if (camera.position.distanceToSquared(followCamPos) > 1.0) {
+        camera.position.lerp(followCamPos, 0.05)
+      } else {
+        isFollowCamAttached = true
+      }
+
+    } else {
+      camera.position.copy(followCamPos)
+    }
+
+    const aircraftPos = aircraft.group.position.clone()
+
+    camera.lookAt(aircraftPos)
+  } else {
+    controls.update()
+  }
+}
 
 //
 // fullscreen toggle on double click event listener
@@ -311,7 +396,7 @@ const tick = function () {
 
   animationFrameRequestId = requestAnimationFrame(tick)
 
-  controls.update()
+  updateCamera()
 
   draw(elapsedTime, deltaTime)
 

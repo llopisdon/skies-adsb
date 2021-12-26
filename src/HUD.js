@@ -52,8 +52,8 @@ setupAnimationEventListeners(HUD_L)
 class _HUD {
 
   constructor(landscape = false) {
-    this.aircraft = undefined
-    this.hud = undefined
+    this.aircraft = null
+    this.hud = null
     this.toggleOrientation(landscape)
     this._reset()
   }
@@ -67,16 +67,16 @@ class _HUD {
   }
 
   _showPhoto() {
-    if (this.hud === undefined || this.aircraftPhotoShown) return
+    if (!this.hud || this.aircraftPhotoShown) return
     const aircraft = this.aircraft
-    this.hud.photo.src = aircraft.photo['thumbnail']['src'] || HUD_DEFAULT_PHOTO
+    this.hud.photo.src = aircraft.photo?.['thumbnail']['src'] ?? HUD_DEFAULT_PHOTO
     this.hud.photo.style.display = 'inline'
     this.hud.photographer.innerText = `Photographer: ${aircraft.photo['photographer'] || NOT_AVAILABLE}`
     this.aircraftPhotoShown = true
   }
 
   _reset() {
-    this.aircraft = undefined
+    this.aircraft = null
     this.needsFetchAircraftInfo = false
     this.aircraftInfoShown = false
     this.needsFetchAircraftPhoto = false
@@ -92,7 +92,7 @@ class _HUD {
   }
 
   _clearAircraftInfo() {
-    if (this.hud === undefined) return
+    if (!this.hud) return
     this.hud.callsign.innerText = NOT_AVAILABLE
     this.hud.airline.innerText = NOT_AVAILABLE
     this.hud.aircraftType.innerText = NOT_AVAILABLE
@@ -103,20 +103,20 @@ class _HUD {
   }
 
   _showAircraftInfo() {
-    if (this.hud === undefined || this.aircraftInfoShown) return
+    if (!this.hud || this.aircraftInfoShown) return
     const aircraft = this.aircraft
     console.log(aircraft.flightInfo)
-    this.hud.callsign.innerText = `${aircraft.flightInfo['ident'] || NOT_AVAILABLE}`
-    this.hud.airline.innerText = `${aircraft.flightInfo['airlineCallsign'] || NOT_AVAILABLE} | ${aircraft.flightInfo['airline'] || NOT_AVAILABLE}`
-    this.hud.aircraftType.innerText = `Type: ${aircraft.flightInfo['type'] || NOT_AVAILABLE} | ${aircraft.flightInfo['manufacturer'] || NOT_AVAILABLE}`
-    this.hud.origin.innerText = `Origin: ${aircraft.flightInfo['origin'] || NOT_AVAILABLE}, ${aircraft.flightInfo['originName'] || NOT_AVAILABLE}`
-    this.hud.destination.innerText = `Dest: ${aircraft.flightInfo['destination'] || NOT_AVAILABLE}, ${aircraft.flightInfo['destinationName'] || NOT_AVAILABLE}`
+    this.hud.callsign.innerText = `${aircraft.flightInfo?.['ident'] ?? NOT_AVAILABLE}`
+    this.hud.airline.innerText = `${aircraft.flightInfo?.['airlineCallsign'] ?? NOT_AVAILABLE} | ${aircraft.flightInfo?.['airline'] ?? NOT_AVAILABLE}`
+    this.hud.aircraftType.innerText = `Type: ${aircraft.flightInfo?.['type'] ?? NOT_AVAILABLE} | ${aircraft.flightInfo?.['manufacturer'] ?? NOT_AVAILABLE}`
+    this.hud.origin.innerText = `Origin: ${aircraft.flightInfo?.['origin'] ?? NOT_AVAILABLE}, ${aircraft.flightInfo?.['originName'] ?? NOT_AVAILABLE}`
+    this.hud.destination.innerText = `Dest: ${aircraft.flightInfo?.['destination'] ?? NOT_AVAILABLE}, ${aircraft.flightInfo?.['destinationName'] ?? NOT_AVAILABLE}`
     this.hud.spinner.className = 'hidden'
     this.aircraftInfoShown = true
   }
 
   _updateTelemetry() {
-    if (this.hud === undefined || this.aircraft === undefined) return
+    if (!this.hud || !this.aircraft) return
 
     const aircraft = this.aircraft
 
@@ -127,7 +127,7 @@ class _HUD {
   }
 
   hide(animate = true) {
-    if (this.hud === undefined || this.hud.container.classList.contains('hidden') || this.hud.container.classList.contains('hide')) {
+    if (!this.hud || this.hud.container.classList.contains('hidden') || this.hud.container.classList.contains('hide')) {
       return;
     }
 
@@ -140,7 +140,7 @@ class _HUD {
   }
 
   show(aircraft) {
-    if (this.hud === undefined || this.hud.container.classList.contains('show')) {
+    if (!this.hud || this.hud.container.classList.contains('show')) {
       return
     }
     this._reset()
@@ -153,7 +153,7 @@ class _HUD {
   }
 
   update() {
-    if (this.aircraft === undefined) return
+    if (!this.aircraft) return
 
     this._updateTelemetry()
 
@@ -169,7 +169,7 @@ class _HUD {
   _fetchAircraftPhoto() {
     const aircraft = this.aircraft
 
-    if (aircraft.hex === undefined) {
+    if (!aircraft?.hex) {
       return
     }
 
@@ -203,7 +203,7 @@ class _HUD {
             HUD._showPhoto()
           }
         }
-        if (aircraft.photo === undefined) {
+        if (!aircraft?.photo) {
           const aircraftTypeKey = aircraft.getAircraftTypeKey()
           if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
             aircraft.photo = aircraftPhotos[aircraftTypeKey]
@@ -220,7 +220,7 @@ class _HUD {
   _fetchAircraftInfo() {
     const aircraft = this.aircraft
 
-    if (aircraft.callsign === undefined) {
+    if (!aircraft?.callsign) {
       return
     }
 
