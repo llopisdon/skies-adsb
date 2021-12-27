@@ -108,7 +108,7 @@ export class Aircraft {
 
     // follow camera
     this.followCam = new THREE.Object3D()
-    this.followCam.position.set(0, 4, 6)
+    this.followCam.position.set(0, 6, 24)
     this.mesh.add(this.followCam)
 
     // lights
@@ -165,6 +165,7 @@ export class Aircraft {
 
     if (data[ADSB.ALTITUDE] !== "") {
       this.alt = Number(data[ADSB.ALTITUDE])
+      // note: the aircraft y-position is kept in feet for display purposes.      
       this.pos.y = this.alt
     }
 

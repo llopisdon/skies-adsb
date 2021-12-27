@@ -174,6 +174,9 @@ function deselectAirCraftAndHideHUD(animate = true) {
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null
     UTILS.INTERSECTED.aircraft = null
+    if (cameraMode === CAMERA_FOLLOW) {
+      resetGhostCamera(false)
+    }
     isFollowCamAttached = false
     HUD.hide(animate)
   }
@@ -284,6 +287,16 @@ homeButton.addEventListener('click', () => {
   controls.reset()
 })
 
+function resetGhostCamera(hardReset = true) {
+
+  cameraMode = CAMERA_GHOST
+  controls.enabled = true
+
+  if (hardReset) {
+    controls.reset()
+  }
+}
+
 //
 // camera - toggle between orbit control camera and follow camera
 //
@@ -301,8 +314,7 @@ cameraButton.addEventListener('click', () => {
     cameraMode = CAMERA_FOLLOW
     controls.enabled = false
   } else {
-    cameraMode = CAMERA_GHOST
-    controls.enabled = true
+    resetGhostCamera(false)
   }
   console.log(`toggle camera... -> ${cameraMode}`)
 })
@@ -326,9 +338,13 @@ function updateCamera() {
       camera.position.copy(followCamPos)
     }
 
-    const aircraftPos = aircraft.group.position.clone()
 
+    const aircraftPos = aircraft.group.position.clone()
     camera.lookAt(aircraftPos)
+    controls.target.copy(aircraftPos)
+
+    light.position.copy(camera.position)
+    light.target.position.copy(controls.target)
   } else {
     controls.update()
   }
