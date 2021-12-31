@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+import SphericalMercator from '@mapbox/sphericalmercator'
+import { OrthographicCamera } from 'three'
 
 export const DATA_HOSTS = {
   "adsb": `ws://${(process.env.NODE_ENV === "development")
@@ -20,17 +22,13 @@ console.log(DATA_HOSTS)
 //
 // For right now the scale of 1 unit for ever 250 meters seems to look good. 
 //
+//export const SCALE = 1.0 / 250.0
 export const SCALE = 1.0 / 250.0
 
 
 export const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
-}
-
-export const origin = {
-  lat: 0,
-  lng: 0
 }
 
 export const INTERSECTED = {
@@ -91,12 +89,38 @@ export function calcBearing(from, to) {
   return brng
 }
 
-export function getXY(from, to) {
-  const bearing = calcBearing(from, to)
-  const d = calcSphericalDistance(from, to)
+const sphericalMercator = new SphericalMercator()
 
-  const x = d * Math.cos(THREE.MathUtils.degToRad(90 - bearing))
-  const y = -d * Math.sin(THREE.MathUtils.degToRad(90 - bearing))
+export const origin = {
+  lat: 0,
+  lng: 0
+}
 
-  return { x: x, y: y }
+export function initOrigin(lngLat) {
+  [origin.lng, origin.lat] = lngLat
+  let [mx, my] = sphericalMercator.forward(lngLat)
+  origin.x = Math.abs(mx)
+  origin.y = Math.abs(my)
+}
+
+//
+// returns lon/lat into Web Mercator coordinates centered around the UTILS.origin
+//
+export function getXY(lonLat) {
+
+  let [xx, yy] = sphericalMercator.forward(lonLat)
+
+  if (xx < 0) {
+    xx += origin.x
+  } else {
+    xx -= origin.x
+  }
+
+  if (yy < 0) {
+    yy += origin.y
+  } else {
+    yy -= origin.y
+  }
+
+  return [xx, -yy]
 }

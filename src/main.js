@@ -84,12 +84,11 @@ scene.add(light.target)
 //
 navigator.geolocation.getCurrentPosition((pos) => {
   console.log(`ORIGIN lat: ${pos.coords.latitude} lng: ${pos.coords.longitude}`)
-  UTILS.origin.lat = pos.coords.latitude
-  UTILS.origin.lng = pos.coords.longitude
+  UTILS.initOrigin([pos.coords.longitude, pos.coords.latitude])
   MAPS.initGroundPlaneBoundariesAndPOI(scene)
-
 }, (error) => {
   console.log("UNABLE TO GET GEOLOCATION | REASON -> " + error.message)
+  // TODO this code does not work any more -- need to fix
   MAPS.setFallbackOrigin(UTILS.origin)
   console.log(`fallback location - HOME: ${UTILS.origin}`)
   MAPS.initGroundPlaneBoundariesAndPOI(scene)

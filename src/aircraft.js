@@ -62,14 +62,11 @@ export class Aircraft {
       x: null,
       y: null,
       z: null,
-      lat: null,
-      lng: null,
+      lngLat: [null, null]
     }
     this.rssi = 0.0
     this.msgs = 0
     this.is_on_ground = false
-    this.bearing = 0
-    this.distance = 0.0
     this.timestamp = 0
 
     this.photoFuture = null
@@ -170,11 +167,11 @@ export class Aircraft {
     }
 
     if (data[ADSB.LATITUDE] !== "") {
-      this.pos.lat = Number(data[ADSB.LATITUDE])
+      this.pos.lngLat[1] = Number(data[ADSB.LATITUDE])
     }
 
     if (data[ADSB.LONGITUDE] !== "") {
-      this.pos.lng = Number(data[ADSB.LONGITUDE])
+      this.pos.lngLat[0] = Number(data[ADSB.LONGITUDE])
     }
 
     if (data[ADSB.SQUAWK] !== "") {
@@ -199,11 +196,7 @@ export class Aircraft {
         this.mesh.visible = true
       }
 
-      this.bearing = UTILS.calcBearing(UTILS.origin, this.pos)
-      this.distance = UTILS.calcSphericalDistance(UTILS.origin, this.pos)
-
-      this.pos.x = this.distance * Math.cos(THREE.MathUtils.degToRad(90 - this.bearing))
-      this.pos.z = -this.distance * Math.sin(THREE.MathUtils.degToRad(90 - this.bearing))
+      [this.pos.x, this.pos.z] = UTILS.getXY(this.pos.lngLat)
 
       // position is in world coordinates
       const xPos = this.pos.x * UTILS.SCALE
@@ -258,12 +251,12 @@ export class Aircraft {
   }
 
   hasValidTelemetry() {
-    return this.pos?.y && this.pos?.lat && this.pos?.lng
+    return this.pos?.y && this.pos.lngLat?.[0] && this.pos.lngLat?.[1]
   }
 
   _log() {
     console.log("================")
-    console.log(`hex: ${this.hex} | sqwk: ${this.sqwk} | cs: ${this.callsign} | alt: ${this.alt} | spd: ${this.spd} | hdg: ${this.hdg} | lat: ${this.pos.lat} | lng: ${this.pos.lng} | brng: ${this.bearing} | dist: ${this.distance}`)
+    console.log(`hex: ${this.hex} | sqwk: ${this.sqwk} | cs: ${this.callsign} | alt: ${this.alt} | spd: ${this.spd} | hdg: ${this.hdg} | lng: ${this.pos.lngLat[0]} | lat: ${this.pos.lngLat[1]}`)
     console.log(this.pos)
     console.log("################")
   }

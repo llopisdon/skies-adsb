@@ -22,7 +22,7 @@ function initGeoJSON(scene) {
     switch (feature["geometry"]["type"]) {
       case "Polygon": {
         const points = feature["geometry"]["coordinates"][0].map(coord => {
-          const { x, y } = UTILS.getXY(UTILS.origin, { lat: coord[1], lng: coord[0] })
+          const [x, y] = UTILS.getXY(coord)
           return new THREE.Vector2(x * UTILS.SCALE, y * UTILS.SCALE)
         })
         console.log(points)
@@ -65,7 +65,7 @@ export function initGroundPlaneBoundariesAndPOI(scene) {
     map[key] = []
     let points = []
     for (let i = 0; i < zone.length; i += 2) {
-      const { x, y } = UTILS.getXY(UTILS.origin, { lat: zone[i], lng: zone[i + 1] })
+      const [x, y] = UTILS.getXY([zone[i + 1], zone[i]])
       points.push(new THREE.Vector2(x * UTILS.SCALE, y * UTILS.SCALE))
     }
 
@@ -85,7 +85,7 @@ export function initGroundPlaneBoundariesAndPOI(scene) {
   for (const key in GEOJSON.mia_poi) {
     const ref_pt = GEOJSON.mia_poi[key]
     console.log(`${key} -> ${ref_pt}`)
-    const { x, y } = UTILS.getXY(UTILS.origin, { lat: ref_pt[0], lng: ref_pt[1] })
+    const [x, y] = UTILS.getXY([ref_pt[1], ref_pt[0]])
     poiVertices.push(new THREE.Vector3(x * UTILS.SCALE, 0, y * UTILS.SCALE))
 
     const label = new Text()
