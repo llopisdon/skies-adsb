@@ -43,6 +43,7 @@ scene.add(camera)
 
 // controls
 const controls = new OrbitControls(camera, renderer.domElement)
+
 //
 // track if mouse click causes camera changes via OrbitControls
 // used to help toggle display of HUD and prevent the HUD
