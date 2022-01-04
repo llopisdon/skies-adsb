@@ -81,14 +81,6 @@ scene.add(light.target)
 
 
 //
-// init map and POI
-//
-
-MAPS.init(scene)
-
-
-
-//
 // draw
 //
 function draw(elapsedTime, deltaTime) {
@@ -267,12 +259,18 @@ function isClientXYInNavContainer(clientX, clientY) {
   return (clientX >= navRect.left) && (clientY <= navRect.bottom)
 }
 
+//
+// enable nav
+//
+
+const nav = document.getElementById("nav")
+nav.style.visibility = 'visible'
+
 
 //
 // home - reset orbit controls to initial pos + look-at
 //
 const homeButton = document.getElementById("home")
-console.log(homeButton)
 homeButton.addEventListener('click', () => {
   cameraMode = CAMERA_GHOST
   controls.enabled = true
@@ -280,10 +278,8 @@ homeButton.addEventListener('click', () => {
 })
 
 function resetGhostCamera(hardReset = true) {
-
   cameraMode = CAMERA_GHOST
   controls.enabled = true
-
   if (hardReset) {
     controls.reset()
   }
@@ -386,11 +382,43 @@ function handleVisibilityChange() {
 document.addEventListener('visibilitychange', handleVisibilityChange, false);
 
 
+
 //
-// Starting parsing ADSB messages
+// load maps, origin, and start websocket connection
 //
 
-ADSB.start(scene, clock)
+const loader = new THREE.FileLoader();
+loader.load('data/map.json',
+  (data) => {
+
+    console.log('[ map.json - loaded... ]')
+
+    //
+    // init map and POI
+    //
+
+    MAPS.init(scene, JSON.parse(data))
+
+
+    //
+    // Starting parsing ADSB messages
+    //
+
+    ADSB.start(scene, clock)
+  },
+  (xhr) => {
+    if (xhr.total > 0) {
+      console.log('map.json - ' + (xhr.loaded / xhr.total * 100) + '% loaded')
+    }
+  },
+  (err) => {
+    console.error('[*** Error Loading map.json ***]')
+    console.log(err)
+    console.log('[***************]')
+  }
+);
+
+
 
 //
 // tick

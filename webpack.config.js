@@ -30,6 +30,10 @@ module.exports = {
           from: 'static',
           to: 'static',
           noErrorOnMissing: true,
+        },
+        {
+          from: 'data',
+          to: 'data',
         }
       ],
     }),

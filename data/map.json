@@ -1,5 +1,4 @@
-
-const json = {
+{
   "type": "FeatureCollection",
   "features": [
     {
@@ -20733,7 +20732,3 @@ const json = {
     }
   ]
 }
-
-
-
-export { json };

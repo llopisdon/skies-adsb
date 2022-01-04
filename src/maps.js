@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import * as GEOJSON from './geojson'
 import { Text } from 'troika-three-text'
 import * as UTILS from './utils.js'
 
@@ -17,7 +16,7 @@ const TEXT_FONT = "./static/Orbitron-VariableFont_wght.ttf"
 const GEOJSON_GEOMETRY_TYPE_POLYGON = "Polygon"
 const GEOJSON_GEOMETRY_TYPE_POINT = "Point"
 
-export function init(scene) {
+export function init(scene, json) {
 
   //
   // must find origin for this map first
@@ -25,7 +24,7 @@ export function init(scene) {
   let originFound = false
   let fallbackOriginLngLat = null
 
-  for (const feature of GEOJSON.json["features"]) {
+  for (const feature of json["features"]) {
     if ("origin" in feature["properties"]) {
       const lngLat = feature["geometry"]["coordinates"]
       UTILS.initOrigin(lngLat)
@@ -44,7 +43,7 @@ export function init(scene) {
   const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
   const poiVertices = []
 
-  for (const feature of GEOJSON.json["features"]) {
+  for (const feature of json["features"]) {
 
     switch (feature["geometry"]["type"]) {
       case GEOJSON_GEOMETRY_TYPE_POLYGON: {
@@ -68,7 +67,6 @@ export function init(scene) {
         const coord = feature["geometry"]["coordinates"]
         const [x, y] = UTILS.getXY(coord)
         const vector3 = new THREE.Vector3(x * UTILS.SCALE, 0, y * UTILS.SCALE)
-        console.log(vector3)
         poiVertices.push(vector3)
 
         const label = new Text()
@@ -88,8 +86,6 @@ export function init(scene) {
         break;
     }
   }
-
-  console.log(poiVertices)
 
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
   const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
