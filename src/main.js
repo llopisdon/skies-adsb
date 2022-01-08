@@ -388,10 +388,10 @@ document.addEventListener('visibilitychange', handleVisibilityChange, false);
 //
 
 const loader = new THREE.FileLoader();
-loader.load('data/map.json',
+loader.load('data/sofla.json',
   (data) => {
 
-    console.log('[ map.json - loaded... ]')
+    console.log('[ sofla.json - loaded... ]')
 
     //
     // init map and POI
