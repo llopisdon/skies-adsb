@@ -16,7 +16,22 @@ module.exports = {
   plugins: [
 
     new FaviconsWebpackPlugin({
-      manifest: './src/manifest.json'
+      manifest: './src/manifest.json',
+      favicons: {
+        appName: "skies-adsb",
+        appDescription: "Realtime 3D Plane Spotting",
+        developerName: "MACHINE INTERACTIVE",
+        developerURL: null,
+        url: "https://www.machineinteractive.com",
+        background: "#000",
+        theme_color: "#000",
+        icons: {
+          appleStartup: false,
+          coast: false,
+          yandex: false,
+          windows: false,
+        }
+      }
     }),
 
     new Dotenv(),

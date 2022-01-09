@@ -18,7 +18,8 @@ body {
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 180px;
+  width: auto;
+  padding: 8px;
   border-radius: 30px;
   background-color: rgba(77, 82, 129, 0.5);
   display: flex;
@@ -26,6 +27,7 @@ body {
   justify-content: space-evenly;
   z-index: 1;
   gap: 8px;
+  min-height: 56px;
 }
 
 #nav button {
@@ -53,32 +55,13 @@ button {
   outline: none;
 }
 
-#portrait-hud {
-  width: 100%;
+#hud {
   z-index: 100;
 }
 
-#landscape-hud {
-  width: 500px;
-  margin: 8px;
-  z-index: 100; 
-}
-
 .aircraftPhoto {
-  width: 200px;
-  height: 112px;
-}
-
-.aircraftHUDBackground {
-  background-color: rgba(255, 255, 255, 0.75);
-}
-
-
-@media (min-width: 576px) {
-  #portrait-hud {
-    width: 320px;
-    z-index: 100;
-  }
+  height: 160px;
+  object-fit: contain;
 }
 
 .show {

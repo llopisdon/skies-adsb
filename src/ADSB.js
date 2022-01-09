@@ -55,6 +55,9 @@ export function start(threeJsScene, threeJsClock) {
   scene = threeJsScene
   clock = threeJsClock
   websocket = new WebSocket(UTILS.DATA_HOSTS["adsb"])
+  websocket.addEventListener('error', (event) => {
+    console.log('Error Message from server ', event.data)
+  })
   websocket.addEventListener('message', handleADSBMessage)
 }
 

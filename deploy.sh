@@ -9,6 +9,7 @@ sudo rm -rf *
 sudo tar xf ~/dist.tar .
 cd
 rm dist.tar
+sudo service lighttpd restart
 EOF
 echo "cleaning up..."
 rm dist.tar

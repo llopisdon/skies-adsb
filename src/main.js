@@ -136,7 +136,7 @@ function draw(elapsedTime, deltaTime) {
 
     if (aircraftHasExpired) {
       if (aircraft.hex === UTILS.INTERSECTED.key) {
-        HUD.hide()
+        deselectAirCraftAndHideHUD()
       }
       aircraft.remove(scene)
     }
@@ -147,7 +147,6 @@ function draw(elapsedTime, deltaTime) {
   }
 
   if (pointer?.x && pointer?.y) {
-    deselectAirCraftAndHideHUD()
     pointer.set(null, null)
   }
 }
@@ -179,10 +178,6 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix()
   renderer.setSize(UTILS.sizes.width, UTILS.sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-  deselectAirCraftAndHideHUD({ animate: false })
-
-  HUD.toggleOrientation(UTILS.isLandscape())
 })
 
 //
@@ -258,6 +253,17 @@ function isClientXYInNavContainer(clientX, clientY) {
   const navRect = navContainer.getBoundingClientRect()
   return (clientX >= navRect.left) && (clientY <= navRect.bottom)
 }
+
+
+//
+// HUD close
+//
+
+const hudCloseButton = document.getElementById("hud-close")
+hudCloseButton.addEventListener('click', () => {
+  deselectAirCraftAndHideHUD()
+})
+
 
 //
 // enable nav

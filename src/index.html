@@ -14,64 +14,105 @@
   <canvas class="webgl"></canvas>
 
   <div id="nav" style="visibility: hidden;">
-    <button id="home"></button>
-    <button id="camera"></button>
-    <button id="full-screen"></button>
+    <button class="btn" id="home"></button>
+    <button class="btn" id="camera"></button>
+    <button class="btn" id="full-screen"></button>
   </div>
 
-  <div id="portrait-hud" class="hidden" style="visibility: hidden;">
-    <div class="position-relative">
-      <div class="d-flex m-2">
-        <div class="aircraftHUDBackground rounded-3 p-2 m-auto" style="width: 320px;">
-          <div>
-            <img class="aircraftPhoto rounded-3" id="photo">
+
+  <div id="hud" class="hidden" style="visibility: hidden;">
+
+    <div class="row justify-content-center g-0">
+
+      <div class="col-12 col-md-8">
+
+        <div class="">
+
+          <div class="container" style="max-width: 780px; max-height: 180px;">
+
+            <div class="row g-1 rounded bg-light opacity-75 mb-2 pb-2">
+
+              <div class="d-none d-md-block col-0 col-md-4 mt-2 ps-2">
+                <div class="d-flex justify-content-center h-100 align-items-center">
+                  <div>
+                    <img id="photo" class="img-fluid rounded" alt="aircraft photo"
+                      style="object-fit: contain; height: 160px;">
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="col-md-8 ps-2">
+
+                <div class="row g-0">
+
+                  <div class="col-10">
+                    <a id="callsign" href="https://www.google.com/search?q=flight status AAL961" class="link-primary"
+                      target="_blank"></a>
+                  </div>
+
+                  <div class="col-2 pe-2">
+                    <div class="d-flex flex-row-reverse">
+                      <button id="hud-close" type="button" class="btn-close" aria-label="Close"></button>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <a id="aircraftType" href="https://www.google.com/search?q=about 737 MAX 8 Boeing"
+                      class="link-primary" target="_blank"></a>
+                  </div>
+
+                  <div class="col-12">
+                    <a id="airline" href="https://www.google.com/search?q=about American American Airlines Inc."
+                      class="link-primary" target="_blank"></a>
+                  </div>
+
+                  <div class="col-6 col-md-12">
+                    <a id="origin_short" class="d-block d-md-none link-primary"
+                      href="https://www.google.com/search?q=aerodrome KMIA" target="_blank"></a>
+                    <a id="origin_long" class="d-none d-md-block link-primary"
+                      href="https://www.google.com/search?q=aerodrome KMIA" target="_blank"></a>
+                  </div>
+
+                  <div class="col-6 col-md-12">
+                    <a id="destination_short" class="d-block d-md-none link-primary"
+                      href="https://www.google.com/search?q=aerodrome MROC" target="_blank"></a>
+                    <a id="destination_long" class="d-none d-md-block link-primary"
+                      href="https://www.google.com/search?q=aerodrome MROC" class="link-primary" target="_blank"></a>
+                  </div>
+
+                  <div class="col-12">
+
+                    <a id="photographer" class="link-primary" target="_blank"></a>
+
+                  </div>
+
+                  <div id="telemetry_heading" class="col-4"></div>
+
+                  <div id="telemetry_ground_speed" class="col-4"></div>
+
+                  <div id="telemetry_altitude" class="col-4"></div>
+
+                </div>
+
+
+                <div id="spinner">
+                  <div class="spinner-border" role="status">
+                    <span class=" visually-hidden">Loading...</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
-          <div id="photographer" class="pt-2"></div>
-
-          <div id="callsign"></div>
-          <div id="airline"></div>
-          <div id="aircraftType"></div>
-
-          <div id="origin"></div>
-          <div id="destination"></div>
-          <div id="telemetry"></div>
         </div>
+
       </div>
-      <div id="spinner">
-        <div class="spinner-border" role="status"">
-            <span class=" visually-hidden">Loading...</span>
-        </div>
-      </div>
+
     </div>
   </div>
 
-  <div id="landscape-hud" class="hidden" style="visibility: hidden;">
-    <div class="position-relative">
-      <div class="aircraftHUDBackground d-flex rounded-3 p-2 m-auto hudbackground" style="width: 500px;">
-        <div>
-          <div>
-            <img class="aircraftPhoto rounded-3" id="photo">
-          </div>
-          <div id="photographer" class="pt-2"></div>
-        </div>
-
-        <div class="ps-4">
-          <div id="callsign"></div>
-          <div id="airline"></div>
-          <div id="aircraftType"></div>
-
-          <div id="origin"></div>
-          <div id="destination"></div>
-          <div id="telemetry"></div>
-        </div>
-      </div>
-      <div id="spinner">
-        <div class="spinner-border" role="status">
-          <span class=" visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </body>
 
