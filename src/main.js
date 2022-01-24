@@ -35,8 +35,12 @@ document.body.appendChild(stats.dom)
 // Clock
 let clock = new THREE.Clock()
 
-// camera
-const camera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
+// cameras
+
+const orbitCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
+const coPilotCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
+const coPilotCameraTarget = new THREE.Object3D()
+let camera = orbitCamera
 camera.position.z = 10
 scene.add(camera)
 
@@ -83,7 +87,12 @@ scene.add(light.target)
 //
 // draw
 //
+
+const cameraWorldPos = new THREE.Vector3()
+
 function draw(elapsedTime, deltaTime) {
+
+  camera.getWorldPosition(cameraWorldPos)
 
   HUD.update()
 
@@ -97,7 +106,7 @@ function draw(elapsedTime, deltaTime) {
 
     const aircraft = AIRCRAFT.aircrafts[key];
 
-    const aircraftHasExpired = aircraft.draw(scene, elapsedTime, camera.position)
+    const aircraftHasExpired = aircraft.draw(scene, elapsedTime, cameraWorldPos)
 
     if (pointer?.x && pointer?.y) {
 
@@ -116,14 +125,18 @@ function draw(elapsedTime, deltaTime) {
         if (aircraft.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
           if (UTILS.INTERSECTED?.key) {
-            isFollowCamAttached = false
+            resetCoPilotCamera()
             UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
+            UTILS.INTERSECTED.aircraft.followCam.clear()
           }
 
           UTILS.INTERSECTED.key = key
           UTILS.INTERSECTED.mesh = aircraft.mesh
           UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
           UTILS.INTERSECTED.aircraft = aircraft
+
+          UTILS.INTERSECTED.aircraft.followCam.add(coPilotCameraTarget)
+          UTILS.INTERSECTED.aircraft.followCam.add(coPilotCamera)
 
           console.log("!!! INTERSECT !!!")
 
@@ -153,6 +166,9 @@ function draw(elapsedTime, deltaTime) {
 
 function deselectAirCraftAndHideHUD(animate = true) {
   if (UTILS.INTERSECTED?.key) {
+
+    UTILS.INTERSECTED.aircraft.followCam.clear()
+
     UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null
@@ -160,6 +176,9 @@ function deselectAirCraftAndHideHUD(animate = true) {
     if (cameraMode === CAMERA_FOLLOW) {
       resetGhostCamera(false)
     }
+
+    resetCoPilotCamera()
+
     isFollowCamAttached = false
     HUD.hide(animate)
   }
@@ -172,10 +191,17 @@ window.addEventListener('resize', () => {
   UTILS.sizes.width = window.innerWidth
   UTILS.sizes.height = window.innerHeight
 
+  windowHalfX = window.innerWidth / 2.0
+  windowHalfY = window.innerHeight / 2.0
+
   console.log(`window resize - w: ${UTILS.sizes.width} h: ${UTILS.sizes.height}`)
 
-  camera.aspect = UTILS.sizes.width / UTILS.sizes.height
-  camera.updateProjectionMatrix()
+  orbitCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
+  orbitCamera.updateProjectionMatrix()
+
+  coPilotCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
+  coPilotCamera.updateProjectionMatrix()
+
   renderer.setSize(UTILS.sizes.width, UTILS.sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
@@ -200,15 +226,18 @@ window.addEventListener('click', (event) => {
 
   if (ignoreTouchEndEvent) {
     ignoreTouchEndEvent = false
+    console.log("\tignoreTouchEvent --")
     return
   }
 
   if (event.pointerType === 'mouse' && numOrbitControlsActive > 0) {
+    console.log("\tignore click -- pointer is mouse...")
     return
   }
 
-  if (isClickDueToOrbitControlsInteraction) {
+  if (!isFollowCamAttached && isClickDueToOrbitControlsInteraction) {
     isClickDueToOrbitControlsInteraction = false
+    console.log("click due to oribitcontrols interaction...")
     return
   }
 
@@ -234,7 +263,7 @@ window.addEventListener('touchend', (event) => {
     return
   }
 
-  if (isClickDueToOrbitControlsInteraction) {
+  if (!isFollowCamAttached && isClickDueToOrbitControlsInteraction) {
     isClickDueToOrbitControlsInteraction = false
     return
   }
@@ -253,6 +282,83 @@ function isClientXYInNavContainer(clientX, clientY) {
   const navRect = navContainer.getBoundingClientRect()
   return (clientX >= navRect.left) && (clientY <= navRect.bottom)
 }
+
+
+let targetRotation
+let targetRotationOnPointerDown
+let targetY
+let targetYOnPointerDown
+
+let pointerX
+let pointerXOnPointerDown
+let pointerY
+let pointerYOnPointerDown
+
+let windowHalfX = window.innerWidth / 2
+let windowHalfY = window.innerHeight / 2
+
+let isFollowCamAttached = false
+const coPilotTargetPos = new THREE.Vector3()
+
+
+function resetCoPilotCamera() {
+  targetRotation = -Math.PI / 2.0
+  targetRotationOnPointerDown = -Math.PI / 2.0
+  targetY = 0
+  targetYOnPointerDown = 0
+
+  pointerX = 0
+  pointerXOnPointerDown = 0
+  pointerY = 0
+  pointerYOnPointerDown = 0
+
+  coPilotCameraTarget.position.set(0, 0, -24)
+  coPilotCameraTarget.getWorldPosition(coPilotTargetPos)
+  coPilotCamera.position.set(0, 0, 0)
+  coPilotCamera.lookAt(coPilotTargetPos)
+}
+
+resetCoPilotCamera()
+
+
+function onPointerDown(event) {
+
+  console.log(`onPointerDown - isFollowCamAttached: ${isFollowCamAttached} event.isPrimary: ${event.isPrimary}`)
+
+  if (isFollowCamAttached === false) return
+  if (event.isPrimary === false) return
+  pointerXOnPointerDown = event.clientX - windowHalfX
+  targetRotationOnPointerDown = targetRotation
+  pointerYOnPointerDown = event.clientY - windowHalfY
+  targetYOnPointerDown = targetY
+  document.addEventListener('pointermove', onPointerMove)
+  document.addEventListener('pointerup', onPointerUp)
+}
+
+function onPointerMove(event) {
+  if (event.isPrimary === false) return
+  pointerX = event.clientX - windowHalfX
+  pointerY = event.clientY - windowHalfY
+  targetRotation = targetRotationOnPointerDown + (pointerX - pointerXOnPointerDown) * 0.01
+  const tmpY = targetYOnPointerDown + (pointerY - pointerYOnPointerDown) * 0.01
+  targetY = THREE.MathUtils.clamp(tmpY, -2.0, 2.0)
+
+  if (isFollowCamAttached) {
+    coPilotCameraTarget.position.x = 2.0 * Math.cos(targetRotation)
+    coPilotCameraTarget.position.z = 2.0 * Math.sin(targetRotation)
+    coPilotCameraTarget.position.y = targetY
+    coPilotCameraTarget.getWorldPosition(coPilotTargetPos)
+    coPilotCamera.lookAt(coPilotTargetPos)
+  }
+}
+
+function onPointerUp(event) {
+  if (event.isPrimary === false) return
+  document.removeEventListener('pointermove', onPointerMove)
+  document.removeEventListener('pointerup', onPointerUp)
+}
+
+document.addEventListener('pointerdown', onPointerDown)
 
 
 //
@@ -278,12 +384,14 @@ nav.style.visibility = 'visible'
 //
 const homeButton = document.getElementById("home")
 homeButton.addEventListener('click', () => {
+  camera = orbitCamera
   cameraMode = CAMERA_GHOST
   controls.enabled = true
   controls.reset()
 })
 
 function resetGhostCamera(hardReset = true) {
+  camera = orbitCamera
   cameraMode = CAMERA_GHOST
   controls.enabled = true
   if (hardReset) {
@@ -313,60 +421,59 @@ cameraButton.addEventListener('click', () => {
   console.log(`toggle camera... -> ${cameraMode}`)
 })
 
-let isFollowCamAttached = false
 
 function updateCamera() {
+
   if (cameraMode == "follow" && UTILS.INTERSECTED?.aircraft) {
     const aircraft = UTILS.INTERSECTED?.aircraft
 
     const followCamPos = aircraft.followCam.getWorldPosition(new THREE.Vector3())
 
     if (!isFollowCamAttached) {
-      if (camera.position.distanceToSquared(followCamPos) > 1.0) {
-        camera.position.lerp(followCamPos, 0.05)
+
+      if (orbitCamera.position.distanceToSquared(followCamPos) > 1.0) {
+        orbitCamera.position.lerp(followCamPos, 0.05)
       } else {
         isFollowCamAttached = true
+        camera = coPilotCamera
       }
 
     } else {
-      camera.position.copy(followCamPos)
+      orbitCamera.position.copy(followCamPos)
     }
 
-
     const aircraftPos = aircraft.group.position.clone()
-    camera.lookAt(aircraftPos)
+    orbitCamera.lookAt(aircraftPos)
     controls.target.copy(aircraftPos)
 
-    light.position.copy(camera.position)
+    light.position.copy(orbitCamera.position)
     light.target.position.copy(controls.target)
-  } else {
-    controls.update()
+
   }
+
+  controls.update()
 }
 
 //
 // fullscreen toggle on double click event listener
+// see:
+// https://developers.google.com/web/fundamentals/native-hardware/fullscreen
 //
 const fullscreenButton = document.getElementById("full-screen")
 console.log(fullscreenButton)
 fullscreenButton.addEventListener('click', () => {
-  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
 
-  if (!fullscreenElement) {
-    if (document.body.requestFullscreen) {
-      document.body.requestFullscreen()
-    }
-    else if (document.body.webkitRequestFullscreen) {
-      document.body.webkitRequestFullscreen()
-    }
+  const doc = window.document;
+  const docEl = doc.documentElement;
+
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl);
   }
   else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen()
-    }
-    else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen()
-    }
+    cancelFullScreen.call(doc);
   }
 })
 

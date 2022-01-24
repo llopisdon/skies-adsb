@@ -35,8 +35,7 @@ function getHUDContainer(hudId) {
     destination_long: container.querySelector("#destination_long"),
     telemetry_heading: container.querySelector("#telemetry_heading"),
     telemetry_ground_speed: container.querySelector("#telemetry_ground_speed"),
-    telemetry_altitude: container.querySelector("#telemetry_altitude"),
-    spinner: container.querySelector("#spinner"),
+    telemetry_altitude: container.querySelector("#telemetry_altitude"),    
   }
 }
 
@@ -111,8 +110,7 @@ class _HUD {
     this.hud.destination_long.href = ""
     this.hud.telemetry_heading.text = `H: ${NOT_AVAILABLE}`
     this.hud.telemetry_ground_speed.text = `GSPD: ${NOT_AVAILABLE}`
-    this.hud.telemetry_altitude.text = `ALT: ${NOT_AVAILABLE}`
-    this.hud.spinner.className = 'position-absolute top-50 start-50 translate-middle'
+    this.hud.telemetry_altitude.text = `ALT: ${NOT_AVAILABLE}`    
   }
 
   _showAircraftInfo() {
@@ -132,8 +130,7 @@ class _HUD {
     this.hud.destination_short.text = `D: ${aircraft.flightInfo?.['destination'] ?? NOT_AVAILABLE}`
     this.hud.destination_short.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.['destination']}`
     this.hud.destination_long.text = `Dest: ${aircraft.flightInfo?.['destination'] ?? NOT_AVAILABLE}, ${aircraft.flightInfo?.['destinationName'] ?? NOT_AVAILABLE}`
-    this.hud.destination_long.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.['destination']}`
-    this.hud.spinner.className = 'hidden'
+    this.hud.destination_long.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.['destination']}`    
     this.aircraftInfoShown = true
   }
 

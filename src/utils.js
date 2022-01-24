@@ -1,6 +1,5 @@
-import * as THREE from 'three'
 import SphericalMercator from '@mapbox/sphericalmercator'
-import { OrthographicCamera } from 'three'
+
 
 export const DATA_HOSTS = {
   "adsb": `ws://${(process.env.NODE_ENV === "development")
