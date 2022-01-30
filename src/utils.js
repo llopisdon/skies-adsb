@@ -12,6 +12,14 @@ export const DATA_HOSTS = {
   "photos": "https://api.planespotters.net/pub/photos/hex"
 }
 
+let params = new URLSearchParams(document.location.search)
+let mode = params.get("zero")
+if (mode === "1") {
+  DATA_HOSTS["adsb"] = "wss://***REMOVED***"
+  DATA_HOSTS["flightinfo"] = "https://***REMOVED***/flightinfo"
+}
+
+
 console.log(DATA_HOSTS)
 
 //
