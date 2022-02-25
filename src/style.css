@@ -1,6 +1,6 @@
-body { 
-  margin: 0;
-  padding: 0;
+body {
+  margin: 0px;
+  padding: 0px;
 }
 
 html,
@@ -8,6 +8,7 @@ body {
   overflow: hidden;
   color: #444;
   height: 100%;
+  font-family: "IBM Plex Mono", monospace;
 }
 
 #webgl:-webkit-full-screen {
@@ -15,89 +16,217 @@ body {
   height: 100%;
 }
 
-
-.hidden {
-  display: none;
+.material-icons-outlined.md-36 {
+  font-size: 36px;
 }
 
-#nav {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: auto;
-  padding: 8px;
-  border-radius: 30px;
-  background-color: rgba(77, 82, 129, 0.5);
+.material-icons-outlined.md-dark {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.material-icons-outlined.md-dark.md-inactive {
+  color: rgba(0, 0, 0, 0.26);
+}
+
+/* Rules for using icons as white on a dark background. */
+.material-icons-outlined.md-light {
+  color: rgba(255, 255, 255, 1);
+}
+
+.material-icons-outlined.md-light.md-inactive {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 100%;
+  background-color: rgba(255, 255, 0, 0.26);
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
+  border: 0;
+  color: #f0f;
+  transition: background-color 0.5s ease;
+}
+
+@media (hover: hover) {
+  button:hover {
+    background-color: rgba(255, 255, 0, 0.5);
+  }
+}
+
+.icon.active {
+  background-color: rgba(255, 255, 0, 0.75);
+}
+
+.action-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
   z-index: 1;
-  gap: 8px;
-  min-height: 56px;
 }
 
-#nav button {
-    width: 30px;
-    height: 30px;
-    background-size: cover;
-    background-repeat: no-repeat;
+#hud-left {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 2;
+}
+
+#hud-right {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  opacity: 0;
+  display: none;
+  z-index: 2;
+}
+
+#hud-dialog-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#hud-dialog {
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+  bottom: 0;
+  background-color: #f8f8f8;
+  transform: translateY(100%);
+  border-radius: 8px 8px 0px 0px;
+  opacity: 0.6;
+}
+
+#photo {
+  object-fit: cover;
+}
+
+.container {
+  display: flex;
+  flex-flow: column wrap;
+  gap: 4px;
+}
+
+.media {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+
+.media > * {
+  flex: 1 1;
+  width: 50vw;
+}
+
+img {
+  width: 100%;
+  height: 240px;
+  border-radius: 8px 8px 0px 0px;
+}
+
+.image {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.content {
+  padding: 8px 8px 8px 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.telemetry {
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  gap: 0.25em;
+}
+
+@media only screen and (min-width: 1080px) {
+  #hud-dialog {
+    width: 75vw;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  #hud-dialog {
+    width: 55vw;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  img {
+    border-radius: 8px 0px 0px 0px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .media > * {
+    flex: 1 1;
+    width: 100vw;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .content {
+    padding: 0px 8px 8px 8px;
+  }
+
+  .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 100%;
+    background-color: rgba(255, 255, 0, 0.26);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 0;
-    background-color: transparent;
-    cursor: pointer;
-    margin: 8px 8px;      
-}
-
-#home {
-  background-image: url('static/house.svg');
-}
-#camera {
-  background-image: url('static/camera.svg');
-}
-#full-screen {
-   background-image: url('static/fullscreen.svg');
-}
-
-button {
-  outline: none;
-}
-
-#hud {
-  z-index: 100;
-}
-
-.aircraftPhoto {
-  height: 160px;
-  object-fit: contain;
-}
-
-.show {
-  animation-name: fadeIn;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-  transition-timing-function: linear; 
-}
-
-.hide {
-  animation-name: fadeOut;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-}
-
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
+    color: #f0f;
+    transition: background-color 0.5s ease;
   }
-  100% {
-    opacity: 1;
+
+  .material-icons-outlined.md-36 {
+    font-size: 24px;
+  }
+
+  img {
+    width: 100vw;
+    height: 140px;
   }
 }
 
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
+@media only screen and (max-height: 600px) and (orientation: landscape) {
+  body {
+    font-size: 12px;
   }
-  100% {
-    opacity: 0;
+
+  .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 100%;
+    background-color: rgba(255, 255, 0, 0.26);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    color: #f0f;
+    transition: background-color 0.5s ease;
+  }
+
+  .material-icons-outlined.md-36 {
+    font-size: 24px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
   }
 }

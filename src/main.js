@@ -30,7 +30,8 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 // stats
 const stats = new Stats()
 stats.showPanel(0)
-document.body.appendChild(stats.dom)
+//document.body.appendChild(stats.dom)
+
 
 // Clock
 let clock = new THREE.Clock()
@@ -43,6 +44,7 @@ const coPilotCameraTarget = new THREE.Object3D()
 let camera = orbitCamera
 camera.position.z = 10
 scene.add(camera)
+
 
 
 // controls
@@ -164,7 +166,7 @@ function draw(elapsedTime, deltaTime) {
   }
 }
 
-function deselectAirCraftAndHideHUD(animate = true) {
+function deselectAirCraftAndHideHUD() {
   if (UTILS.INTERSECTED?.key) {
 
     UTILS.INTERSECTED.aircraft.followCam.clear()
@@ -180,7 +182,7 @@ function deselectAirCraftAndHideHUD(animate = true) {
     resetCoPilotCamera()
 
     isFollowCamAttached = false
-    HUD.hide(animate)
+    HUD.hide()
   }
 }
 
@@ -219,8 +221,8 @@ window.addEventListener('click', (event) => {
   const clientX = event.clientX;
   const clientY = event.clientY;
 
-  if (isClientXYInNavContainer(clientX, clientY)) {
-    console.log("[click in nav container!!!]")
+  if (HUD.isClientXYInHUDContainer(clientX, clientY)) {
+    console.log("[click in HUD container!!!]")
     return
   }
 
@@ -254,7 +256,7 @@ window.addEventListener('touchend', (event) => {
   const clientX = event.changedTouches[0].clientX
   const clientY = event.changedTouches[0].clientY
 
-  if (isClientXYInNavContainer(clientX, clientY)) {
+  if (HUD.isClientXYInHUDContainer(clientX, clientY)) {
     console.log("[touchend in nav container!!!]")
     return
   }
@@ -276,12 +278,6 @@ window.addEventListener('touchend', (event) => {
   )
   console.log(`touchend`, pointer, event)
 })
-
-const navContainer = document.getElementById("nav")
-function isClientXYInNavContainer(clientX, clientY) {
-  const navRect = navContainer.getBoundingClientRect()
-  return (clientX >= navRect.left) && (clientY <= navRect.bottom)
-}
 
 
 let targetRotation
@@ -362,33 +358,61 @@ document.addEventListener('pointerdown', onPointerDown)
 
 
 //
-// HUD close
+// HUD
 //
 
-const hudCloseButton = document.getElementById("hud-close")
-hudCloseButton.addEventListener('click', () => {
-  deselectAirCraftAndHideHUD()
-})
+HUD.hud.homeButton.addEventListener('click', (e) => {
+  console.log("click - HUD.homeButton")
+
+  if (cameraMode === CAMERA_FOLLOW) {
+    HUD.toggleFollow()
+  }
 
 
-//
-// enable nav
-//
-
-const nav = document.getElementById("nav")
-nav.style.visibility = 'visible'
-
-
-//
-// home - reset orbit controls to initial pos + look-at
-//
-const homeButton = document.getElementById("home")
-homeButton.addEventListener('click', () => {
   camera = orbitCamera
   cameraMode = CAMERA_GHOST
   controls.enabled = true
   controls.reset()
+  e.stopPropagation()
 })
+
+HUD.hud.closeButton.addEventListener('click', (e) => {
+  if (!HUD.isVisisble()) return
+  console.log("click - HUD.closeButton")
+  deselectAirCraftAndHideHUD()
+  e.stopPropagation()
+})
+
+HUD.hud.infoButton.addEventListener('click', (e) => {
+  if (!HUD.isVisisble()) return
+  HUD.toggleDialog()
+  e.stopPropagation()
+})
+
+//
+// camera - toggle between orbit control camera and follow camera
+//
+
+const CAMERA_GHOST = "ghost"
+const CAMERA_FOLLOW = "follow"
+
+let cameraMode = CAMERA_GHOST
+
+HUD.hud.cameraButton.addEventListener('click', (e) => {
+  if (!HUD.isVisisble()) return
+  if (UTILS.INTERSECTED?.aircraft) {
+    console.log("INTERSECTED AIRCRAFT: ")
+    console.log(UTILS.INTERSECTED?.aircraft)
+    cameraMode = CAMERA_FOLLOW
+    controls.enabled = false
+  } else {
+    resetGhostCamera(false)
+  }
+  console.log(`toggle camera... -> ${cameraMode}`)
+  HUD.toggleFollow()
+  e.stopPropagation()
+})
+
 
 function resetGhostCamera(hardReset = true) {
   camera = orbitCamera
@@ -400,26 +424,26 @@ function resetGhostCamera(hardReset = true) {
 }
 
 //
-// camera - toggle between orbit control camera and follow camera
+// fullscreen toggle on double click event listener
+// see:
+// https://developers.google.com/web/fundamentals/native-hardware/fullscreen
 //
+HUD.hud.fullscreenButton.addEventListener('click', (e) => {
+  const doc = window.document
+  const docEl = doc.documentElement
 
-const CAMERA_GHOST = "ghost"
-const CAMERA_FOLLOW = "follow"
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen
 
-let cameraMode = CAMERA_GHOST
-
-const cameraButton = document.getElementById("camera")
-cameraButton.addEventListener('click', () => {
-  if (UTILS.INTERSECTED?.aircraft) {
-    console.log("INTERSECTED AIRCRAFT: ")
-    console.log(UTILS.INTERSECTED?.aircraft)
-    cameraMode = CAMERA_FOLLOW
-    controls.enabled = false
-  } else {
-    resetGhostCamera(false)
+  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl)
   }
-  console.log(`toggle camera... -> ${cameraMode}`)
+  else {
+    cancelFullScreen.call(doc)
+  }
+  e.stopPropagation()
 })
+
 
 
 function updateCamera() {
@@ -454,28 +478,6 @@ function updateCamera() {
   controls.update()
 }
 
-//
-// fullscreen toggle on double click event listener
-// see:
-// https://developers.google.com/web/fundamentals/native-hardware/fullscreen
-//
-const fullscreenButton = document.getElementById("full-screen")
-console.log(fullscreenButton)
-fullscreenButton.addEventListener('click', () => {
-
-  const doc = window.document;
-  const docEl = doc.documentElement;
-
-  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-    requestFullScreen.call(docEl);
-  }
-  else {
-    cancelFullScreen.call(doc);
-  }
-})
 
 //
 // handle page visibility
