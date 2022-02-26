@@ -197,6 +197,20 @@ class _HUD {
     }
   }
 
+  enableHUD() {
+    const param = {
+      opacity: 1,
+      display: "flex",
+      duration: 0.25,
+    }
+
+    console.log(param)
+
+    gsap.to("#hud-left", param)
+    gsap.to("#hud-dialog-container", param)
+  }
+
+
   toggleRightActions() {
     this.isRightDialogShown = !this.isRightDialogShown
 

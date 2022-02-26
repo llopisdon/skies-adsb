@@ -520,6 +520,9 @@ loader.load('data/sofla.json',
     //
 
     ADSB.start(scene, clock)
+
+    // enable HUD
+    HUD.enableHUD()
   },
   (xhr) => {
     if (xhr.total > 0) {

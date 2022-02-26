@@ -71,6 +71,8 @@ body {
   position: absolute;
   left: 16px;
   top: 16px;
+  opacity: 0;
+  display: none;
   z-index: 2;
 }
 
@@ -87,6 +89,7 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  opacity: 0;
 }
 
 #hud-dialog {
