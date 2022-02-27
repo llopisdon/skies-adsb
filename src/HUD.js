@@ -236,6 +236,15 @@ class _HUD {
     gsap.to("#hud-right", param)
   }
 
+  toggleSettings() {
+    let settingsButton = this.hud.settingsButton
+    if (settingsButton.classList.contains("active")) {
+      settingsButton.classList.remove("active")
+    } else {
+      settingsButton.classList.add("active")
+    }
+  }
+
   toggleFollow() {
     let follow = this.hud.cameraButton
     this.isFollowCamActive = !this.isFollowCamActive
@@ -360,4 +369,3 @@ class _HUD {
 
 // HUD
 export const HUD = new _HUD()
-console.log(HUD)

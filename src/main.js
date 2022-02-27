@@ -7,6 +7,8 @@ import * as UTILS from './utils.js'
 import { HUD } from './HUD.js'
 import * as AIRCRAFT from './aircraft.js'
 import * as ADSB from './ADSB.js'
+import * as dat from 'dat.gui'
+import * as SKYBOX from './skybox.js'
 
 //
 // globals
@@ -30,7 +32,34 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 // stats
 const stats = new Stats()
 stats.showPanel(0)
-//document.body.appendChild(stats.dom)
+document.body.appendChild(stats.dom)
+stats.dom.style.display = "none"
+
+
+// dat.gui
+const gui = new dat.GUI({
+  hidable: true
+})
+gui.hide()
+let showDatGui = false
+
+let settings = {
+  showStats: false,
+  skybox: 'dawn+dusk'
+}
+
+gui.add(settings, 'skybox', ['dawn+dusk', 'day', 'night']).onChange((timeOfDay) => {
+  console.log(`timeOfDay: ${timeOfDay}`)
+  skybox.setTexture(timeOfDay)
+})
+
+gui.add(settings, 'showStats').onChange((showStats) => {
+  if (showStats) {
+    stats.dom.style.display = ""
+  } else {
+    stats.dom.style.display = "none"
+  }
+})
 
 
 // Clock
@@ -84,6 +113,9 @@ const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.copy(camera.position)
 scene.add(light)
 scene.add(light.target)
+
+// skybox
+const skybox = new SKYBOX.Skybox(scene)
 
 
 //
@@ -362,17 +394,24 @@ document.addEventListener('pointerdown', onPointerDown)
 //
 
 HUD.hud.homeButton.addEventListener('click', (e) => {
-  console.log("click - HUD.homeButton")
-
   if (cameraMode === CAMERA_FOLLOW) {
     HUD.toggleFollow()
   }
-
-
   camera = orbitCamera
   cameraMode = CAMERA_GHOST
   controls.enabled = true
   controls.reset()
+  e.stopPropagation()
+})
+
+HUD.hud.settingsButton.addEventListener('click', (e) => {
+  HUD.toggleSettings()
+  showDatGui = !showDatGui
+  if (showDatGui) {
+    gui.show()
+  } else {
+    gui.hide()
+  }
   e.stopPropagation()
 })
 
@@ -535,7 +574,6 @@ loader.load('data/sofla.json',
     console.log('[***************]')
   }
 );
-
 
 
 //

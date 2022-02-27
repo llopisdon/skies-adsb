@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@mapbox/sphericalmercator": "^1.2.0",
+    "dat.gui": "^0.7.9",
     "stats.js": "^0.17.0",
     "three": "^0.133.1",
     "troika-three-text": "^0.43.1-alpha.0"
