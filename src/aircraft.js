@@ -81,6 +81,7 @@ export class Aircraft {
 
     // aircraft mesh
     this.mesh = new THREE.Mesh(airCraftGeometry, airCraftMaterial.clone())
+    this.mesh.name = "aircraft_mesh"
     this.mesh.visible = false
 
     // aircraft height line
@@ -91,6 +92,7 @@ export class Aircraft {
     this.heightLineGeometry.attributes.position.usage = THREE.DynamicDrawUsage
     this.heightLinePos = this.heightLineGeometry.attributes.position
     this.heightLineMesh = new THREE.Line(this.heightLineGeometry, airCraftHeightLineMaterial)
+    this.heightLineMesh.name = "height_line"
     this.mesh.add(this.heightLineMesh)
 
     // aircraft messages text
@@ -101,11 +103,17 @@ export class Aircraft {
     this.text.anchorY = 1
     this.text.color = 0xED225D
     this.text.font = "./static/Orbitron-VariableFont_wght.ttf"
+    this.text.name = "aircraft_text"
     this.group.add(this.text)
 
     // follow camera
     this.followCam = new THREE.Object3D()
+    this.followCam.name = "follow_cam"
     this.followCam.position.set(0, 6, 24)
+    this.followCamTarget = new THREE.Object3D()
+    this.followCamTarget.name = "follow_cam_target"
+    this.followCamTarget.position.set(0, -6, -UTILS.FOLLOW_CAM_DISTANCE)
+    this.followCam.add(this.followCamTarget)
     this.mesh.add(this.followCam)
 
     // lights
@@ -115,6 +123,7 @@ export class Aircraft {
       ),
       redNavigationLightMaterial
     )
+    this.redNavigationLight.name = "red_nav_light"
     this.mesh.add(this.redNavigationLight)
 
     this.greenNavigationLight = new THREE.Points(
@@ -123,6 +132,7 @@ export class Aircraft {
       ),
       greenNavigationLightMaterial
     )
+    this.greenNavigationLight.name = "green_nav_light"
     this.mesh.add(this.greenNavigationLight)
 
     this.strobeLight = new THREE.Points(
@@ -131,6 +141,7 @@ export class Aircraft {
       ),
       new THREE.PointsMaterial({ size: 0.5, color: blackColor })
     )
+    this.strobeLight.name = "strobe_light"
     this.mesh.add(this.strobeLight)
 
     this.strobeLightTop = new THREE.Points(
@@ -139,12 +150,20 @@ export class Aircraft {
       ),
       new THREE.PointsMaterial({ size: 0.5, color: blackColor })
     )
+    this.strobeLightTop.name = "strobe_light_top"
     this.mesh.add(this.strobeLightTop)
 
 
     this.group.add(this.mesh)
 
     scene.add(this.group)
+  }
+
+  resetFollowCameraTarget() {
+    this.followCam.rotation.y = 0
+    this.followCam.rotation.x = 0
+    this.followCamTarget.position.set(0, -6, -24)
+    this.followCamTarget.matrixWorldNeedsUpdate = true
   }
 
   remove(scene) {
@@ -214,6 +233,10 @@ export class Aircraft {
       this.text.sync()
 
       this.group.position.set(xPos, yPos, zPos)
+      // this.group.matrixWorldNeedsUpdate = true
+      // this.mesh.matrixWorldNeedsUpdate = true
+      // this.followCam.matrixWorldNeedsUpdate = true
+      // this.followCamTarget.matrixWorldNeedsUpdate = true
     }
 
     // after each update reset timestamp

@@ -68,12 +68,10 @@ let clock = new THREE.Clock()
 // cameras
 
 const orbitCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
-const coPilotCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
-const coPilotCameraTarget = new THREE.Object3D()
+const followCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
+followCamera.rotation.order = 'YXZ'
 let camera = orbitCamera
 camera.position.z = 10
-scene.add(camera)
-
 
 
 // controls
@@ -159,18 +157,14 @@ function draw(elapsedTime, deltaTime) {
         if (aircraft.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
           if (UTILS.INTERSECTED?.key) {
-            resetCoPilotCamera()
+            UTILS.INTERSECTED?.aircraft.resetFollowCameraTarget()
             UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
-            UTILS.INTERSECTED.aircraft.followCam.clear()
           }
 
           UTILS.INTERSECTED.key = key
           UTILS.INTERSECTED.mesh = aircraft.mesh
           UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
           UTILS.INTERSECTED.aircraft = aircraft
-
-          UTILS.INTERSECTED.aircraft.followCam.add(coPilotCameraTarget)
-          UTILS.INTERSECTED.aircraft.followCam.add(coPilotCamera)
 
           console.log("!!! INTERSECT !!!")
 
@@ -200,18 +194,16 @@ function draw(elapsedTime, deltaTime) {
 
 function deselectAirCraftAndHideHUD() {
   if (UTILS.INTERSECTED?.key) {
-
-    UTILS.INTERSECTED.aircraft.followCam.clear()
-
     UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null
+    const aircraft = UTILS.INTERSECTED.aircraft
     UTILS.INTERSECTED.aircraft = null
     if (cameraMode === CAMERA_FOLLOW) {
-      resetGhostCamera(false)
+      const target = aircraft.followCamTarget.getWorldPosition(new THREE.Vector3())
+      aircraft.resetFollowCameraTarget()
+      resetGhostCamera(target)
     }
-
-    resetCoPilotCamera()
 
     isFollowCamAttached = false
     HUD.hide()
@@ -221,6 +213,11 @@ function deselectAirCraftAndHideHUD() {
 //
 // window resize event listeners
 //
+
+let windowHalfX = window.innerWidth / 2.0
+let windowHalfY = window.innerHeight / 2.0
+
+
 window.addEventListener('resize', () => {
   UTILS.sizes.width = window.innerWidth
   UTILS.sizes.height = window.innerHeight
@@ -233,8 +230,8 @@ window.addEventListener('resize', () => {
   orbitCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
   orbitCamera.updateProjectionMatrix()
 
-  coPilotCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
-  coPilotCamera.updateProjectionMatrix()
+  followCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
+  followCamera.updateProjectionMatrix()
 
   renderer.setSize(UTILS.sizes.width, UTILS.sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -248,7 +245,7 @@ let ignoreTouchEndEvent = false
 
 window.addEventListener('click', (event) => {
 
-  console.log(`[click..]`)
+  console.log(`[click..] isPointerMoving: ${isPointerMoving} isFollowCamAttached: ${isFollowCamAttached}`)
 
   const clientX = event.clientX;
   const clientY = event.clientY;
@@ -261,6 +258,11 @@ window.addEventListener('click', (event) => {
   if (ignoreTouchEndEvent) {
     ignoreTouchEndEvent = false
     console.log("\tignoreTouchEvent --")
+    return
+  }
+
+  if (wasPointerMoving) {
+    wasPointerMoving = false
     return
   }
 
@@ -282,14 +284,22 @@ window.addEventListener('click', (event) => {
   console.log(`click`, pointer, event)
 })
 
+let previousTouch = null
 
 window.addEventListener('touchend', (event) => {
+
+  previousTouch = null
 
   const clientX = event.changedTouches[0].clientX
   const clientY = event.changedTouches[0].clientY
 
   if (HUD.isClientXYInHUDContainer(clientX, clientY)) {
     console.log("[touchend in nav container!!!]")
+    return
+  }
+
+  if (wasPointerMoving) {
+    wasPointerMoving = false
     return
   }
 
@@ -308,85 +318,65 @@ window.addEventListener('touchend', (event) => {
     (clientX / window.innerWidth) * 2 - 1,
     -(clientY / window.innerHeight) * 2 + 1
   )
+
   console.log(`touchend`, pointer, event)
 })
 
 
-let targetRotation
-let targetRotationOnPointerDown
-let targetY
-let targetYOnPointerDown
+let isPointerMoving = false
+let wasPointerMoving = false
 
-let pointerX
-let pointerXOnPointerDown
-let pointerY
-let pointerYOnPointerDown
 
-let windowHalfX = window.innerWidth / 2
-let windowHalfY = window.innerHeight / 2
+window.addEventListener('touchmove', (event) => {
+  console.log(`[touch move] attached: ${isFollowCamAttached} ->`, event)
+
+  const touch = event.touches[0]
+
+  if (isFollowCamAttached && previousTouch !== null) {
+
+    isPointerMoving = true
+    wasPointerMoving = true
+
+    const movementX = touch.pageX - previousTouch.pageX
+    const movementY = touch.pageY - previousTouch.pageY
+    const aircraft = UTILS.INTERSECTED?.aircraft
+    aircraft.followCam.rotation.y -= movementX / 500;
+    aircraft.followCam.rotation.x -= movementY / 500;
+  }
+
+  previousTouch = touch
+})
+
+
+let isMouseDown = false
+window.addEventListener('mousedown', (event) => {
+  console.log('[mousedown]')
+  isMouseDown = true
+})
+window.addEventListener('mouseup', (event) => {
+  console.log('[mouseup]')
+  isMouseDown = false
+  if (isPointerMoving) {
+    isPointerMoving = false
+    wasPointerMoving = true
+  }
+})
+
+
+window.addEventListener('mousemove', (event) => {
+  if (isMouseDown && isFollowCamAttached) {
+
+    isPointerMoving = true
+
+    console.log(`[mouse move] attached: ${isFollowCamAttached} ->`, event)
+    const aircraft = UTILS.INTERSECTED?.aircraft
+    aircraft.followCam.rotation.y -= event.movementX / 500;
+    aircraft.followCam.rotation.x -= event.movementY / 500;
+  }
+})
 
 let isFollowCamAttached = false
-const coPilotTargetPos = new THREE.Vector3()
 
-
-function resetCoPilotCamera() {
-  targetRotation = -Math.PI / 2.0
-  targetRotationOnPointerDown = -Math.PI / 2.0
-  targetY = 0
-  targetYOnPointerDown = 0
-
-  pointerX = 0
-  pointerXOnPointerDown = 0
-  pointerY = 0
-  pointerYOnPointerDown = 0
-
-  coPilotCameraTarget.position.set(0, 0, -24)
-  coPilotCameraTarget.getWorldPosition(coPilotTargetPos)
-  coPilotCamera.position.set(0, 0, 0)
-  coPilotCamera.lookAt(coPilotTargetPos)
-}
-
-resetCoPilotCamera()
-
-
-function onPointerDown(event) {
-
-  console.log(`onPointerDown - isFollowCamAttached: ${isFollowCamAttached} event.isPrimary: ${event.isPrimary}`)
-
-  if (isFollowCamAttached === false) return
-  if (event.isPrimary === false) return
-  pointerXOnPointerDown = event.clientX - windowHalfX
-  targetRotationOnPointerDown = targetRotation
-  pointerYOnPointerDown = event.clientY - windowHalfY
-  targetYOnPointerDown = targetY
-  document.addEventListener('pointermove', onPointerMove)
-  document.addEventListener('pointerup', onPointerUp)
-}
-
-function onPointerMove(event) {
-  if (event.isPrimary === false) return
-  pointerX = event.clientX - windowHalfX
-  pointerY = event.clientY - windowHalfY
-  targetRotation = targetRotationOnPointerDown + (pointerX - pointerXOnPointerDown) * 0.01
-  const tmpY = targetYOnPointerDown + (pointerY - pointerYOnPointerDown) * 0.01
-  targetY = THREE.MathUtils.clamp(tmpY, -2.0, 2.0)
-
-  if (isFollowCamAttached) {
-    coPilotCameraTarget.position.x = 2.0 * Math.cos(targetRotation)
-    coPilotCameraTarget.position.z = 2.0 * Math.sin(targetRotation)
-    coPilotCameraTarget.position.y = targetY
-    coPilotCameraTarget.getWorldPosition(coPilotTargetPos)
-    coPilotCamera.lookAt(coPilotTargetPos)
-  }
-}
-
-function onPointerUp(event) {
-  if (event.isPrimary === false) return
-  document.removeEventListener('pointermove', onPointerMove)
-  document.removeEventListener('pointerup', onPointerUp)
-}
-
-document.addEventListener('pointerdown', onPointerDown)
 
 
 //
@@ -439,13 +429,20 @@ let cameraMode = CAMERA_GHOST
 
 HUD.hud.cameraButton.addEventListener('click', (e) => {
   if (!HUD.isVisisble()) return
-  if (UTILS.INTERSECTED?.aircraft) {
+  if (cameraMode === CAMERA_GHOST) {
     console.log("INTERSECTED AIRCRAFT: ")
     console.log(UTILS.INTERSECTED?.aircraft)
     cameraMode = CAMERA_FOLLOW
+    followCamera.position.copy(camera.position)
+    followCamera.lookAt(camera.lookAt)
+    camera = followCamera
     controls.enabled = false
   } else {
-    resetGhostCamera(false)
+    const aircraft = UTILS.INTERSECTED?.aircraft
+    const target = aircraft.followCamTarget.getWorldPosition(new THREE.Vector3())
+    aircraft.resetFollowCameraTarget()
+    resetGhostCamera(target)
+    isFollowCamAttached = false
   }
   console.log(`toggle camera... -> ${cameraMode}`)
   HUD.toggleFollow()
@@ -453,13 +450,13 @@ HUD.hud.cameraButton.addEventListener('click', (e) => {
 })
 
 
-function resetGhostCamera(hardReset = true) {
+function resetGhostCamera(target) {
+  orbitCamera.position.copy(camera.position)
+  controls.target.set(target.x, target.y, target.z)
+  controls.update()
+  controls.enabled = true
   camera = orbitCamera
   cameraMode = CAMERA_GHOST
-  controls.enabled = true
-  if (hardReset) {
-    controls.reset()
-  }
 }
 
 //
@@ -487,34 +484,21 @@ HUD.hud.fullscreenButton.addEventListener('click', (e) => {
 
 function updateCamera() {
 
-  if (cameraMode == "follow" && UTILS.INTERSECTED?.aircraft) {
+  if (cameraMode === "follow" && UTILS.INTERSECTED?.aircraft) {
     const aircraft = UTILS.INTERSECTED?.aircraft
-
     const followCamPos = aircraft.followCam.getWorldPosition(new THREE.Vector3())
+    const followCamTargetPos = aircraft.followCamTarget.getWorldPosition(new THREE.Vector3())
+    camera.position.lerp(followCamPos, 0.05)
+    camera.lookAt(followCamTargetPos)
 
-    if (!isFollowCamAttached) {
-
-      if (orbitCamera.position.distanceToSquared(followCamPos) > 1.0) {
-        orbitCamera.position.lerp(followCamPos, 0.05)
-      } else {
-        isFollowCamAttached = true
-        camera = coPilotCamera
-      }
-
-    } else {
-      orbitCamera.position.copy(followCamPos)
+    if (camera.position.distanceToSquared(followCamPos) < 1.0) {
+      isFollowCamAttached = true
     }
-
-    const aircraftPos = aircraft.group.position.clone()
-    orbitCamera.lookAt(aircraftPos)
-    controls.target.copy(aircraftPos)
-
-    light.position.copy(orbitCamera.position)
-    light.target.position.copy(controls.target)
-
+    light.position.copy(camera.position)
+    light.target.position.copy(followCamTargetPos)
+  } else {
+    controls.update()
   }
-
-  controls.update()
 }
 
 
@@ -530,7 +514,7 @@ function handleVisibilityChange() {
   } else {
     console.log("resume simulation...")
     ADSB.start(scene, clock)
-    animationFrameRequestId = window.requestAnimationFrame(tick)
+    animationFrameRequestId = window.requestAnimationFrame(animate)
   }
 }
 document.addEventListener('visibilitychange', handleVisibilityChange, false);
@@ -577,16 +561,16 @@ loader.load('data/sofla.json',
 
 
 //
-// tick
+// animate
 //
 
-const tick = function () {
+const animate = function () {
   stats.begin()
 
   const elapsedTime = clock.getElapsedTime()
   const deltaTime = clock.getDelta()
 
-  animationFrameRequestId = requestAnimationFrame(tick)
+  animationFrameRequestId = requestAnimationFrame(animate)
 
   updateCamera()
 
@@ -597,4 +581,4 @@ const tick = function () {
   stats.end()
 }
 
-tick()
+animate()

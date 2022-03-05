@@ -44,6 +44,8 @@ export const INTERSECTED = {
   aircraft: null,
 }
 
+export const FOLLOW_CAM_DISTANCE = 24.0
+
 
 export function isLandscape() {
   return sizes.width > sizes.height && sizes.height < 576
