@@ -46,9 +46,7 @@ class _HUD {
       callsign: dialog.querySelector("#callsign"),
       airline: dialog.querySelector("#airline"),
       aircraftType: dialog.querySelector("#aircraftType"),
-      origin_short: dialog.querySelector("#origin_short"),
       origin_long: dialog.querySelector("#origin_long"),
-      destination_short: dialog.querySelector("#destination_short"),
       destination_long: dialog.querySelector("#destination_long"),
       telemetry_heading: dialog.querySelector("#telemetry_heading"),
       telemetry_ground_speed: dialog.querySelector("#telemetry_ground_speed"),
@@ -90,12 +88,8 @@ class _HUD {
     this.hud.airline.href = ""
     this.hud.aircraftType.text = NOT_AVAILABLE
     this.hud.aircraftType.href = ""
-    this.hud.origin_short.text = `O: ${NOT_AVAILABLE}`
-    this.hud.origin_short.href = ""
     this.hud.origin_long.text = `Origin: ${NOT_AVAILABLE}`
     this.hud.origin_long.href = ""
-    this.hud.destination_short.text = `D: ${NOT_AVAILABLE}`
-    this.hud.destination_short.href = ""
     this.hud.destination_long.text = `Dest: ${NOT_AVAILABLE}`
     this.hud.destination_long.href = ""
     this.hud.telemetry_heading.text = `H: ${NOT_AVAILABLE}`
@@ -117,15 +111,9 @@ class _HUD {
     this.hud.aircraftType.text = `Type: ${aircraft.flightInfo?.["type"] ?? NOT_AVAILABLE
       } | ${aircraft.flightInfo?.["manufacturer"] ?? NOT_AVAILABLE}`
     this.hud.aircraftType.href = `https://www.google.com/search?q=about ${aircraft.flightInfo?.["type"]} ${aircraft.flightInfo?.["manufacturer"]}`
-    this.hud.origin_short.text = `O: ${aircraft.flightInfo?.["origin"] ?? NOT_AVAILABLE
-      }`
-    this.hud.origin_short.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.["origin"]}`
     this.hud.origin_long.text = `Origin: ${aircraft.flightInfo?.["origin"] ?? NOT_AVAILABLE
       }, ${aircraft.flightInfo?.["originName"] ?? NOT_AVAILABLE}`
     this.hud.origin_long.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.["origin"]}`
-    this.hud.destination_short.text = `D: ${aircraft.flightInfo?.["destination"] ?? NOT_AVAILABLE
-      }`
-    this.hud.destination_short.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.["destination"]}`
     this.hud.destination_long.text = `Dest: ${aircraft.flightInfo?.["destination"] ?? NOT_AVAILABLE
       }, ${aircraft.flightInfo?.["destinationName"] ?? NOT_AVAILABLE}`
     this.hud.destination_long.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.["destination"]}`
