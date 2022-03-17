@@ -333,15 +333,8 @@ window.addEventListener('touchmove', (event) => {
   const touch = event.touches[0]
 
   if (isFollowCamAttached && previousTouch !== null) {
-
     isPointerMoving = true
     wasPointerMoving = true
-
-    const movementX = touch.pageX - previousTouch.pageX
-    const movementY = touch.pageY - previousTouch.pageY
-    const aircraft = UTILS.INTERSECTED?.aircraft
-    aircraft.followCam.rotation.y -= movementX / 500;
-    aircraft.followCam.rotation.x -= movementY / 500;
   }
 
   previousTouch = touch
@@ -362,20 +355,47 @@ window.addEventListener('mouseup', (event) => {
   }
 })
 
-
 window.addEventListener('mousemove', (event) => {
   if (isMouseDown && isFollowCamAttached) {
-
     isPointerMoving = true
-
-    console.log(`[mouse move] attached: ${isFollowCamAttached} ->`, event)
-    const aircraft = UTILS.INTERSECTED?.aircraft
-    aircraft.followCam.rotation.y -= event.movementX / 500;
-    aircraft.followCam.rotation.x -= event.movementY / 500;
   }
 })
 
 let isFollowCamAttached = false
+
+function onPointerDown(event) {
+
+  if (event.isPrimary === false) return;
+
+  document.addEventListener('pointermove', onPointerMove)
+  document.addEventListener('pointerup', onPointerUp)
+}
+
+document.addEventListener('pointerdown', onPointerDown)
+
+
+function onPointerMove(event) {
+
+  if (event.isPrimary === false) return;
+
+  if (isFollowCamAttached) {
+    isPointerMoving = true
+    const aircraft = UTILS.INTERSECTED?.aircraft
+    aircraft.followCam.rotation.y -= event.movementX / 500
+    aircraft.followCam.rotation.x -= event.movementY / 500
+  }
+}
+
+function onPointerUp(event) {
+
+  if (event.isPrimary === false) return
+
+  document.removeEventListener('pointermove', onPointerMove)
+  document.removeEventListener('pointerup', onPointerUp)
+}
+
+
+
 
 
 
