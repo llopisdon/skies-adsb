@@ -44,9 +44,14 @@ gui.hide()
 let showDatGui = false
 
 let settings = {
+  lng: "-80.27787208557129",
+  lat: "25.794868197349306",
   showStats: false,
   skybox: 'dawn+dusk'
 }
+
+// gui.add(settings, 'lng', settings.lng)
+// gui.add(settings, 'lat', settings.lat)
 
 gui.add(settings, 'skybox', ['dawn+dusk', 'day', 'night']).onChange((timeOfDay) => {
   console.log(`timeOfDay: ${timeOfDay}`)
@@ -114,6 +119,19 @@ scene.add(light.target)
 
 // skybox
 const skybox = new SKYBOX.Skybox(scene)
+
+
+// polar grid
+// const radius = 500
+// const radials = 16
+// const circles = 5
+// const divisions = 64
+// const color1 = "#81efff"
+// const color2 = color1
+// const helper = new THREE.PolarGridHelper(radius, radials, circles, divisions, color1, color2)
+// scene.add(helper)
+
+
 
 
 //
@@ -363,9 +381,23 @@ window.addEventListener('mousemove', (event) => {
 
 let isFollowCamAttached = false
 
+const rotateStart = new THREE.Vector2()
+const rotateEnd = new THREE.Vector2()
+const rotateDelta = new THREE.Vector2()
+
 function onPointerDown(event) {
 
   if (event.isPrimary === false) return;
+
+  console.log("[onPointerDown]")
+
+  if (isFollowCamAttached) {
+    if (event.pointerType === 'touch') {
+      rotateStart.set(event.pageX, event.pageY)
+    } else {
+      rotateStart.set(event.clientX, event.clientY)
+    }
+  }
 
   document.addEventListener('pointermove', onPointerMove)
   document.addEventListener('pointerup', onPointerUp)
@@ -381,8 +413,27 @@ function onPointerMove(event) {
   if (isFollowCamAttached) {
     isPointerMoving = true
     const aircraft = UTILS.INTERSECTED?.aircraft
-    aircraft.followCam.rotation.y -= event.movementX / 500
-    aircraft.followCam.rotation.x -= event.movementY / 500
+
+    let yRot = 0.0
+    let xRot = 0.0
+
+    if (event.pointerType === 'touch') {
+      rotateEnd.set(event.pageX, event.pageY)
+      rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(1.0)
+      const element = canvas;
+      yRot = 2 * Math.PI * rotateDelta.x / element.clientHeight // yes, height
+      xRot = 2 * Math.PI * rotateDelta.y / element.clientHeight
+      rotateStart.copy(rotateEnd);
+    } else {
+      rotateEnd.set(event.clientX, event.clientY)
+      rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(1.0)
+      const element = canvas;
+      yRot = 2 * Math.PI * rotateDelta.x / element.clientHeight // yes, height
+      xRot = 2 * Math.PI * rotateDelta.y / element.clientHeight
+      rotateStart.copy(rotateEnd);
+    }
+    aircraft.followCam.rotation.y -= yRot
+    aircraft.followCam.rotation.x -= xRot
   }
 }
 
@@ -393,9 +444,6 @@ function onPointerUp(event) {
   document.removeEventListener('pointermove', onPointerMove)
   document.removeEventListener('pointerup', onPointerUp)
 }
-
-
-
 
 
 
