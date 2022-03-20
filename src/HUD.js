@@ -146,7 +146,7 @@ class _HUD {
       clientX <= rightHUDRect.right &&
       clientY <= rightHUDRect.bottom &&
       clientY >= rightHUDRect.top
-    return this.isVisisble() && (inLeftHUD || inRightHUD)
+    return inLeftHUD || inRightHUD
   }
 
   isVisisble() {

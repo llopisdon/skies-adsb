@@ -89,18 +89,9 @@ const controls = new OrbitControls(camera, renderer.domElement)
 // see:
 // https://www.html5rocks.com/en/mobile/touchandmouse/
 //
-let numOrbitControlsActive = 0
-let isClickDueToOrbitControlsInteraction = false
 controls.addEventListener('change', (event) => {
-  isClickDueToOrbitControlsInteraction = true
   light.position.copy(camera.position)
   light.target.position.copy(controls.target)
-})
-controls.addEventListener('start', (event) => {
-  numOrbitControlsActive++
-})
-controls.addEventListener('end', (event) => {
-  numOrbitControlsActive--
 })
 
 
@@ -232,16 +223,9 @@ function deselectAirCraftAndHideHUD() {
 // window resize event listeners
 //
 
-let windowHalfX = window.innerWidth / 2.0
-let windowHalfY = window.innerHeight / 2.0
-
-
 window.addEventListener('resize', () => {
   UTILS.sizes.width = window.innerWidth
   UTILS.sizes.height = window.innerHeight
-
-  windowHalfX = window.innerWidth / 2.0
-  windowHalfY = window.innerHeight / 2.0
 
   console.log(`window resize - w: ${UTILS.sizes.width} h: ${UTILS.sizes.height}`)
 
@@ -255,141 +239,20 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-//
-// single click listener to check for airplane intersections
-//
-
-let ignoreTouchEndEvent = false
-
-window.addEventListener('click', (event) => {
-
-  console.log(`[click..] isPointerMoving: ${isPointerMoving} isFollowCamAttached: ${isFollowCamAttached}`)
-
-  const clientX = event.clientX;
-  const clientY = event.clientY;
-
-  if (HUD.isClientXYInHUDContainer(clientX, clientY)) {
-    console.log("[click in HUD container!!!]")
-    return
-  }
-
-  if (ignoreTouchEndEvent) {
-    ignoreTouchEndEvent = false
-    console.log("\tignoreTouchEvent --")
-    return
-  }
-
-  if (wasPointerMoving) {
-    wasPointerMoving = false
-    return
-  }
-
-  if (event.pointerType === 'mouse' && numOrbitControlsActive > 0) {
-    console.log("\tignore click -- pointer is mouse...")
-    return
-  }
-
-  if (!isFollowCamAttached && isClickDueToOrbitControlsInteraction) {
-    isClickDueToOrbitControlsInteraction = false
-    console.log("click due to oribitcontrols interaction...")
-    return
-  }
-
-  pointer.set(
-    (clientX / window.innerWidth) * 2 - 1,
-    -(clientY / window.innerHeight) * 2 + 1
-  )
-  console.log(`click`, pointer, event)
-})
-
-let previousTouch = null
-
-window.addEventListener('touchend', (event) => {
-
-  previousTouch = null
-
-  const clientX = event.changedTouches[0].clientX
-  const clientY = event.changedTouches[0].clientY
-
-  if (HUD.isClientXYInHUDContainer(clientX, clientY)) {
-    console.log("[touchend in nav container!!!]")
-    return
-  }
-
-  if (wasPointerMoving) {
-    wasPointerMoving = false
-    return
-  }
-
-  if (numOrbitControlsActive > 0) {
-    return
-  }
-
-  if (!isFollowCamAttached && isClickDueToOrbitControlsInteraction) {
-    isClickDueToOrbitControlsInteraction = false
-    return
-  }
-
-  ignoreTouchEndEvent = true
-
-  pointer.set(
-    (clientX / window.innerWidth) * 2 - 1,
-    -(clientY / window.innerHeight) * 2 + 1
-  )
-
-  console.log(`touchend`, pointer, event)
-})
-
-
-let isPointerMoving = false
-let wasPointerMoving = false
-
-
-window.addEventListener('touchmove', (event) => {
-  console.log(`[touch move] attached: ${isFollowCamAttached} ->`, event)
-
-  const touch = event.touches[0]
-
-  if (isFollowCamAttached && previousTouch !== null) {
-    isPointerMoving = true
-    wasPointerMoving = true
-  }
-
-  previousTouch = touch
-})
-
-
-let isMouseDown = false
-window.addEventListener('mousedown', (event) => {
-  console.log('[mousedown]')
-  isMouseDown = true
-})
-window.addEventListener('mouseup', (event) => {
-  console.log('[mouseup]')
-  isMouseDown = false
-  if (isPointerMoving) {
-    isPointerMoving = false
-    wasPointerMoving = true
-  }
-})
-
-window.addEventListener('mousemove', (event) => {
-  if (isMouseDown && isFollowCamAttached) {
-    isPointerMoving = true
-  }
-})
 
 let isFollowCamAttached = false
 
+const pointerStart = new THREE.Vector2()
+const pointerEnd = new THREE.Vector2()
 const rotateStart = new THREE.Vector2()
 const rotateEnd = new THREE.Vector2()
 const rotateDelta = new THREE.Vector2()
 
 function onPointerDown(event) {
 
-  if (event.isPrimary === false) return;
+  if (event.isPrimary === false) return
 
-  console.log("[onPointerDown]")
+  pointerStart.set(event.clientX, event.clientY)
 
   if (isFollowCamAttached) {
     if (event.pointerType === 'touch') {
@@ -407,39 +270,38 @@ document.addEventListener('pointerdown', onPointerDown)
 
 
 function onPointerMove(event) {
-
-  if (event.isPrimary === false) return;
+  if (event.isPrimary === false) return
 
   if (isFollowCamAttached) {
-    isPointerMoving = true
     const aircraft = UTILS.INTERSECTED?.aircraft
-
-    let yRot = 0.0
-    let xRot = 0.0
 
     if (event.pointerType === 'touch') {
       rotateEnd.set(event.pageX, event.pageY)
-      rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(1.0)
-      const element = canvas;
-      yRot = 2 * Math.PI * rotateDelta.x / element.clientHeight // yes, height
-      xRot = 2 * Math.PI * rotateDelta.y / element.clientHeight
-      rotateStart.copy(rotateEnd);
     } else {
       rotateEnd.set(event.clientX, event.clientY)
-      rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(1.0)
-      const element = canvas;
-      yRot = 2 * Math.PI * rotateDelta.x / element.clientHeight // yes, height
-      xRot = 2 * Math.PI * rotateDelta.y / element.clientHeight
-      rotateStart.copy(rotateEnd);
     }
-    aircraft.followCam.rotation.y -= yRot
-    aircraft.followCam.rotation.x -= xRot
+    rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(1.0)
+    rotateStart.copy(rotateEnd);
+
+    aircraft.followCam.rotation.y -= 2 * Math.PI * rotateDelta.x / canvas.clientHeight
+    aircraft.followCam.rotation.x -= 2 * Math.PI * rotateDelta.y / canvas.clientHeight
   }
 }
 
 function onPointerUp(event) {
-
   if (event.isPrimary === false) return
+
+  pointerEnd.set(event.clientX, event.clientY)
+
+  const isClick = pointerStart.distanceToSquared(pointerEnd) === 0
+  const notInHUD = !HUD.isClientXYInHUDContainer(event.clientX, event.clientY)
+
+  if (isClick && notInHUD) {
+    pointer.set(
+      (pointerEnd.x / window.innerWidth) * 2 - 1,
+      -(pointerEnd.y / window.innerHeight) * 2 + 1
+    )
+  }
 
   document.removeEventListener('pointermove', onPointerMove)
   document.removeEventListener('pointerup', onPointerUp)
@@ -519,6 +381,8 @@ HUD.hud.cameraButton.addEventListener('click', (e) => {
 
 
 function resetGhostCamera(target) {
+  rotateStart.set(0, 0)
+  rotateEnd.set(0, 0)
   orbitCamera.position.copy(camera.position)
   controls.target.set(target.x, target.y, target.z)
   controls.update()
