@@ -18,6 +18,8 @@ const GEOJSON_GEOMETRY_TYPE_POINT = "Point"
 
 export function init(scene, json) {
 
+  const mapGroup = new THREE.Group()
+
   //
   // must find origin for this map first
   //
@@ -59,7 +61,7 @@ export function init(scene, json) {
           color: MAP_COLOR,
           linewidth: 2
         }))
-        scene.add(lineSegments)
+        mapGroup.add(lineSegments)
       }
         break;
       case GEOJSON_GEOMETRY_TYPE_POINT: {
@@ -81,7 +83,7 @@ export function init(scene, json) {
         label.position.z = y * UTILS.SCALE
 
         poiLabels.push(label)
-        scene.add(label)
+        mapGroup.add(label)
       }
         break;
     }
@@ -89,6 +91,10 @@ export function init(scene, json) {
 
   const poiGeometry = new THREE.BufferGeometry().setFromPoints(poiVertices)
   const poiMesh = new THREE.Points(poiGeometry, refPointMaterial)
-  scene.add(poiMesh)
+  mapGroup.add(poiMesh)
+
+  scene.add(mapGroup)
+
+  return mapGroup
 }
 

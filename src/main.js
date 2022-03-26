@@ -9,6 +9,7 @@ import * as AIRCRAFT from './aircraft.js'
 import * as ADSB from './ADSB.js'
 import * as dat from 'dat.gui'
 import * as SKYBOX from './skybox.js'
+import { PolarGridHelper } from 'three'
 
 //
 // globals
@@ -44,27 +45,45 @@ gui.hide()
 let showDatGui = false
 
 let settings = {
-  lng: "-80.27787208557129",
-  lat: "25.794868197349306",
+  // lng: "-80.27787208557129",
+  // lat: "25.794868197349306",
   showStats: false,
-  skybox: 'dawn+dusk'
+  skybox: 'dawn+dusk',
+  map: 'sofla',
+  polarGridHelper: false,
 }
 
 // gui.add(settings, 'lng', settings.lng)
 // gui.add(settings, 'lat', settings.lat)
 
-gui.add(settings, 'skybox', ['dawn+dusk', 'day', 'night']).onChange((timeOfDay) => {
-  console.log(`timeOfDay: ${timeOfDay}`)
+gui.add(settings, 'map', ['sofla', 'none']).onChange(map => {
+  console.log('select map: ' + map)
+  switch (map) {
+    case 'sofla':
+      mapGroup.visible = true
+      break;
+    case 'none':
+      mapGroup.visible = false
+      break;
+  }
+})
+gui.add(settings, 'polarGridHelper').onChange(isVisible => {
+  polarGridHelper.visible = isVisible
+})
+
+gui.add(settings, 'skybox', ['dawn+dusk', 'day', 'night']).onChange(timeOfDay => {
   skybox.setTexture(timeOfDay)
 })
 
-gui.add(settings, 'showStats').onChange((showStats) => {
+gui.add(settings, 'showStats').onChange(showStats => {
   if (showStats) {
     stats.dom.style.display = ""
   } else {
     stats.dom.style.display = "none"
   }
 })
+
+
 
 
 // Clock
@@ -113,14 +132,15 @@ const skybox = new SKYBOX.Skybox(scene)
 
 
 // polar grid
-// const radius = 500
-// const radials = 16
-// const circles = 5
-// const divisions = 64
-// const color1 = "#81efff"
-// const color2 = color1
-// const helper = new THREE.PolarGridHelper(radius, radials, circles, divisions, color1, color2)
-// scene.add(helper)
+const radius = 500
+const radials = 16
+const circles = 5
+const divisions = 64
+const color1 = "#81efff"
+const color2 = color1
+const polarGridHelper = new THREE.PolarGridHelper(radius, radials, circles, divisions, color1, color2)
+polarGridHelper.visible = false
+scene.add(polarGridHelper)
 
 
 
@@ -457,6 +477,8 @@ document.addEventListener('visibilitychange', handleVisibilityChange, false);
 // load maps, origin, and start websocket connection
 //
 
+let mapGroup = undefined
+
 const loader = new THREE.FileLoader();
 loader.load('data/sofla.json',
   (data) => {
@@ -467,7 +489,7 @@ loader.load('data/sofla.json',
     // init map and POI
     //
 
-    MAPS.init(scene, JSON.parse(data))
+    mapGroup = MAPS.init(scene, JSON.parse(data))
 
 
     //
