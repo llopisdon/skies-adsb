@@ -101,12 +101,14 @@ export function calcBearing(from, to) {
 const sphericalMercator = new SphericalMercator()
 
 export const origin = {
-  lat: 0,
-  lng: 0
+  longitude: 0,
+  latitude: 0,
+  x: 0,
+  y: 0
 }
 
 export function initOrigin(lngLat) {
-  [origin.lng, origin.lat] = lngLat
+  [origin.longitude, origin.latitude] = lngLat
   let [mx, my] = sphericalMercator.forward(lngLat)
   origin.x = Math.abs(mx)
   origin.y = Math.abs(my)

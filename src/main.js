@@ -9,7 +9,6 @@ import * as AIRCRAFT from './aircraft.js'
 import * as ADSB from './ADSB.js'
 import * as dat from 'dat.gui'
 import * as SKYBOX from './skybox.js'
-import { PolarGridHelper } from 'three'
 
 //
 // globals
@@ -45,29 +44,40 @@ gui.hide()
 let showDatGui = false
 
 let settings = {
-  // lng: "-80.27787208557129",
-  // lat: "25.794868197349306",
-  showStats: false,
+  longitude: "",
+  latitude: "",
+  "show stats": false,
   skybox: 'dawn+dusk',
-  map: 'sofla',
-  polarGridHelper: false,
+  "show map": true,
+  "show grid": false,
+  poi: []
 }
 
-// gui.add(settings, 'lng', settings.lng)
-// gui.add(settings, 'lat', settings.lat)
+console.log(settings)
 
-gui.add(settings, 'map', ['sofla', 'none']).onChange(map => {
-  console.log('select map: ' + map)
-  switch (map) {
-    case 'sofla':
-      mapGroup.visible = true
-      break;
-    case 'none':
-      mapGroup.visible = false
-      break;
+const longtiudeController = gui.add(settings, 'longitude')
+const latitudeController = gui.add(settings, 'latitude')
+
+const reloadMapButton = {
+  "set origin": function () {
+
+    UTILS.initOrigin([
+      settings.longitude,
+      settings.latitude,
+    ])
+
+    reloadMap()
+  }
+}
+gui.add(reloadMapButton, "set origin")
+
+const showMapController = gui.add(settings, 'show map').onChange(visible => {
+  if (mapGroup !== undefined) {
+    mapGroup.visible = visible
   }
 })
-gui.add(settings, 'polarGridHelper').onChange(isVisible => {
+const showGridController = gui.add(settings, 'show grid').onChange(isVisible => {
+  console.log(`show grid: ${isVisible}`)
   polarGridHelper.visible = isVisible
 })
 
@@ -75,15 +85,13 @@ gui.add(settings, 'skybox', ['dawn+dusk', 'day', 'night']).onChange(timeOfDay =>
   skybox.setTexture(timeOfDay)
 })
 
-gui.add(settings, 'showStats').onChange(showStats => {
+gui.add(settings, 'show stats').onChange(showStats => {
   if (showStats) {
     stats.dom.style.display = ""
   } else {
     stats.dom.style.display = "none"
   }
 })
-
-
 
 
 // Clock
@@ -333,7 +341,7 @@ function onPointerUp(event) {
 // HUD
 //
 
-HUD.hud.homeButton.addEventListener('click', (e) => {
+function resetCameraToHome() {
   if (cameraMode === CAMERA_FOLLOW) {
     HUD.toggleFollow()
   }
@@ -341,6 +349,11 @@ HUD.hud.homeButton.addEventListener('click', (e) => {
   cameraMode = CAMERA_GHOST
   controls.enabled = true
   controls.reset()
+}
+
+
+HUD.hud.homeButton.addEventListener('click', (e) => {
+  resetCameraToHome()
   e.stopPropagation()
 })
 
@@ -478,18 +491,40 @@ document.addEventListener('visibilitychange', handleVisibilityChange, false);
 //
 
 let mapGroup = undefined
+let poi = undefined
+let poiController = undefined
 
-const loader = new THREE.FileLoader();
-loader.load('data/sofla.json',
+const loader = new THREE.FileLoader()
+loader.load(`data/${process.env.MAP}`,
   (data) => {
 
-    console.log('[ sofla.json - loaded... ]')
+    console.log(`[ ${process.env.MAP} - loaded... ]`)
 
     //
     // init map and POI
     //
 
-    mapGroup = MAPS.init(scene, JSON.parse(data))
+    const res = MAPS.init(scene, JSON.parse(data))
+    console.log(res)
+    mapGroup = res.mapGroup
+    poi = res.poi
+
+    console.log(Object.keys(poi))
+
+    poiController = gui.add(settings, 'poi', Object.keys(poi)).onChange(key => {
+      if (key !== MAPS.POI_KEY_CURRENT_LNG_LAT) {
+        console.log(poi[key])
+        const lng = poi[key].longitude
+        const lat = poi[key].latitude
+        UTILS.initOrigin([
+          lng, lat
+        ])
+        longtiudeController.setValue(lng)
+        latitudeController.setValue(lat)
+      }
+      reloadMap()
+    })
+    poiController.setValue(res.originId)
 
 
     //
@@ -503,15 +538,95 @@ loader.load('data/sofla.json',
   },
   (xhr) => {
     if (xhr.total > 0) {
-      console.log('map.json - ' + (xhr.loaded / xhr.total * 100) + '% loaded')
+      console.log(`${process.env.MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
     }
   },
   (err) => {
-    console.error('[*** Error Loading map.json ***]')
-    console.log(err)
-    console.log('[***************]')
+    console.error(`[*** Error Loading Map ***]`)
+    console.error(`\tunable to load: 'data/${process.env.MAP}'`)
+    console.error(err)
+    console.error('[***************]')
+
+    gui.remove(showMapController)
+    showGridController.setValue(true)
+
+    //
+    // Fallback to default origin
+    //
+    UTILS.initOrigin([
+      process.env.DEFAULT_ORIGIN_LONGITUDE,
+      process.env.DEFAULT_ORIGIN_LATITUDE,
+    ])
+    console.error(`FALL BACK TO DEFAULT ORIGIN: `)
+    console.error(UTILS.origin)
+
+    longtiudeController.setValue(process.env.DEFAULT_ORIGIN_LONGITUDE)
+    latitudeController.setValue(process.env.DEFAULT_ORIGIN_LATITUDE)
+
+    //
+    // Starting parsing ADSB messages
+    //
+
+    ADSB.start(scene, clock)
+
+    // enable HUD
+    HUD.enableHUD()
   }
-);
+)
+
+function reloadMap() {
+  console.log('[reloadMap...]')
+  scene.remove(mapGroup)
+  mapGroup = undefined
+  const loader = new THREE.FileLoader();
+  loader.load(`data/${process.env.MAP}`,
+    (data) => {
+
+      console.log(`[ ${process.env.MAP} - loaded... ]`)
+
+      //
+      // init map and POI
+      //
+
+      const res = MAPS.init(scene, JSON.parse(data), true)
+      mapGroup = res.mapGroup
+      console.log(res)
+
+      resetCameraToHome()
+    },
+    (xhr) => {
+      if (xhr.total > 0) {
+        console.log(`${process.env.MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+      }
+    },
+    (err) => {
+      console.error(`[*** Error Loading Map ***]`)
+      console.error(`\tunable to load: 'data/${process.env.MAP}'`)
+      console.error(err)
+      console.error('[***************]')
+
+      gui.remove(showMapController)
+      showGridController.setValue(true)
+
+      //
+      // Fallback to default origin
+      //
+      UTILS.initOrigin([
+        process.env.DEFAULT_ORIGIN_LONGITUDE,
+        process.env.DEFAULT_ORIGIN_LATITUDE,
+      ])
+      console.error(`FALL BACK TO DEFAULT ORIGIN: `)
+      console.error(UTILS.origin)
+
+      longtiudeController.setValue(process.env.DEFAULT_ORIGIN_LONGITUDE)
+      latitudeController.setValue(process.env.DEFAULT_ORIGIN_LATITUDE)
+
+      resetCameraToHome()
+    }
+  )
+}
+
+
 
 
 //

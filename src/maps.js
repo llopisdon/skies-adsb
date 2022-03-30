@@ -16,37 +16,63 @@ const TEXT_FONT = "./static/Orbitron-VariableFont_wght.ttf"
 const GEOJSON_GEOMETRY_TYPE_POLYGON = "Polygon"
 const GEOJSON_GEOMETRY_TYPE_POINT = "Point"
 
-export function init(scene, json) {
+export const POI_KEY_DEFAULT_ORIGIN = "default origin"
+export const POI_KEY_CURRENT_LNG_LAT = "current lng/lat"
+
+export function init(scene, json, overrideOrigin = false) {
 
   const mapGroup = new THREE.Group()
 
-  //
-  // must find origin for this map first
-  //
-  let originFound = false
-  let fallbackOriginLngLat = null
+  const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
 
-  for (const feature of json["features"]) {
-    if ("origin" in feature["properties"]) {
-      const lngLat = feature["geometry"]["coordinates"]
-      UTILS.initOrigin(lngLat)
-      console.log(`[ origin: ${lngLat} ]`)
-      originFound = true
-      break
-    } else if (fallbackOriginLngLat !== null && feature["geometry"]["type"] === GEOJSON_GEOMETRY_TYPE_POINT) {
-      fallbackOriginLngLat = feature["geometry"]["coordinates"]
+  const poiVertices = []
+
+  const poi = []
+
+  poi[POI_KEY_DEFAULT_ORIGIN] = {
+    longitude: process.env.DEFAULT_ORIGIN_LONGITUDE,
+    latitude: process.env.DEFAULT_ORIGIN_LATITUDE
+  }
+
+  poi[POI_KEY_CURRENT_LNG_LAT] = {
+    longitude: 0,
+    latitude: 0
+  }
+
+  let originId = POI_KEY_DEFAULT_ORIGIN
+
+  if (overrideOrigin) {
+    poi[POI_KEY_CURRENT_LNG_LAT].longitude = UTILS.origin.longitude
+    poi[POI_KEY_CURRENT_LNG_LAT].latitude = UTILS.origin.latitude
+    originId = POI_KEY_CURRENT_LNG_LAT
+  } else {
+
+    //
+    // must find origin for this map first
+    //
+    let originFound = false
+
+
+    for (const feature of json["features"]) {
+      if ("origin" in feature["properties"]) {
+        const lngLat = feature["geometry"]["coordinates"]
+        UTILS.initOrigin(lngLat)
+        console.log(`[ origin: ${lngLat} ]`)
+        originId = feature["properties"]["id"]
+        originFound = true
+        break
+      }
+    }
+
+    if (!originFound) {
+      UTILS.initOrigin([
+        poi[POI_KEY_DEFAULT_ORIGIN].longitude,
+        poi[POI_KEY_DEFAULT_ORIGIN].latitude,
+      ])
     }
   }
 
-  if (!originFound) {
-    UTILS.initOrigin(fallbackOriginLngLat)
-  }
-
-  const refPointMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff00ff })
-  const poiVertices = []
-
   for (const feature of json["features"]) {
-
     switch (feature["geometry"]["type"]) {
       case GEOJSON_GEOMETRY_TYPE_POLYGON: {
         const points = feature["geometry"]["coordinates"][0].map(coord => {
@@ -65,8 +91,15 @@ export function init(scene, json) {
       }
         break;
       case GEOJSON_GEOMETRY_TYPE_POINT: {
-
         const coord = feature["geometry"]["coordinates"]
+
+        const poiId = feature["properties"]["id"]
+        poi[poiId] = {
+          id: poiId,
+          longitude: coord[0],
+          latitude: coord[1]
+        }
+
         const [x, y] = UTILS.getXY(coord)
         const vector3 = new THREE.Vector3(x * UTILS.SCALE, 0, y * UTILS.SCALE)
         poiVertices.push(vector3)
@@ -95,6 +128,10 @@ export function init(scene, json) {
 
   scene.add(mapGroup)
 
-  return mapGroup
+  return {
+    mapGroup,
+    originId,
+    poi
+  }
 }
 
