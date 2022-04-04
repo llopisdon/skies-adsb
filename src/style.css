@@ -202,7 +202,7 @@ img {
 
 @media only screen and (max-height: 600px) and (orientation: landscape) {
   body {
-    font-size: 12px;
+    font-size: 16px;
   }
 
   .icon {

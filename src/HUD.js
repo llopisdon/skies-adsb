@@ -149,7 +149,7 @@ class _HUD {
     return inLeftHUD || inRightHUD
   }
 
-  isVisisble() {
+  isVisible() {
     return this.aircraft !== null
   }
 
@@ -163,7 +163,7 @@ class _HUD {
   }
 
   show(aircraft) {
-    if (!this.isVisisble()) this.toggleRightActions()
+    if (!this.isVisible()) this.toggleRightActions()
     this._reset()
     this.aircraft = aircraft
     this.needsFetchAircraftInfo = true
@@ -172,7 +172,7 @@ class _HUD {
   }
 
   update() {
-    if (!this.isVisisble()) return
+    if (!this.isVisible()) return
 
     this._updateTelemetry()
 
@@ -336,7 +336,7 @@ class _HUD {
       return
     }
 
-    const url = `${UTILS.DATA_HOSTS["flightinfo"]}/${aircraft.callsign}`
+    const url = `${UTILS.DATA_HOSTS["flight_info"]}/${aircraft.callsign}`
     aircraft.flightInfoFuture = fetch(url)
       .then((response) => response.json())
       .then((data) => {

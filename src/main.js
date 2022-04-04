@@ -55,8 +55,8 @@ let settings = {
 
 console.log(settings)
 
-const longtiudeController = gui.add(settings, 'longitude')
 const latitudeController = gui.add(settings, 'latitude')
+const longitudeController = gui.add(settings, 'longitude')
 
 const reloadMapButton = {
   "set origin": function () {
@@ -171,9 +171,9 @@ function draw(elapsedTime, deltaTime) {
   // aircraft
   //
 
-  for (const key in AIRCRAFT.aircrafts) {
+  for (const key in AIRCRAFT.aircraft) {
 
-    const aircraft = AIRCRAFT.aircrafts[key];
+    const aircraft = AIRCRAFT.aircraft[key];
 
     const aircraftHasExpired = aircraft.draw(scene, elapsedTime, cameraWorldPos)
 
@@ -369,14 +369,14 @@ HUD.hud.settingsButton.addEventListener('click', (e) => {
 })
 
 HUD.hud.closeButton.addEventListener('click', (e) => {
-  if (!HUD.isVisisble()) return
+  if (!HUD.isVisible()) return
   console.log("click - HUD.closeButton")
   deselectAirCraftAndHideHUD()
   e.stopPropagation()
 })
 
 HUD.hud.infoButton.addEventListener('click', (e) => {
-  if (!HUD.isVisisble()) return
+  if (!HUD.isVisible()) return
   HUD.toggleDialog()
   e.stopPropagation()
 })
@@ -391,7 +391,7 @@ const CAMERA_FOLLOW = "follow"
 let cameraMode = CAMERA_GHOST
 
 HUD.hud.cameraButton.addEventListener('click', (e) => {
-  if (!HUD.isVisisble()) return
+  if (!HUD.isVisible()) return
   if (cameraMode === CAMERA_GHOST) {
     console.log("INTERSECTED AIRCRAFT: ")
     console.log(UTILS.INTERSECTED?.aircraft)
@@ -494,95 +494,106 @@ let mapGroup = undefined
 let poi = undefined
 let poiController = undefined
 
-const loader = new THREE.FileLoader()
-loader.load(`data/${process.env.MAP}`,
-  (data) => {
+function loadFallbackGridPlane() {
+  gui.remove(showMapController)
+  showGridController.setValue(true)
 
-    console.log(`[ ${process.env.MAP} - loaded... ]`)
+  //
+  // Fallback to default origin
+  //
+  UTILS.initOrigin([
+    process.env.DEFAULT_ORIGIN_LONGITUDE,
+    process.env.DEFAULT_ORIGIN_LATITUDE,
+  ])
+  console.error(`FALL BACK TO DEFAULT ORIGIN: `)
+  console.error(UTILS.origin)
 
-    //
-    // init map and POI
-    //
+  longitudeController.setValue(process.env.DEFAULT_ORIGIN_LONGITUDE)
+  latitudeController.setValue(process.env.DEFAULT_ORIGIN_LATITUDE)
 
-    const res = MAPS.init(scene, JSON.parse(data))
-    console.log(res)
-    mapGroup = res.mapGroup
-    poi = res.poi
+  //
+  // Starting parsing ADSB messages
+  //
 
-    console.log(Object.keys(poi))
+  ADSB.start(scene, clock)
 
-    poiController = gui.add(settings, 'poi', Object.keys(poi)).onChange(key => {
-      if (key !== MAPS.POI_KEY_CURRENT_LNG_LAT) {
-        console.log(poi[key])
-        const lng = poi[key].longitude
-        const lat = poi[key].latitude
-        UTILS.initOrigin([
-          lng, lat
-        ])
-        longtiudeController.setValue(lng)
-        latitudeController.setValue(lat)
+  // enable HUD
+  HUD.enableHUD()
+
+  resetCameraToHome()
+}
+
+if (process.env.OPTIONAL_MAP) {
+
+  const loader = new THREE.FileLoader()
+  loader.load(`data/${process.env.OPTIONAL_MAP}`,
+    (data) => {
+
+      console.log(`[ ${process.env.OPTIONAL_MAP} - loaded... ]`)
+
+      //
+      // init map and POI
+      //
+
+      const res = MAPS.init(scene, JSON.parse(data))
+      console.log(res)
+      mapGroup = res.mapGroup
+      poi = res.poi
+
+      console.log(Object.keys(poi))
+
+      poiController = gui.add(settings, 'poi', Object.keys(poi)).onChange(key => {
+        if (key !== MAPS.POI_KEY_CURRENT_LNG_LAT) {
+          console.log(poi[key])
+          const lng = poi[key].longitude
+          const lat = poi[key].latitude
+          UTILS.initOrigin([
+            lng, lat
+          ])
+          longitudeController.setValue(lng)
+          latitudeController.setValue(lat)
+        }
+        reloadMap()
+      })
+      poiController.setValue(res.originId)
+
+
+      //
+      // Starting parsing ADSB messages
+      //
+
+      ADSB.start(scene, clock)
+
+      // enable HUD
+      HUD.enableHUD()
+    },
+    (xhr) => {
+      if (xhr.total > 0) {
+        console.log(`${process.env.OPTIONAL_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
       }
-      reloadMap()
-    })
-    poiController.setValue(res.originId)
+    },
+    (err) => {
+      console.error(`[*** Error Loading Map ***]`)
+      console.error(`\tunable to load: 'data/${process.env.OPTIONAL_MAP}'`)
+      console.error(err)
+      console.error('[***************]')
 
-
-    //
-    // Starting parsing ADSB messages
-    //
-
-    ADSB.start(scene, clock)
-
-    // enable HUD
-    HUD.enableHUD()
-  },
-  (xhr) => {
-    if (xhr.total > 0) {
-      console.log(`${process.env.MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+      loadFallbackGridPlane()
     }
-  },
-  (err) => {
-    console.error(`[*** Error Loading Map ***]`)
-    console.error(`\tunable to load: 'data/${process.env.MAP}'`)
-    console.error(err)
-    console.error('[***************]')
-
-    gui.remove(showMapController)
-    showGridController.setValue(true)
-
-    //
-    // Fallback to default origin
-    //
-    UTILS.initOrigin([
-      process.env.DEFAULT_ORIGIN_LONGITUDE,
-      process.env.DEFAULT_ORIGIN_LATITUDE,
-    ])
-    console.error(`FALL BACK TO DEFAULT ORIGIN: `)
-    console.error(UTILS.origin)
-
-    longtiudeController.setValue(process.env.DEFAULT_ORIGIN_LONGITUDE)
-    latitudeController.setValue(process.env.DEFAULT_ORIGIN_LATITUDE)
-
-    //
-    // Starting parsing ADSB messages
-    //
-
-    ADSB.start(scene, clock)
-
-    // enable HUD
-    HUD.enableHUD()
-  }
-)
+  )
+} else {
+  loadFallbackGridPlane()
+}
 
 function reloadMap() {
   console.log('[reloadMap...]')
   scene.remove(mapGroup)
   mapGroup = undefined
   const loader = new THREE.FileLoader();
-  loader.load(`data/${process.env.MAP}`,
+  loader.load(`data/${process.env.OPTIONAL_MAP}`,
     (data) => {
 
-      console.log(`[ ${process.env.MAP} - loaded... ]`)
+      console.log(`[ ${process.env.OPTIONAL_MAP} - loaded... ]`)
 
       //
       // init map and POI
@@ -596,32 +607,16 @@ function reloadMap() {
     },
     (xhr) => {
       if (xhr.total > 0) {
-        console.log(`${process.env.MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+        console.log(`${process.env.OPTIONAL_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
       }
     },
     (err) => {
       console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'data/${process.env.MAP}'`)
+      console.error(`\tunable to load: 'data/${process.env.OPTIONAL_MAP}'`)
       console.error(err)
       console.error('[***************]')
 
-      gui.remove(showMapController)
-      showGridController.setValue(true)
-
-      //
-      // Fallback to default origin
-      //
-      UTILS.initOrigin([
-        process.env.DEFAULT_ORIGIN_LONGITUDE,
-        process.env.DEFAULT_ORIGIN_LATITUDE,
-      ])
-      console.error(`FALL BACK TO DEFAULT ORIGIN: `)
-      console.error(UTILS.origin)
-
-      longtiudeController.setValue(process.env.DEFAULT_ORIGIN_LONGITUDE)
-      latitudeController.setValue(process.env.DEFAULT_ORIGIN_LATITUDE)
-
-      resetCameraToHome()
+      loadFallbackGridPlane()
     }
   )
 }

@@ -3,7 +3,7 @@ import { Text } from 'troika-three-text'
 import * as UTILS from './utils.js'
 import * as ADSB from './ADSB.js'
 
-export const aircrafts = {}
+export const aircraft = {}
 
 const airCraftGeometry = new THREE.BufferGeometry()
 airCraftGeometry.setFromPoints([
@@ -171,7 +171,7 @@ export class Aircraft {
     scene.remove(this.text)
     this.text.dispose()
     scene.remove(this.group)
-    delete aircrafts[this.hex]
+    delete aircraft[this.hex]
   }
 
   update(data, elapsedTime) {
@@ -205,8 +205,8 @@ export class Aircraft {
       this.hdg = data[ADSB.TRACK]
       this.mesh.rotation.y = THREE.MathUtils.degToRad(-this.hdg)
     }
-    if (data[ADSB.GORUND_SPEED] !== "") {
-      this.spd = data[ADSB.GORUND_SPEED]
+    if (data[ADSB.GROUND_SPEED] !== "") {
+      this.spd = data[ADSB.GROUND_SPEED]
     }
 
     if (this.hasValidTelemetry()) {

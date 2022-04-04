@@ -5,19 +5,22 @@ export const DATA_HOSTS = {
   "adsb": `ws://${(process.env.NODE_ENV === "development")
     ? process.env.SKIES_ADSB_HOST_DEV
     : process.env.SKIES_ADSB_HOST}`,
-  "flightinfo": `http://${(process.env.NODE_ENV === "development")
-    ? process.env.SKIES_FLASK_HOST_DEV
-    : process.env.SKIES_FLASK_HOST}/flightinfo`,
+  "flight_info": `http://${(process.env.NODE_ENV === "development")
+    ? process.env.SKIES_FLIGHTINFO_HOST_DEV
+    : process.env.SKIES_FLIGHTINFO_HOST}/flightinfo`,
   "photos": "https://api.planespotters.net/pub/photos/hex"
 }
 
-let params = new URLSearchParams(document.location.search)
-let mode = params.get("zero")
-if (mode === "1") {
-  DATA_HOSTS["adsb"] = "wss://***REMOVED***"
-  DATA_HOSTS["flightinfo"] = "https://***REMOVED***/flightinfo"
-}
 
+if (process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME) {
+  const pattern = new URLPattern({
+    hostname: process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME
+  })
+  if (pattern.test(document.location.href)) {
+    DATA_HOSTS["adsb"] = process.env.OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL
+    DATA_HOSTS["flight_info"] = process.env.OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL
+  }
+}
 
 console.log(DATA_HOSTS)
 
@@ -25,11 +28,10 @@ console.log(DATA_HOSTS)
 // ADS-B sends back speed, velocity changes, and altitude in knots and feet.
 //
 // For display purposes all of the distance, heading, and bearing calculations
-// are calculted in meters using the ADS-B lat/long data.
+// are calculated in meters using the ADS-B lat/long data.
 //
 // For right now the scale of 1 unit for ever 250 meters seems to look good. 
 //
-//export const SCALE = 1.0 / 250.0
 export const SCALE = 1.0 / 250.0
 
 
