@@ -19,9 +19,9 @@ module.exports = {
       manifest: './src/manifest.json',
       favicons: {
         appName: "skies-adsb",
-        appDescription: "Realtime 3D Plane Spotting",
+        appDescription: "a virtual plane spotting progressive web app (PWA) / virtual aquarium (with aircraft instead of fish) / interactive real-time simulation",
         developerName: "MACHINE INTERACTIVE",
-        developerURL: null,
+        developerURL: "https://www.machineinteractive.com",
         url: "https://www.machineinteractive.com",
         background: "#000",
         theme_color: "#000",
@@ -47,8 +47,8 @@ module.exports = {
           noErrorOnMissing: true,
         },
         {
-          from: 'data',
-          to: 'data',
+          from: 'geojson',
+          to: 'geojson',
         }
       ],
     }),

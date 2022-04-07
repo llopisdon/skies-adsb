@@ -22,7 +22,7 @@ export const IS_ON_GROUND = 21
 
 
 //
-// websocket - handles ADSB messages coming from RTL-SDR/RPI
+// websocket - handles ADS-B messages coming from RTL-SDR/RPI
 //
 let websocket = null
 let scene = null

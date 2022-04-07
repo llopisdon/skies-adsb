@@ -14,7 +14,7 @@ https://www.google.com/search?q=aerodrome MROC
 // TODO periodically clear out photos
 const aircraftPhotos = {}
 
-const HUD_DEFAULT_PHOTO = "./static/aircraft.jpg"
+const HUD_DEFAULT_PHOTO = "./static/Pan_Am_747.jpg"
 const NOT_AVAILABLE = "n/a"
 
 class _HUD {

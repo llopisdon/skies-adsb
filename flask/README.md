@@ -28,5 +28,5 @@ Run flask server:
 cd /path/to/skies-adsb/flask
 . dev/bin/activate
 export FLASK_ENV=development
-flash run -h 0.0.0.0
+flask run -h 0.0.0.0
 ```

@@ -13,10 +13,9 @@ export const DATA_HOSTS = {
 
 
 if (process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME) {
-  const pattern = new URLPattern({
-    hostname: process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME
-  })
-  if (pattern.test(document.location.href)) {
+  const cloudflareURL = new URL(`https://${process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME}`)
+  const currentUrl = new URL(document.location.href)
+  if (currentUrl.hostname === cloudflareURL.hostname) {
     DATA_HOSTS["adsb"] = process.env.OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL
     DATA_HOSTS["flight_info"] = process.env.OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL
   }

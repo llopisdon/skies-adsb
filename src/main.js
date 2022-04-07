@@ -523,13 +523,13 @@ function loadFallbackGridPlane() {
   resetCameraToHome()
 }
 
-if (process.env.OPTIONAL_MAP) {
+if (process.env.OPTIONAL_GEOJSON_MAP) {
 
   const loader = new THREE.FileLoader()
-  loader.load(`data/${process.env.OPTIONAL_MAP}`,
+  loader.load(`geojson/${process.env.OPTIONAL_GEOJSON_MAP}`,
     (data) => {
 
-      console.log(`[ ${process.env.OPTIONAL_MAP} - loaded... ]`)
+      console.log(`[ ${process.env.OPTIONAL_GEOJSON_MAP} - loaded... ]`)
 
       //
       // init map and POI
@@ -569,12 +569,12 @@ if (process.env.OPTIONAL_MAP) {
     },
     (xhr) => {
       if (xhr.total > 0) {
-        console.log(`${process.env.OPTIONAL_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+        console.log(`${process.env.OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
       }
     },
     (err) => {
       console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'data/${process.env.OPTIONAL_MAP}'`)
+      console.error(`\tunable to load: 'geojson/${process.env.OPTIONAL_GEOJSON_MAP}'`)
       console.error(err)
       console.error('[***************]')
 
@@ -590,10 +590,10 @@ function reloadMap() {
   scene.remove(mapGroup)
   mapGroup = undefined
   const loader = new THREE.FileLoader();
-  loader.load(`data/${process.env.OPTIONAL_MAP}`,
+  loader.load(`geojson/${process.env.OPTIONAL_GEOJSON_MAP}`,
     (data) => {
 
-      console.log(`[ ${process.env.OPTIONAL_MAP} - loaded... ]`)
+      console.log(`[ ${process.env.OPTIONAL_GEOJSON_MAP} - loaded... ]`)
 
       //
       // init map and POI
@@ -607,12 +607,12 @@ function reloadMap() {
     },
     (xhr) => {
       if (xhr.total > 0) {
-        console.log(`${process.env.OPTIONAL_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+        console.log(`${process.env.OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
       }
     },
     (err) => {
       console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'data/${process.env.OPTIONAL_MAP}'`)
+      console.error(`\tunable to load: 'geojson/${process.env.OPTIONAL_GEOJSON_MAP}'`)
       console.error(err)
       console.error('[***************]')
 

@@ -1,11 +1,12 @@
 {
   "name": "skies-adsb",
   "version": "1.0.0",
-  "description": "",
+  "description": "skies-adsb is a virtual plane spotting progressive web app / virtual aquarium (with aircraft instead of fish) / interactive real-time simulation.",
   "private": true,
   "scripts": {
     "start": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "start-flask-dev": "cd flask && . dev/bin/activate && export FLASK_ENV=development && flask run -h 0.0.0.0"
   },
   "keywords": [],
   "author": "",
