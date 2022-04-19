@@ -9,7 +9,7 @@ skies-adsb is a virtual plane spotting progressive web app (PWA) / virtual aquar
 
 Aircraft are tracked via unfiltered [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) transponder data in real-time and rendered in 3D.
 
-The [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) data source is meant to be a [RTL-SDR receiver](https://www.rtl-sdr.com/about-rtl-sdr/) connected to a [Raspberry Pi](https://www.raspberrypi.org/) running on your home network.
+The [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) data is provided by a [RTL-SDR receiver](https://www.rtl-sdr.com/about-rtl-sdr/) connected to a [Raspberry Pi](https://www.raspberrypi.org/) running on your home network.
 
 Flight status data is provided by the [FlightAware AeroAPI v2](https://flightaware.com/commercial/aeroapi/).
 
