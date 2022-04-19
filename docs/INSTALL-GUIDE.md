@@ -325,7 +325,7 @@ nvm install node
 Once Node.js and NPM are installed now you can build the skies-adsb web app as follows:
 
 ```
-cd /path/to/skies-adsb/raspberrypi
+cd /path/to/skies-adsb
 npm install
 npm run build
 ```
@@ -333,7 +333,7 @@ npm run build
 when the "npm run build" script is finished you can deploy the web app to the RPI as follows:
 
 ```
-cd /path/to/skies-adsb/raspberrypi
+cd /path/to/skies-adsb
 chmod +x deploy.sh
 ./deploy.sh
 
