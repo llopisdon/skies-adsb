@@ -14,7 +14,7 @@ skies-adsb is a real-time 3D browser based web app for tracking aircraft using [
 - flight status data is provided by the [FlightAware AeroAPI v2](https://flightaware.com/commercial/aeroapi/)
 - aircraft photos are provided by [Planespotters.net](https://www.planespotters.net/).
 - responsive and progressive web app built for touch displays and mobile devices
-- supports importing GeoJSON Maps of your local area to use as a ground reference plane
+- supports importing GeoJSON maps of your local area to use as a ground reference plane
 
 ![Gif Recording](docs/skies-adsb-recording.gif)
 _recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
