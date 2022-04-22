@@ -39,7 +39,7 @@ _recording of the skies-adsb app running in a browser demonstrating the use of t
 
 # Development
 
-The app is written using WebGL+HTML5+CSS+JavaScript and it works on all of the latest major browsers: Chrome (Desktop+Mobile), Firefox (Desktop), and Safari (Desktop+Mobile). The controls are design to be mobile/tablet friendly.
+The app is written using WebGL+HTML5+CSS+JavaScript and it works on all of the latest major browsers: Chrome (Desktop+Mobile), Firefox (Desktop), and Safari (Desktop+Mobile).
 
 [Development Guide](docs/DEVELOPMENT.md)
 
