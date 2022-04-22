@@ -5,15 +5,16 @@ _image of the skies-adsb app running in a browser showing air traffic around KMI
 
 # Introduction
 
-skies-adsb is a virtual plane spotting progressive web app (PWA) / virtual aquarium (with aircraft instead of fish) / interactive real-time simulation.
+skies-adsb is a real-time 3D browser based web app for tracking aircraft using [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) data obtained from a [RTL-SDR](https://www.rtl-sdr.com/about-rtl-sdr/) receiver.
 
-Aircraft are tracked via unfiltered [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) transponder data in real-time and rendered in 3D.
+## Features
 
-The [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) data is provided by a [RTL-SDR receiver](https://www.rtl-sdr.com/about-rtl-sdr/) connected to a [Raspberry Pi](https://www.raspberrypi.org/) running on your home network.
-
-Flight status data is provided by the [FlightAware AeroAPI v2](https://flightaware.com/commercial/aeroapi/).
-
-The aircraft photos are provided by [Planespotters.net](https://www.planespotters.net/).
+- aircraft are tracked and rendered in real-time using unfiltered [ADS-B](https://mode-s.org/decode/content/ads-b/1-basics.html) data
+- the app is hosted on a [Raspberry Pi](https://www.raspberrypi.org/) running on your local network
+- flight status data is provided by the [FlightAware AeroAPI v2](https://flightaware.com/commercial/aeroapi/)
+- aircraft photos are provided by [Planespotters.net](https://www.planespotters.net/).
+- responsive and progressive web app built for touch displays and mobile devices
+- supports importing GeoJSON Maps of your local area to use as a ground reference plane
 
 ![Gif Recording](docs/skies-adsb-recording.gif)
 _recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
