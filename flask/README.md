@@ -31,6 +31,12 @@ touch config.json
 
 note: only AeroAPI v2 is currently supported
 
+For instructions on how to create an AeroAPI v2 key go here:
+
+https://flightaware.com/commercial/aeroapi/documentation2.rvt
+
+see section on **"Authentication"**.
+
 ## Install dependencies
 
 ```

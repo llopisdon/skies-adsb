@@ -217,6 +217,12 @@ touch config.json
 
 note: only AeroAPI v2 is currently supported
 
+For instructions on how to create an AeroAPI v2 key go here:
+
+https://flightaware.com/commercial/aeroapi/documentation2.rvt
+
+see section on **"Authentication"**.
+
 ## Step 5 - Deploy and run the Raspberry Pi skies-adsb setup.sh Script
 
 With the .env file created you are ready to set up the RPI to host the skies-adsb app.
