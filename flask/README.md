@@ -14,15 +14,32 @@ xmltodict
 
 # Development Environment Setup
 
+## Create a Flask config.json file
+
 ```
 cd /path/to/skies-adsb/flask
 touch config.json
+```
+
+## Add the FlightAware AeroAPI v2 Key to the config.json file
+
+```
+{
+  "FLIGHTAWARE_API_KEY": "<YOUR API KEY>"
+}
+```
+
+note: only AeroAPI v2 is currently supported
+
+## Install dependencies
+
+```
 python3 -m venv dev
 . dev/bin/activate
 pip3 install flask flask-cors requests xmltodict
 ```
 
-Run flask server:
+## Run the Flask server:
 
 ```
 cd /path/to/skies-adsb/flask

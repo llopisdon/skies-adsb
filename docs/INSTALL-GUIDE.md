@@ -10,6 +10,7 @@ This document describes how to setup and deploy the skies-adsb app to a Raspberr
 - [Step 2b - Optional Setup Cloudflare Tunnel](INSTALL-GUIDE.md#step-2b---optional-setup-cloudflare-tunnel)
 - [Step 3 - Clone the skies-adsb repository on your Host machine](INSTALL-GUIDE.md#step-3---clone-the-skies-adsb-repository-on-your-host-machine)
 - [Step 4 - Setup .env file variables](INSTALL-GUIDE.md#step-4---setup-env-file-variables)
+- [Step 4b - Setup Flask Server config.json](INSTALL-GUIDE.md#step-4b---setup-flask-server-configjson)
 - [Step 5 - Deploy and run the Raspberry Pi skies-adsb setup.sh Script](INSTALL-GUIDE.md#step-5---deploy-and-run-the-raspberry-pi-skies-adsb-setupsh-script)
 - [Step 6 - Install the RTL-SDR receiver](INSTALL-GUIDE.md#step-6---install-the-rtl-sdr-receiver)
 - [Step 7 - Install Node.js+NPM On Your Host Machine](INSTALL-GUIDE.md#step-7---install-nodejsnpm-on-your-host-machine)
@@ -196,6 +197,25 @@ OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST=https://skies-flask.example.com/flightinfo
 OPTIONAL_GEOJSON_MAP=sofla.json
 
 ```
+
+## Step 4b - Setup Flask Server config.json
+
+### Create a Flask config.json file
+
+```
+cd /path/to/skies-adsb/flask
+touch config.json
+```
+
+### Add the FlightAware AeroAPI v2 Key to the config.json file
+
+```
+{
+  "FLIGHTAWARE_API_KEY": "<YOUR API KEY>"
+}
+```
+
+note: only AeroAPI v2 is currently supported
 
 ## Step 5 - Deploy and run the Raspberry Pi skies-adsb setup.sh Script
 
