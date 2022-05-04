@@ -2,21 +2,22 @@
 
 This document describes how to setup and deploy the skies-adsb app to a Raspberry Pi Zero W (any recent Raspberry Pi) connected to a RTL-SDR receiver on your home network.
 
-- [Terms Used](INSTALL-GUIDE.md#terms-used)
-- [What You Will Need & Shopping List](INSTALL-GUIDE.md#hardware-and-reference-materials-used-to-build-this-project)
-- [Hardware and reference materials used to build this project](https://github.com/llopisdon/skies-adsb/blob/documentation/docs/INSTALL-GUIDE.md#hardware-and-reference-materials-used-to-build-this-project)
-- [Step 1 - Determine Your Geolocation Coordinates (Latitude and Longitude)](INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude)
-- [Step 2 - Raspberry Pi (RPI) Setup](INSTALL-GUIDE.md#step-2---raspberry-pi-rpi-setup)
-- [Step 2b - Optional Setup Cloudflare Tunnel](INSTALL-GUIDE.md#step-2b---optional-setup-cloudflare-tunnel)
-- [Step 3 - Clone the skies-adsb repository on your Host machine](INSTALL-GUIDE.md#step-3---clone-the-skies-adsb-repository-on-your-host-machine)
-- [Step 4 - Setup .env file variables](INSTALL-GUIDE.md#step-4---setup-env-file-variables)
-- [Step 4b - Setup Flask Server config.json](INSTALL-GUIDE.md#step-4b---setup-flask-server-configjson)
-- [Step 5 - Deploy and run the Raspberry Pi skies-adsb setup.sh Script](INSTALL-GUIDE.md#step-5---deploy-and-run-the-raspberry-pi-skies-adsb-setupsh-script)
-- [Step 6 - Install the RTL-SDR receiver](INSTALL-GUIDE.md#step-6---install-the-rtl-sdr-receiver)
-- [Step 7 - Install Node.js+NPM On Your Host Machine](INSTALL-GUIDE.md#step-7---install-nodejsnpm-on-your-host-machine)
-- [Step 8 - Build and Deploy the skies-adsb web app to the Raspberry Pi](INSTALL-GUIDE.md#step-8---build-and-deploy-the-skies-adsb-web-app-to-the-raspberry-pi)
-- [Step 9 - Test the skies-adsb Installation](INSTALL-GUIDE.md#step-9---test-the-skies-adsb-installation)
-- [Step 10 - Enjoy](INSTALL-GUIDE.md#step-10---enjoy)
+- [Terms Used](RPI-RPI-INSTALL-GUIDE.md#terms-used)
+- [What You Will Need & Shopping List](RPI-INSTALL-GUIDE.md#hardware-and-reference-materials-used-to-build-this-project)
+- [Hardware and reference materials used to build this project](https://github.com/llopisdon/skies-adsb/blob/documentation/docs/RPI-INSTALL-GUIDE.md#hardware-and-reference-materials-used-to-build-this-project)
+- [Step 1 - Determine Your Geolocation Coordinates (Latitude and Longitude)](RPI-INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude)
+- [Step 2 - Raspberry Pi (RPI) Setup](RPI-INSTALL-GUIDE.md#step-2---raspberry-pi-rpi-setup)
+- [Step 2b - Optional Setup Cloudflare Tunnel](RPI-INSTALL-GUIDE.md#step-2b---optional-setup-cloudflare-tunnel)
+- [Step 3 - Clone the skies-adsb repository on your Host machine](RPI-INSTALL-GUIDE.md#step-3---clone-the-skies-adsb-repository-on-your-host-machine)
+- [Step 4 - Setup .env file variables](RPI-INSTALL-GUIDE.md#step-4---setup-env-file-variables)
+- [Step 4b - Setup Flask Server config.json](RPI-INSTALL-GUIDE.md#step-4b---setup-flask-server-configjson)
+- [Step 4c (optional) - Use Existing ADS-B decoder / Customize RPI setup.sh Script](RPI-INSTALL-GUIDE.md#step-4c-optional---use-existing-ads-b-decoder--customize-rpi-setupsh-script)
+- [Step 5 - Deploy and run the Raspberry Pi skies-adsb setup.sh Script](RPI-INSTALL-GUIDE.md#step-5---deploy-and-run-the-raspberry-pi-skies-adsb-setupsh-script)
+- [Step 6 - Install the RTL-SDR receiver](RPI-INSTALL-GUIDE.md#step-6---install-the-rtl-sdr-receiver)
+- [Step 7 - Install Node.js+NPM On Your Host Machine](RPI-INSTALL-GUIDE.md#step-7---install-nodejsnpm-on-your-host-machine)
+- [Step 8 - Build and Deploy the skies-adsb web app to the Raspberry Pi](RPI-INSTALL-GUIDE.md#step-8---build-and-deploy-the-skies-adsb-web-app-to-the-raspberry-pi)
+- [Step 9 - Test the skies-adsb Installation](RPI-INSTALL-GUIDE.md#step-9---test-the-skies-adsb-installation)
+- [Step 10 - Enjoy](RPI-INSTALL-GUIDE.md#step-10---enjoy)
 
 ## Terms Used
 
@@ -164,7 +165,7 @@ Explanation of the environment variables:
 | Variable Name | Explanation | Example |
 |---------------|-------------|---------|
 | DEFAULT_ORIGIN_LATITUDE | this is used as a fallback for the default Latitude for the origin of where your tracker setup is setup in physical space. It is obtained [Step 1](#step-1---determine-your-geolocation-coordinates-latitude-and-longitude). | 25.794868197349306 |
-| DEFAULT_ORIGIN_LONGITUDE | this is used as a fallback for the default Longitude for the origin of where your tracker setup is setup in physical space. It is obtained in [Step 1](INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).| -80.27787208557129 |
+| DEFAULT_ORIGIN_LONGITUDE | this is used as a fallback for the default Longitude for the origin of where your tracker setup is setup in physical space. It is obtained in [Step 1](RPI-INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).| -80.27787208557129 |
 | DEPLOY_USER_AT_HOSTNAME | this is the user and hostname on the RPI which will be used to deploy the skies-adsb app. | pi@raspberrypi.local |
 | SKIES_ADSB_HOST | the IP address of the RPI on your local network hosting the skies-adsb websocket service at port 30006. | 192.168.1.1:30006 |
 | SKIES_ADSB_HOST_DEV | usually the same entry as the SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:30006 |
@@ -223,9 +224,58 @@ https://flightaware.com/commercial/aeroapi/documentation2.rvt
 
 see section on **"Authentication"**.
 
-## Step 5 - Deploy and run the Raspberry Pi skies-adsb setup.sh Script
+## Step 4c (optional) - Use Existing ADS-B decoder / Customize RPI setup.sh Script
 
-With the .env file created you are ready to set up the RPI to host the skies-adsb app.
+### Using An Existing ADS-B decoder
+
+The skies-adsb app works with any ADS-B decoder which outputs [SBS1 BaseStation formatted data](http://woodair.net/sbs/article/barebones42_socket_data.htm).
+
+By default the RPI setup.sh script will use the ADS-B decoder package [adsbxchange/dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability). The only reason this package is used is because it is included by default in the [Raspberry Pi OS image](https://www.raspberrypi.com/software/). The setup script assumes that the ADS-B decoder is on same host RPI that the web app is served from.
+
+If you already have an existing decoder you wish to use (such as [readsb](https://github.com/wiedehopf/readsb) or [flightaware/dump1090](https://github.com/flightaware/dump1090)) then you must comment the call to the **do_opt_install_dump1090_mutability** bash function in the **/path/to/skies-adsb/raspberrypi/setup.sh** file as follows:
+
+```
+do_opt_upgrade_rpi
+do_opt_install_dependencies
+#do_opt_install_dump1090_mutability
+do_opt_install_flask_and_dependencies
+do_req_setup_app
+do_req_cleanup
+```
+
+next modify the **skies-adsb.sh** script as follows:
+
+```
+#!/usr/bin/env bash
+websockify 0.0.0.0:30006 <ip address of your decoder>:<sbs1 output port>
+```
+
+note: dump1090 forks use port 30003 for SBS1 output.
+
+### Removing optional dependencies
+
+If you have an existing RPI+RTL-SDR installation you might not want to run the upgrade or install any of the skies-adsb dependencies. Feel free to comment out any bash function call prefixed by:
+
+```
+do_opt_xyz
+```
+
+by default the deploy and setup scripts are set to use the following webserver document root:
+
+```
+/var/www/html
+```
+
+if you need a different document root be sure to edit the following files to point to your particular webserver document root:
+
+```
+/path/to/skies-adsb/deploy.sh
+/path/to/skies-adsb/raspberrypi/setup.sh
+```
+
+## Step 5 - Deploy and run the RPI skies-adsb setup.sh Script
+
+With the .env file created in _step 4_ you are ready to set up the RPI to host the skies-adsb app.
 
 Make sure you set the DEPLOY_USER_AT_HOSTNAME variable in the .env file.
 
@@ -249,9 +299,15 @@ chmod +x setup.sh
 
 ```
 
-**IMPORTANT NOTE - dump1090-mutability DO NOT AUTOSTART**
+At some point in the dump1090-mutability config dialog will pop up:
 
-**During the install of dump1090-mutability select "NO" to start dump1090-mutability automatically. We will be starting it manually later.**
+![Screenshot](configure_dump1090-mutability.png)
+
+be sure to select "Yes" for "Start dump1090 automatically". If you make a mistake you can always re-run the dump1090-mutability setup as follows from the RPI:
+
+```
+sudo dpkg-reconfigure dump1090-mutability
+```
 
 When the setup script is complete it will reboot the RPI. When the RPI boots up again ssh into the RPI and verify that the flask and websocket proxy are listening on ports 5000 and 30006 respectively.
 
@@ -326,6 +382,24 @@ nc localhost 30003
 
 you should see a stream of raw ADSB data. Press CTRL-C to stop.
 
+alternatively you can just verify that the ports 30001 to 30005 are listening for connections:
+
+```
+ssh pi@raspberrypi.local
+ss -tlp
+```
+
+you should see something like:
+
+```
+LISTEN  0       511              0.0.0.0:30001          0.0.0.0:*
+LISTEN  0       511              0.0.0.0:30002          0.0.0.0:*
+LISTEN  0       511              0.0.0.0:30003          0.0.0.0:*
+LISTEN  0       511              0.0.0.0:30004          0.0.0.0:*
+LISTEN  0       511              0.0.0.0:30005          0.0.0.0:*
+
+```
+
 Now lets setup the Host machine build environment so we can build and deploy the skies-adsb web app.
 
 ## Step 7 - Install Node.js+NPM On Your Host Machine
@@ -378,7 +452,7 @@ http://raspberypi.local/skies-adsb
 
 and you should see either a wireframe map of South Florida (if you set the MAP variable in the .env file to: sofla.json) or a wireframe reference grid at the center of the display. You may or may not see any traffic depending on your geographic location. If you are using the South Florida map and you are in South Florida you should see aircraft.
 
-If you see no air traffic make sure you have set the correct Latitude+Longitude coordinates for your default origin as described in [Step 1](INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).
+If you see no air traffic make sure you have set the correct Latitude+Longitude coordinates for your default origin as described in [Step 1](RPI-INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).
 
 You can override the default origin lat/lng coordinates from the skies-adsb web app.
 

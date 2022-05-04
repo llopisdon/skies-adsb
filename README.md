@@ -19,13 +19,17 @@ skies-adsb is a real-time 3D browser based web app for tracking aircraft using [
 ![Gif Recording](docs/skies-adsb-recording.gif)
 _recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
 
-# How To Use
+# Installation Guides
 
-## Installation Guide - How to setup skies-adsb on your local network with a Raspberry Pi
+Below is an installation guide for setting up skies-adsb on a Raspberry Pi either as a new install or on top of an existing Raspberry Pi installation:
 
-[Install Guide](docs/INSTALL-GUIDE.md)
+[How to setup skies-adsb on your local network with a Raspberry Pi](docs/RPI-INSTALL-GUIDE.md)
 
-## How to create skies-adsb GeoJSON maps
+If you do not have an Raspberry Pi or you wish to use an existing ADS-B decoder already running on a network (or localhost) you can run skies-adsb as a local webapp by following this guide:
+
+[How to setup skies-adsb on a localhost using an existing ADS-B decoder](docs/LOCALHOST-INSTALL-GUIDE.md)
+
+# How to create skies-adsb GeoJSON maps
 
 [GeoJSON Maps - How To Create/Update/Use](docs/GEOJSON-MAPS.md)
 
@@ -33,7 +37,7 @@ _recording of the skies-adsb app running in a browser demonstrating the use of t
 
 [Setup Cloudflare Tunnel to make skies-adsb available over the Internet](docs/CLOUDFLARE-TUNNEL.md)
 
-## Flask API Server Documentation
+# Flask API Server Documentation
 
 [Information about the Flask API Server included with skies-adsb](flask/README.md)
 

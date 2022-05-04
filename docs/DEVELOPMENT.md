@@ -1,5 +1,9 @@
 # Development Guide
 
+TODO
+
+add dev environment setup instructions
+
 ## Languages
 
 JavaScript, HTML5, CSS, Python 3

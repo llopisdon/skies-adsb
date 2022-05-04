@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",
-    "start-flask-dev": "cd flask && . dev/bin/activate && export FLASK_ENV=development && flask run -h 0.0.0.0"
+    "start-flask-dev": "cd flask && . dev/bin/activate && export FLASK_ENV=development && flask run -h 0.0.0.0"    
   },
   "keywords": [],
   "author": "",
