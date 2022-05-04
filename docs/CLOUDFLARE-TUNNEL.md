@@ -231,6 +231,6 @@ Open a new incognito browser window to:
 
 https://rpi.yourdomain.com/skies-adsb/
 
-you should be presented with a landing page asking for your email. The email should be one from the list your added when creating the Cloudflare Tunnel Application in **step 10**.
+you should be presented with a landing page asking for your email. The email should be one from the list created the policy setup above.
 
-Enter your email and click "Send me a code". You should now see the skies-adsb app running with air traffic being displayed.
+Enter your email and click "Send me a code". You will be presented with another form asking you for a code. Check your email. Enter in the code you received. You should now see the skies-adsb app running with air traffic being displayed.
