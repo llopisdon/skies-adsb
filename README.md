@@ -23,29 +23,29 @@ _recording of the skies-adsb app running in a browser demonstrating the use of t
 
 Below is an installation guide for setting up skies-adsb on a Raspberry Pi either as a new install or on top of an existing Raspberry Pi installation:
 
-[How to setup skies-adsb on your local network with a Raspberry Pi](docs/RPI-INSTALL-GUIDE.md)
+[Raspberry Pi Install Guide](docs/RPI-INSTALL-GUIDE.md)
 
 If you do not have an Raspberry Pi or you wish to use an existing ADS-B decoder already running on a network (or localhost) you can run skies-adsb as a local webapp by following this guide:
 
-[How to setup skies-adsb on a localhost using an existing ADS-B decoder](docs/LOCALHOST-INSTALL-GUIDE.md)
+[No Raspberry Pi Install Guide / Use Existing Decoder](docs/LOCALHOST-INSTALL-GUIDE.md)
 
-# How to create skies-adsb GeoJSON maps
+# How to create/update/use skies-adsb GeoJSON maps
 
-[GeoJSON Maps - How To Create/Update/Use](docs/GEOJSON-MAPS.md)
+[HOWTO GeoJSON Maps](docs/GEOJSON-MAPS.md)
 
-## How to securely deploy skies-adsb on the Internet
+# How to use Cloudflare Tunnel to securely deploy skies-adsb on the Internet
 
-[Setup Cloudflare Tunnel to make skies-adsb available over the Internet](docs/CLOUDFLARE-TUNNEL.md)
+[HOWTO Cloudflare Tunnel](docs/CLOUDFLARE-TUNNEL.md)
 
 # Flask API Server Documentation
 
-[Information about the Flask API Server included with skies-adsb](flask/README.md)
+[Flask API Server Docs](flask/README.md)
 
 # Development
 
-The app is written using WebGL+HTML5+CSS+JavaScript and it works on all of the latest major browsers: Chrome (Desktop+Mobile), Firefox (Desktop), and Safari (Desktop+Mobile).
+The app is written using WebGL+HTML5+CSS+JavaScript and it works on all of the latest major browsers: Chrome (Desktop+Mobile), Firefox (Desktop), and Safari (Desktop+Mobile). For information on how to setup a development environment for skies-adsb see here:
 
-[Development Guide](docs/DEVELOPMENT.md)
+[HOWTO Development](docs/DEVELOPMENT.md)
 
 # Contributing
 

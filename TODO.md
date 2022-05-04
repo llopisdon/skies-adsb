@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] add Cloudflare Tunnel documentation
 - [ ] migrate Flask app to FlightAware AeroAPI Version 4
 - [ ] add runways POI
 - [ ] add smooth transition to HOME (or any POI)
@@ -11,5 +10,3 @@
 - [ ] add aerodrome windsocks based on METAR
 - [ ] add compass indicator to scene
 - [ ] add documentation describing how to setup Raspberry Pi as a hotspot for offline mode / portable mode
-- [ ] add dev environment setup docs
-- [ ] add documentation for non-RPI setup of skies-adsb on a Ubuntu/Debian Linux machine
