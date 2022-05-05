@@ -30,8 +30,10 @@ Download cloudflared package from here:
 
 https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/
 
-For RPI 32 bit copy the the .deb ARM download link
+For RPI 32 bit copy the the .deb ARM download link (or the binary link)
 For RPI 64-bit copy the .dev ARM64 download link
+
+## 3a. RPI 64-bit instructions
 
 Open a terminal to your RPI and install the cloudflared package:
 
@@ -39,6 +41,26 @@ Open a terminal to your RPI and install the cloudflared package:
 ssh pi@raspberrypi.local
 curl -LO https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.deb
 sudo apt install ./cloudflared-linux-arm64.deb
+```
+
+## 3b. RPI 32-bit instructions
+
+Open a terminal to your RPI and install the cloudflared package:
+
+.deb install:
+
+```
+ssh pi@raspberrypi.local
+curl -LO https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm.deb
+sudo dpkg -i --force-architecture cloudflared-linux-arm.deb
+```
+
+Binary install:
+
+```
+ssh pi@raspberrypi.local
+curl -LO https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm
+chmod +x cloudflared-linux-arm
 ```
 
 ## 4. Create Cloudflare Tunnel
