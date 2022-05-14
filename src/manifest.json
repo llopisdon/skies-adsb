@@ -1,3 +1,26 @@
 {
-  "start_url": "/skies-adsb"
+  "name": "skies-adsb",
+  "short_name": "skies-adsb",
+  "description": "skies-adsb is a real-time 3D browser based web app for tracking aircraft using ADS-B data obtained from a RTL-SDR receiver.",
+  "dir": "auto",
+  "lang": "en-us",
+  "display": "standalone",
+  "orientation": "any",
+  "id": "/skies-adsb",
+  "start_url": "/skies-adsb",
+  "background_color": "#000",
+  "theme_color": "#000",
+  
+  "icons": [
+    {
+      "src": "static/icon512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "static/icon192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
 }

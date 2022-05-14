@@ -1,23 +1,21 @@
 {
   "name": "skies-adsb",
   "version": "1.0.0",
-  "description": "skies-adsb is a virtual plane spotting progressive web app / virtual aquarium (with aircraft instead of fish) / interactive real-time simulation.",
+  "description": "skies-adsb is a real-time 3D browser based web app for tracking aircraft using ADS-B data obtained from a RTL-SDR receiver.",
   "private": true,
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode production",
-    "start-flask-dev": "cd flask && . dev/bin/activate && export FLASK_ENV=development && flask run -h 0.0.0.0"    
+    "start-flask-dev": "cd flask && . dev/bin/activate && export FLASK_ENV=development && flask run -h 0.0.0.0"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT License",
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.4.0",
     "dotenv-webpack": "^7.0.3",
-    "favicons": "^6.2.2",
-    "favicons-webpack-plugin": "^5.0.2",
     "html-webpack-plugin": "^5.4.0",
     "style-loader": "^3.3.0",
     "webpack": "^5.58.2",

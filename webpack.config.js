@@ -3,7 +3,6 @@ const CopyPlugin = require("copy-webpack-plugin")
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
-const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 
 module.exports = {
@@ -15,25 +14,6 @@ module.exports = {
   },
   plugins: [
 
-    new FaviconsWebpackPlugin({
-      manifest: './src/manifest.json',
-      favicons: {
-        appName: "skies-adsb",
-        appDescription: "a virtual plane spotting progressive web app (PWA) / virtual aquarium (with aircraft instead of fish) / interactive real-time simulation",
-        developerName: "MACHINE INTERACTIVE",
-        developerURL: "https://www.machineinteractive.com",
-        url: "https://www.machineinteractive.com",
-        background: "#000",
-        theme_color: "#000",
-        icons: {
-          appleStartup: false,
-          coast: false,
-          yandex: false,
-          windows: false,
-        }
-      }
-    }),
-
     new Dotenv(),
 
     new CleanWebpackPlugin({
@@ -41,6 +21,10 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
+        {
+          from: 'src/manifest.json',
+          to: ''
+        },
         {
           from: 'static',
           to: 'static',
