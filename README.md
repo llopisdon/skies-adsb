@@ -29,23 +29,21 @@ If you do not have an Raspberry Pi or you wish to use an existing ADS-B decoder 
 
 [No Raspberry Pi Install Guide / Use Existing Decoder](docs/LOCALHOST-INSTALL-GUIDE.md)
 
-# How to create/update/use skies-adsb GeoJSON maps
+# HOWTOs
 
-[HOWTO GeoJSON Maps](docs/GEOJSON-MAPS.md)
+[HOWTO create/update/use skies-adsb GeoJSON maps](docs/GEOJSON-MAPS.md)
 
-# How to use Cloudflare Tunnel to securely deploy skies-adsb on the Internet
-
-[HOWTO Cloudflare Tunnel](docs/CLOUDFLARE-TUNNEL.md)
-
-# Flask API Server Documentation
-
-[Flask API Server Docs](flask/README.md)
+[HOWTO securely deploy skies-adsb with Cloudflare Tunnel](docs/CLOUDFLARE-TUNNEL.md)
 
 # Development
 
 The app is written using WebGL+HTML5+CSS+JavaScript and it works on all of the latest major browsers: Chrome (Desktop+Mobile), Firefox (Desktop), and Safari (Desktop+Mobile). For information on how to setup a development environment for skies-adsb see here:
 
 [HOWTO Development](docs/DEVELOPMENT.md)
+
+Flight information and other data sources are managed via a local Flask API server proxy. See:
+
+[Flask API Server Docs](flask/README.md)
 
 # Contributing
 
