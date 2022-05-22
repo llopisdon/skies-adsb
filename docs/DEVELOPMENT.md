@@ -10,11 +10,11 @@ If you wish to contribute to skies-adsb please fork the project and submit chang
 
 ## Setting up development environment
 
-### 1. clone the skies-adsb project found here:
+### 1. Fork the skies-adsb project found here:
 
 https://github.com/llopisdon/skies-adsb
 
-#### 2. install nvm and node.js
+#### 2. Install nvm and node.js
 
 make sure you have installed the Node Version Manager(nvm) from here:
 
@@ -26,14 +26,14 @@ once installed install node.js:
 nvm install node
 ```
 
-### 3. initialize the skies-adsb node modules
+### 3. Initialize the skies-adsb node modules
 
 ```
 cd /path/to/skies-adsb
 npm install
 ```
 
-### 4. edit the .env file to include your local dev hosts
+### 4. Edit the .env file to include your local dev hosts
 
 ```
 cd /path/to/skies-adsb
@@ -69,7 +69,7 @@ if you have an external or existing ADS-B decoder you can modify the SKIES_ADSB_
 
 [LOCALHOST-INTSALL-GUIDE](LOCALHOST-INSTALL-GUIDE.md)
 
-### 5. run dev server
+### 5. Run dev server
 
 now you are ready to run the webpack dev server to serve the app locally:
 
