@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] migrate Flask app to FlightAware AeroAPI Version 4
+- [X] migrate Flask app to FlightAware AeroAPI Version 4
 - [ ] add runways POI
 - [ ] add smooth transition to HOME (or any POI)
 - [ ] fix fullscreen support for iOS/iPad

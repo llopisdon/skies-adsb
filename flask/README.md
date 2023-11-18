@@ -21,7 +21,7 @@ cd /path/to/skies-adsb/flask
 touch config.json
 ```
 
-## Add the FlightAware AeroAPI v2 Key to the config.json file
+## Add the FlightAware AeroAPI v4 Key to the config.json file
 
 ```
 {
@@ -29,11 +29,11 @@ touch config.json
 }
 ```
 
-note: only AeroAPI v2 is currently supported
+note: only AeroAPI v4+ is supported
 
-For instructions on how to create an AeroAPI v2 key go here:
+For instructions on how to create an AeroAPI v4 key go here:
 
-https://flightaware.com/commercial/aeroapi/documentation2.rvt
+https://flightaware.com/aeroapi/portal/documentation
 
 see section on **"Authentication"**.
 
@@ -52,4 +52,14 @@ cd /path/to/skies-adsb/flask
 . dev/bin/activate
 export FLASK_ENV=development
 flask run -h 0.0.0.0
+```
+
+## Update Flask app independent of skies-adsb web app
+
+If you need to update the Flask app without having to reinstall the entire app
+you can run the update_flask_app.sh script as follows:
+
+```
+cd /path/to/skies-adsb/raspberrypi
+./update_flask_app.sh
 ```

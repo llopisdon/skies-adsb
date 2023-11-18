@@ -208,7 +208,7 @@ cd /path/to/skies-adsb/flask
 touch config.json
 ```
 
-### Add the FlightAware AeroAPI v2 Key to the config.json file
+### Add the FlightAware AeroAPI v4 Key to the config.json file
 
 ```
 {
@@ -216,11 +216,12 @@ touch config.json
 }
 ```
 
-note: only AeroAPI v2 is currently supported
+note: only AeroAPI v4+ is supported
 
-For instructions on how to create an AeroAPI v2 key go here:
+For instructions on how to create an AeroAPI v4 key go here:
 
-https://flightaware.com/commercial/aeroapi/documentation2.rvt
+https://www.flightaware.com/aeroapi/portal/documentation
+
 
 see section on **"Authentication"**.
 
