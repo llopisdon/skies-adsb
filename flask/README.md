@@ -1,6 +1,6 @@
 # skies-flask
 
-A Python3+Flask app which acts as a local proxy to the FlightAware AeroAPI v2 and the FAA METAR api.
+A Python3+Flask app which acts as a local proxy to the FlightAware AeroAPI v4 and the FAA METAR api.
 
 # Dependencies:
 
