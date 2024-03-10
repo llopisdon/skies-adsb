@@ -164,17 +164,17 @@ Explanation of the environment variables:
 <!-- prettier-ignore -->
 | Variable Name | Explanation | Example |
 |---------------|-------------|---------|
-| DEFAULT_ORIGIN_LATITUDE | this is used as a fallback for the default Latitude for the origin of where your tracker setup is setup in physical space. It is obtained [Step 1](#step-1---determine-your-geolocation-coordinates-latitude-and-longitude). | 25.794868197349306 |
-| DEFAULT_ORIGIN_LONGITUDE | this is used as a fallback for the default Longitude for the origin of where your tracker setup is setup in physical space. It is obtained in [Step 1](RPI-INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).| -80.27787208557129 |
-| DEPLOY_USER_AT_HOSTNAME | this is the user and hostname on the RPI which will be used to deploy the skies-adsb app. | pi@raspberrypi.local |
-| SKIES_ADSB_HOST | the IP address of the RPI on your local network hosting the skies-adsb websocket service at port 30006. | 192.168.1.1:30006 |
-| SKIES_ADSB_HOST_DEV | usually the same entry as the SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:30006 |
-SKIES_FLASK_HOST | the IP address of the RPI on your local network hosting the skies-adsb Flask API service at port 5000. | 192.168.1.1:5000 |
-| SKIES_FLASK_HOST_DEV | usually the same entry as the SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:5000 |
-| OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME | _OPTIONAL_ a fully qualified domain name used to serve the skies-adsb web app via a Cloudflare Tunnel on the Internet | somehost.example.com |
-| OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL | _OPTIONAL_ a URL used for providing skies-adsb websocket connections via the secure websocket protocol scheme: wss. | wss:somehost-ws.example.com |
-| OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL | _OPTIONAL_ a URL pointing to the skies-adsb Flask Flight Info app. The URL must use the _https_ scheme. | https://somehost-flask.example.com/flightinfo |
-| OPTIONAL_GEOJSON_MAP | _OPTIONAL_ the name of the default map GeoJSON json file used as a reference plane in the tracker app. Included with the app is a simplified view of South Florida with aerodromes and other points of interest. The maps should be located in the geojson directory in the skies-adsb directory. You do not need to specify the full path of the GeoJSON json file. | sofla.json |
+| VITE_DEFAULT_ORIGIN_LATITUDE | this is used as a fallback for the default Latitude for the origin of where your tracker setup is setup in physical space. It is obtained [Step 1](#step-1---determine-your-geolocation-coordinates-latitude-and-longitude). | 25.794868197349306 |
+| VITE_DEFAULT_ORIGIN_LONGITUDE | this is used as a fallback for the default Longitude for the origin of where your tracker setup is setup in physical space. It is obtained in [Step 1](RPI-INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).| -80.27787208557129 |
+| VITE_DEPLOY_USER_AT_HOSTNAME | this is the user and hostname on the RPI which will be used to deploy the skies-adsb app. | pi@raspberrypi.local |
+| VITE_SKIES_ADSB_HOST | the IP address of the RPI on your local network hosting the skies-adsb websocket service at port 30006. | 192.168.1.1:30006 |
+| VITE_SKIES_ADSB_HOST_DEV | usually the same entry as the SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:30006 |
+| VITE_SKIES_FLASK_HOST | the IP address of the RPI on your local network hosting the skies-adsb Flask API service at port 5000. | 192.168.1.1:5000 |
+| VITE_SKIES_FLASK_HOST_DEV | usually the same entry as the VITE_SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:5000 |
+| VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME | _OPTIONAL_ a fully qualified domain name used to serve the skies-adsb web app via a Cloudflare Tunnel on the Internet | somehost.example.com |
+| VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL | _OPTIONAL_ a URL used for providing skies-adsb websocket connections via the secure websocket protocol scheme: wss. | wss:somehost-ws.example.com |
+| VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL | _OPTIONAL_ a URL pointing to the skies-adsb Flask Flight Info app. The URL must use the _https_ scheme. | https://somehost-flask.example.com/flightinfo |
+| VITE_OPTIONAL_GEOJSON_MAP | _OPTIONAL_ the name of the default map GeoJSON json file used as a reference plane in the tracker app. Included with the app is a simplified view of South Florida with aerodromes and other points of interest. The maps should be located in the geojson directory in the skies-adsb directory. You do not need to specify the full path of the GeoJSON json file. | sofla.json |
 
 Example src/.env file:
 
