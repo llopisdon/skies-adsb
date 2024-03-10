@@ -168,7 +168,7 @@ Explanation of the environment variables:
 | VITE_DEFAULT_ORIGIN_LONGITUDE | this is used as a fallback for the default Longitude for the origin of where your tracker setup is setup in physical space. It is obtained in [Step 1](RPI-INSTALL-GUIDE.md#step-1---determine-your-geolocation-coordinates-latitude-and-longitude).| -80.27787208557129 |
 | VITE_DEPLOY_USER_AT_HOSTNAME | this is the user and hostname on the RPI which will be used to deploy the skies-adsb app. | pi@raspberrypi.local |
 | VITE_SKIES_ADSB_HOST | the IP address of the RPI on your local network hosting the skies-adsb websocket service at port 30006. | 192.168.1.1:30006 |
-| VITE_SKIES_ADSB_HOST_DEV | usually the same entry as the SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:30006 |
+| VITE_SKIES_ADSB_HOST_DEV | usually the same entry as the VITE_SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:30006 |
 | VITE_SKIES_FLASK_HOST | the IP address of the RPI on your local network hosting the skies-adsb Flask API service at port 5000. | 192.168.1.1:5000 |
 | VITE_SKIES_FLASK_HOST_DEV | usually the same entry as the VITE_SKIES_ADSB_HOST but you can point this to your localhost for development purposes if needed. | localhost:5000 |
 | VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME | _OPTIONAL_ a fully qualified domain name used to serve the skies-adsb web app via a Cloudflare Tunnel on the Internet | somehost.example.com |
