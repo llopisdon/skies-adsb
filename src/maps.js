@@ -30,8 +30,8 @@ export function init(scene, json, overrideOrigin = false) {
   const poi = []
 
   poi[POI_KEY_DEFAULT_ORIGIN] = {
-    longitude: process.env.DEFAULT_ORIGIN_LONGITUDE,
-    latitude: process.env.DEFAULT_ORIGIN_LATITUDE
+    longitude: import.meta.env.VITE_DEFAULT_ORIGIN_LONGITUDE,
+    latitude: import.meta.env.VITE_DEFAULT_ORIGIN_LATITUDE
   }
 
   poi[POI_KEY_CURRENT_LNG_LAT] = {

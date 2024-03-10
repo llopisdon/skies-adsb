@@ -30,16 +30,16 @@ git clone https://github.com/llopisdon/skies-adsb.git
 
 ```
 cd /path/to/skies-adsb
-touch .env
+touch src/.env
 ```
 
 add the following variables to the .env file -- these are the minimum variables you must define:
 
 ```
-SKIES_ADSB_HOST_EXISTING=<ip address of existing ADS-B decoder host>:30003
-SKIES_FLIGHTINFO_HOST_DEV=localhost:5000
-DEFAULT_ORIGIN_LATITUDE=25.794868197349306
-DEFAULT_ORIGIN_LONGITUDE=-80.27787208557129
+VITE_SKIES_ADSB_HOST_EXISTING=<ip address of existing ADS-B decoder host>:30003
+VITE_SKIES_FLIGHTINFO_HOST_DEV=localhost:5000
+VITE_DEFAULT_ORIGIN_LATITUDE=25.794868197349306
+VITE_DEFAULT_ORIGIN_LONGITUDE=-80.27787208557129
 ```
 
 be sure to change the origin lat/long to match your location or nearest airport acting as the origin for the simulation.

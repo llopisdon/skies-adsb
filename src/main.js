@@ -502,14 +502,14 @@ function loadFallbackGridPlane() {
   // Fallback to default origin
   //
   UTILS.initOrigin([
-    process.env.DEFAULT_ORIGIN_LONGITUDE,
-    process.env.DEFAULT_ORIGIN_LATITUDE,
+    import.meta.env.VITE_DEFAULT_ORIGIN_LONGITUDE,
+    import.meta.env.VITE_DEFAULT_ORIGIN_LATITUDE,
   ])
   console.error(`FALL BACK TO DEFAULT ORIGIN: `)
   console.error(UTILS.origin)
 
-  longitudeController.setValue(process.env.DEFAULT_ORIGIN_LONGITUDE)
-  latitudeController.setValue(process.env.DEFAULT_ORIGIN_LATITUDE)
+  longitudeController.setValue(import.meta.env.VITE_DEFAULT_ORIGIN_LONGITUDE)
+  latitudeController.setValue(import.meta.env.VITE_DEFAULT_ORIGIN_LATITUDE)
 
   //
   // Starting parsing ADSB messages
@@ -523,13 +523,13 @@ function loadFallbackGridPlane() {
   resetCameraToHome()
 }
 
-if (process.env.OPTIONAL_GEOJSON_MAP) {
+if (import.meta.env.VITE_OPTIONAL_GEOJSON_MAP) {
 
   const loader = new THREE.FileLoader()
-  loader.load(`geojson/${process.env.OPTIONAL_GEOJSON_MAP}`,
+  loader.load(`geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}`,
     (data) => {
 
-      console.log(`[ ${process.env.OPTIONAL_GEOJSON_MAP} - loaded... ]`)
+      console.log(`[ ${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - loaded... ]`)
 
       //
       // init map and POI
@@ -569,12 +569,12 @@ if (process.env.OPTIONAL_GEOJSON_MAP) {
     },
     (xhr) => {
       if (xhr.total > 0) {
-        console.log(`${process.env.OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+        console.log(`${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
       }
     },
     (err) => {
       console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'geojson/${process.env.OPTIONAL_GEOJSON_MAP}'`)
+      console.error(`\tunable to load: 'geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}'`)
       console.error(err)
       console.error('[***************]')
 
@@ -590,10 +590,10 @@ function reloadMap() {
   scene.remove(mapGroup)
   mapGroup = undefined
   const loader = new THREE.FileLoader();
-  loader.load(`geojson/${process.env.OPTIONAL_GEOJSON_MAP}`,
+  loader.load(`geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}`,
     (data) => {
 
-      console.log(`[ ${process.env.OPTIONAL_GEOJSON_MAP} - loaded... ]`)
+      console.log(`[ ${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - loaded... ]`)
 
       //
       // init map and POI
@@ -607,12 +607,12 @@ function reloadMap() {
     },
     (xhr) => {
       if (xhr.total > 0) {
-        console.log(`${process.env.OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
+        console.log(`${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
       }
     },
     (err) => {
       console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'geojson/${process.env.OPTIONAL_GEOJSON_MAP}'`)
+      console.error(`\tunable to load: 'geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}'`)
       console.error(err)
       console.error('[***************]')
 

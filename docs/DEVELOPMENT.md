@@ -37,35 +37,35 @@ npm install
 
 ```
 cd /path/to/skies-adsb
-touch .env
+touch src/.env
 ```
 
 edit the .env file as described in the install guide here:
 
 [Step 4](RPI-INSTALL-GUIDE.md#step-4---setup-env-file-variables)
 
-example .env file:
+example src/.env file:
 
 ```
-DEFAULT_ORIGIN_LATITUDE=25.794868197349306
-DEFAULT_ORIGIN_LONGITUDE=-80.27787208557129
+VITE_DEFAULT_ORIGIN_LATITUDE=25.794868197349306
+VITE_DEFAULT_ORIGIN_LONGITUDE=-80.27787208557129
 
-DEPLOY_USER_AT_HOSTNAME=pi@raspberrypi.local
+VITE_DEPLOY_USER_AT_HOSTNAME=pi@raspberrypi.local
 
-SKIES_ADSB_HOST=192.168.1.1:30006
-SKIES_ADSB_HOST_DEV=localhost:30006
+VITE_SKIES_ADSB_HOST=192.168.1.1:30006
+VITE_SKIES_ADSB_HOST_DEV=localhost:30006
 
-SKIES_FLASK_HOST=192.168.1.1:5000
-SKIES_FLASK_HOST_DEV=localhost:5000
+VITE_SKIES_FLASK_HOST=192.168.1.1:5000
+VITE_SKIES_FLASK_HOST_DEV=localhost:5000
 
-OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=skies.example.com
-OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST=wss://skies-ws.example.com
-OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST=https://skies-flask.example.com/flightinfo
+VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=skies.example.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST=wss://skies-ws.example.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST=https://skies-flask.example.com/flightinfo
 
-OPTIONAL_GEOJSON_MAP=sofla.json
+VITE_OPTIONAL_GEOJSON_MAP=sofla.json
 ```
 
-if you have an external or existing ADS-B decoder you can modify the SKIES_ADSB_HOST and SKIES_ADSB_HOST_DEV values to point to it as described in this document:
+if you have an external or existing ADS-B decoder you can modify the VITE_SKIES_ADSB_HOST and VITE_SKIES_ADSB_HOST_DEV values to point to it as described in this document:
 
 [LOCALHOST-INTSALL-GUIDE](LOCALHOST-INSTALL-GUIDE.md)
 

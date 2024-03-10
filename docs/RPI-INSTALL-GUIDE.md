@@ -127,36 +127,36 @@ cd /path/to/your/git/projects
 git clone git@github.com:llopisdon/skies-adsb.git
 ```
 
-## Step 4 - Setup .env file variables
+## Step 4 - Setup src/.env file variables
 
-The .env file will hold several environment variables used to build and deploy the skies-adsb web app.
+The src/.env file will hold several environment variables used to build and deploy the skies-adsb web app.
 
-First create an .env file:
+First create an src/.env file:
 
 ```
 cd /path/to/skies-adsb
-touch .env
+touch src/.env
 ```
 
-.env variable format is as follows:
+src/.env variable format is as follows:
 
 ```
-DEFAULT_ORIGIN_LATITUDE=<Latitude from Step 1>
-DEFAULT_ORIGIN_LONGITUDE=<Longitude from Step 1>
+VITE_DEFAULT_ORIGIN_LATITUDE=<Latitude from Step 1>
+VITE_DEFAULT_ORIGIN_LONGITUDE=<Longitude from Step 1>
 
-DEPLOY_USER_AT_HOSTNAME=<username@hostname.local>
+VITE_DEPLOY_USER_AT_HOSTNAME=<username@hostname.local>
 
-SKIES_ADSB_HOST=<RPI IP address>:30006
-SKIES_ADSB_HOST_DEV=<RPI IP address>:30006
+VITE_SKIES_ADSB_HOST=<RPI IP address>:30006
+VITE_SKIES_ADSB_HOST_DEV=<RPI IP address>:30006
 
-SKIES_FLASK_HOST=<RPI IP address>:5000
-SKIES_FLASK_HOST_DEV=<RPI IP address>:5000
+VITE_SKIES_FLASK_HOST=<RPI IP address>:5000
+VITE_SKIES_FLASK_HOST_DEV=<RPI IP address>:5000
 
-OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=host.domain.com
-OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL=wss:host-ws.domain.com
-OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL=https:host-flask.domain.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=host.domain.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL=wss:host-ws.domain.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL=https:host-flask.domain.com
 
-OPTIONAL_GEOJSON_MAP=<map name>.json
+VITE_OPTIONAL_GEOJSON_MAP=<map name>.json
 ```
 
 Explanation of the environment variables:
@@ -176,26 +176,26 @@ SKIES_FLASK_HOST | the IP address of the RPI on your local network hosting the s
 | OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL | _OPTIONAL_ a URL pointing to the skies-adsb Flask Flight Info app. The URL must use the _https_ scheme. | https://somehost-flask.example.com/flightinfo |
 | OPTIONAL_GEOJSON_MAP | _OPTIONAL_ the name of the default map GeoJSON json file used as a reference plane in the tracker app. Included with the app is a simplified view of South Florida with aerodromes and other points of interest. The maps should be located in the geojson directory in the skies-adsb directory. You do not need to specify the full path of the GeoJSON json file. | sofla.json |
 
-Example .env file:
+Example src/.env file:
 
 ```
 
-DEFAULT_ORIGIN_LATITUDE=25.794868197349306
-DEFAULT_ORIGIN_LONGITUDE=-80.27787208557129
+VITE_DEFAULT_ORIGIN_LATITUDE=25.794868197349306
+VITE_DEFAULT_ORIGIN_LONGITUDE=-80.27787208557129
 
-DEPLOY_USER_AT_HOSTNAME=pi@raspberrypi.local
+VITE_DEPLOY_USER_AT_HOSTNAME=pi@raspberrypi.local
 
-SKIES_ADSB_HOST=192.168.1.1:30006
-SKIES_ADSB_HOST_DEV=localhost:30006
+VITE_SKIES_ADSB_HOST=192.168.1.1:30006
+VITE_SKIES_ADSB_HOST_DEV=localhost:30006
 
-SKIES_FLASK_HOST=192.168.1.1:5000
-SKIES_FLASK_HOST_DEV=localhost:5000
+VITE_SKIES_FLASK_HOST=192.168.1.1:5000
+VITE_SKIES_FLASK_HOST_DEV=localhost:5000
 
-OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=skies.example.com
-OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST=wss://skies-ws.example.com
-OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST=https://skies-flask.example.com/flightinfo
+VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=skies.example.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST=wss://skies-ws.example.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST=https://skies-flask.example.com/flightinfo
 
-OPTIONAL_GEOJSON_MAP=sofla.json
+VITE_OPTIONAL_GEOJSON_MAP=sofla.json
 
 ```
 

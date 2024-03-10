@@ -104,16 +104,16 @@ see: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/r
 
 # 6. Update skies-adsb installation to include the Cloudflare Tunnel URLs
 
-You must now update your skies-adsb installation to include the Cloudflare Tunnel urls you just defined. Go to the location you built the skies-adsb app from and add the following entries to your .env file:
+You must now update your skies-adsb installation to include the Cloudflare Tunnel urls you just defined. Go to the location you built the skies-adsb app from and add the following entries to your src/.env file:
 
 ```
-cd /path/to/skies-adsb
+cd /path/to/skies-adsb/src
 ```
 
 ```
-OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=rpi.yourdomain.com
-OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL=wss:rpi-ws.yourdomain.com
-OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL=https:rpi-flask.yourdomain.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME=rpi.yourdomain.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL=wss:rpi-ws.yourdomain.com
+VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL=https:rpi-flask.yourdomain.com
 ```
 
 rebuild the skies-adsb app:

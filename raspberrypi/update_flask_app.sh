@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-export $(grep -w DEPLOY_USER_AT_HOSTNAME ../.env)
+export $(grep -w VITE_DEPLOY_USER_AT_HOSTNAME ../src/.env)
 echo Copying skies-adsb flask app files to Raspberry Pi...
-scp skies-flask.sh skies-flask.service ../flask/{app.py,config.json} $DEPLOY_USER_AT_HOSTNAME:~/skies-adsb
+scp skies-flask.sh skies-flask.service ../flask/{app.py,config.json} $VITE_DEPLOY_USER_AT_HOSTNAME:~/skies-adsb
 
-ssh $DEPLOY_USER_AT_HOSTNAME 'bash -s' << EOF
+ssh $VITE_DEPLOY_USER_AT_HOSTNAME 'bash -s' << EOF
 cd
 echo "stopping previous skies-flask service..."
 sudo service skies-flask stop

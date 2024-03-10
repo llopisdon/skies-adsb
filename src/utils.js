@@ -2,22 +2,22 @@ import SphericalMercator from '@mapbox/sphericalmercator'
 
 
 export const DATA_HOSTS = {
-  "adsb": `ws://${(process.env.NODE_ENV === "development")
-    ? process.env.SKIES_ADSB_HOST_DEV
-    : process.env.SKIES_ADSB_HOST}`,
-  "flight_info": `http://${(process.env.NODE_ENV === "development")
-    ? process.env.SKIES_FLIGHTINFO_HOST_DEV
-    : process.env.SKIES_FLIGHTINFO_HOST}/flightinfo`,
+  "adsb": `ws://${(import.meta.env.VITE_NODE_ENV === "development")
+    ? import.meta.env.VITE_SKIES_ADSB_HOST_DEV
+    : import.meta.env.VITE_SKIES_ADSB_HOST}`,
+  "flight_info": `http://${(import.meta.env.VITE_NODE_ENV === "development")
+    ? import.meta.env.VITE_SKIES_FLIGHTINFO_HOST_DEV
+    : import.meta.env.VITE_SKIES_FLIGHTINFO_HOST}/flightinfo`,
   "photos": "https://api.planespotters.net/pub/photos/hex"
 }
 
 
-if (process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME) {
-  const cloudflareURL = new URL(`https://${process.env.OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME}`)
+if (import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME) {
+  const cloudflareURL = new URL(`https://${import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME}`)
   const currentUrl = new URL(document.location.href)
   if (currentUrl.hostname === cloudflareURL.hostname) {
-    DATA_HOSTS["adsb"] = process.env.OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL
-    DATA_HOSTS["flight_info"] = process.env.OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL
+    DATA_HOSTS["adsb"] = import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL
+    DATA_HOSTS["flight_info"] = import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL
   }
 }
 
