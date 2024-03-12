@@ -26,14 +26,14 @@ cd /your/projects/dir
 git clone https://github.com/llopisdon/skies-adsb.git
 ```
 
-# 3. create a .env file on your localhost
+# 3. create a src/.env file on your localhost
 
 ```
 cd /path/to/skies-adsb
 touch src/.env
 ```
 
-add the following variables to the .env file -- these are the minimum variables you must define:
+add the following variables to the src/.env file -- these are the minimum variables you must define:
 
 ```
 VITE_SKIES_ADSB_HOST_EXISTING=<ip address of existing ADS-B decoder host>:30003
@@ -46,7 +46,7 @@ be sure to change the origin lat/long to match your location or nearest airport 
 
 If you wish to enable flight status with FlightAware AeroAPI then please follow the setup instructions here:
 
-[Flask Server Setup](flask/README.md)
+[Flask Server Setup](/flask/README.md)
 
 **note: skip the last part called "Run the Flask Server".\***
 
