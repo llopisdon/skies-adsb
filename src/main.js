@@ -16,7 +16,7 @@ import * as SKYBOX from './skybox.js'
 
 let animationFrameRequestId = -1
 
-const pointer = new THREE.Vector2()
+const raycasterPointer = new THREE.Vector2()
 const raycaster = new THREE.Raycaster()
 
 // scene
@@ -97,11 +97,11 @@ gui.add(settings, 'show stats').onChange(showStats => {
 // Clock
 let clock = new THREE.Clock()
 
+//
 // cameras
-
+//
 const orbitCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
 const followCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
-followCamera.rotation.order = 'YXZ'
 let camera = orbitCamera
 camera.position.z = 10
 
@@ -152,7 +152,6 @@ scene.add(polarGridHelper)
 
 
 
-
 //
 // draw
 //
@@ -165,7 +164,7 @@ function draw(elapsedTime, deltaTime) {
 
   HUD.update()
 
-  raycaster.setFromCamera(pointer, camera)
+  raycaster.setFromCamera(raycasterPointer, camera)
 
   //
   // aircraft
@@ -173,11 +172,11 @@ function draw(elapsedTime, deltaTime) {
 
   for (const key in AIRCRAFT.aircraft) {
 
-    const aircraft = AIRCRAFT.aircraft[key];
+    const aircraft = AIRCRAFT.aircraft[key]
 
     const aircraftHasExpired = aircraft.draw(scene, elapsedTime, cameraWorldPos)
 
-    if (pointer?.x && pointer?.y) {
+    if (raycasterPointer?.x && raycasterPointer?.y) {
 
       const groupIntersect = raycaster.intersectObject(aircraft.group, true)
 
@@ -189,7 +188,7 @@ function draw(elapsedTime, deltaTime) {
         console.log(groupIntersect)
         console.log(`hasValidTelemetry: ${aircraft.hasValidTelemetry()}`)
         console.log("---------------")
-        pointer.set(null, null)
+        raycasterPointer.set(null, null)
 
         if (aircraft.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
@@ -224,8 +223,8 @@ function draw(elapsedTime, deltaTime) {
     poiLabel.lookAt(camera.position)
   }
 
-  if (pointer?.x && pointer?.y) {
-    pointer.set(null, null)
+  if (raycasterPointer?.x && raycasterPointer?.y) {
+    raycasterPointer.set(null, null)
   }
 }
 
@@ -237,7 +236,7 @@ function deselectAirCraftAndHideHUD() {
     const aircraft = UTILS.INTERSECTED.aircraft
     UTILS.INTERSECTED.aircraft = null
     if (cameraMode === CAMERA_FOLLOW) {
-      const target = aircraft.followCamTarget.getWorldPosition(new THREE.Vector3())
+      const target = aircraft.group.getWorldPosition(new THREE.Vector3())
       aircraft.resetFollowCameraTarget()
       resetGhostCamera(target)
     }
@@ -268,26 +267,30 @@ window.addEventListener('resize', () => {
 })
 
 
+
+//
+// Raycaster Pointer and Follow Camera Touch Controls
+//
+
 let isFollowCamAttached = false
 
-const pointerStart = new THREE.Vector2()
-const pointerEnd = new THREE.Vector2()
-const rotateStart = new THREE.Vector2()
-const rotateEnd = new THREE.Vector2()
-const rotateDelta = new THREE.Vector2()
+const raycasterPointerStart = new THREE.Vector2()
+const raycasterPointerEnd = new THREE.Vector2()
 
 function onPointerDown(event) {
 
   if (event.isPrimary === false) return
 
-  pointerStart.set(event.clientX, event.clientY)
+  raycasterPointerStart.set(event.clientX, event.clientY)
 
   if (isFollowCamAttached) {
-    if (event.pointerType === 'touch') {
-      rotateStart.set(event.pageX, event.pageY)
-    } else {
-      rotateStart.set(event.clientX, event.clientY)
-    }
+    const aircraft = UTILS.INTERSECTED?.aircraft
+    const aircraftFollowCam = aircraft.followCam
+
+    aircraftFollowCam.userData.touchStartX =
+      event.pointerType === "touch" ? event.pageX : event.clientX
+    aircraftFollowCam.userData.touchStartY =
+      event.pointerType === "touch" ? event.pageY : event.clientY
   }
 
   document.addEventListener('pointermove', onPointerMove)
@@ -296,45 +299,96 @@ function onPointerDown(event) {
 
 document.addEventListener('pointerdown', onPointerDown)
 
+//
+// Follow Camera Touch Controls Constants
+//
+
+const DAMPING_FACTOR = 0.95
+const VELOCITY_THRESHOLD = 0.001
+const DIRECTION_CHANGE_RESISTANCE = 0.7
+const VELOCITY_SMOOTHING = 0.3
+
+const minPolarAngle = Math.PI / 4 // 45 degrees
+const maxPolarAngle = (3 * Math.PI) / 4 // 135 degrees
+
 
 function onPointerMove(event) {
-  if (event.isPrimary === false) return
+  if (event.isPrimary === false || !isFollowCamAttached) return
 
-  if (isFollowCamAttached) {
-    const aircraft = UTILS.INTERSECTED?.aircraft
+  const aircraft = UTILS.INTERSECTED?.aircraft
+  const aircraftFollowCam = aircraft.followCam
 
-    if (event.pointerType === 'touch') {
-      rotateEnd.set(event.pageX, event.pageY)
-    } else {
-      rotateEnd.set(event.clientX, event.clientY)
-    }
-    rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(1.0)
-    rotateStart.copy(rotateEnd);
+  let touchX = event.pointerType === "touch" ? event.pageX : event.clientX
+  let touchY = event.pointerType === "touch" ? event.pageY : event.clientY
 
-    aircraft.followCam.rotation.y -= 2 * Math.PI * rotateDelta.x / canvas.clientHeight
-    aircraft.followCam.rotation.x -= 2 * Math.PI * rotateDelta.y / canvas.clientHeight
+  // Calculate normalized deltas
+  const deltaX =
+    (touchX - aircraftFollowCam.userData.touchStartX) / window.innerWidth
+  const deltaY =
+    (touchY - aircraftFollowCam.userData.touchStartY) / window.innerHeight
+
+  // Calculate new velocity with smoothing
+  let targetVelocity = deltaX * Math.PI
+
+  // Apply direction change resistance
+  if (
+    Math.sign(targetVelocity) !==
+    Math.sign(aircraftFollowCam.userData.rotationVelocity)
+  ) {
+    targetVelocity *= DIRECTION_CHANGE_RESISTANCE
   }
+
+  // Smooth velocity transitions
+  aircraftFollowCam.userData.rotationVelocity =
+    aircraftFollowCam.userData.rotationVelocity * (1 - VELOCITY_SMOOTHING) +
+    targetVelocity * VELOCITY_SMOOTHING
+
+  // Apply minimum threshold
+  if (Math.abs(aircraftFollowCam.userData.rotationVelocity) < VELOCITY_THRESHOLD) {
+    aircraftFollowCam.userData.rotationVelocity = 0
+  }
+
+  // Update spherical coordinates with dampening
+  aircraftFollowCam.userData.sphericalCoords.theta +=
+    aircraftFollowCam.userData.rotationVelocity * DAMPING_FACTOR
+  aircraftFollowCam.userData.sphericalCoords.phi = THREE.MathUtils.clamp(
+    aircraftFollowCam.userData.sphericalCoords.phi +
+    deltaY * Math.PI * DAMPING_FACTOR,
+    minPolarAngle,
+    maxPolarAngle
+  )
+
+  // Update position
+  const position = new THREE.Vector3()
+  position.setFromSpherical(aircraftFollowCam.userData.sphericalCoords)
+
+  const targetPos = aircraft.group.getWorldPosition(new THREE.Vector3())
+  aircraftFollowCam.position.copy(position)
+  followCamera.position.copy(aircraftFollowCam.getWorldPosition(new THREE.Vector3()))
+  followCamera.lookAt(targetPos)
+
+  aircraftFollowCam.userData.touchStartX = touchX
+  aircraftFollowCam.userData.touchStartY = touchY
 }
 
 function onPointerUp(event) {
   if (event.isPrimary === false) return
 
-  pointerEnd.set(event.clientX, event.clientY)
+  raycasterPointerEnd.set(event.clientX, event.clientY)
 
-  const isClick = pointerStart.distanceToSquared(pointerEnd) === 0
+  const isClick = raycasterPointerStart.distanceToSquared(raycasterPointerEnd) === 0
   const notInHUD = !HUD.isClientXYInHUDContainer(event.clientX, event.clientY)
 
   if (isClick && notInHUD) {
-    pointer.set(
-      (pointerEnd.x / window.innerWidth) * 2 - 1,
-      -(pointerEnd.y / window.innerHeight) * 2 + 1
+    raycasterPointer.set(
+      (raycasterPointerEnd.x / window.innerWidth) * 2 - 1,
+      -(raycasterPointerEnd.y / window.innerHeight) * 2 + 1
     )
   }
 
   document.removeEventListener('pointermove', onPointerMove)
   document.removeEventListener('pointerup', onPointerUp)
 }
-
 
 
 //
@@ -401,11 +455,7 @@ HUD.hud.cameraButton.addEventListener('click', (e) => {
     camera = followCamera
     controls.enabled = false
   } else {
-    const aircraft = UTILS.INTERSECTED?.aircraft
-    const target = aircraft.followCamTarget.getWorldPosition(new THREE.Vector3())
-    aircraft.resetFollowCameraTarget()
-    resetGhostCamera(target)
-    isFollowCamAttached = false
+    deselectAirCraftAndHideHUD()
   }
   console.log(`toggle camera... -> ${cameraMode}`)
   HUD.toggleFollow()
@@ -414,8 +464,6 @@ HUD.hud.cameraButton.addEventListener('click', (e) => {
 
 
 function resetGhostCamera(target) {
-  rotateStart.set(0, 0)
-  rotateEnd.set(0, 0)
   orbitCamera.position.copy(camera.position)
   controls.target.set(target.x, target.y, target.z)
   controls.update()
@@ -452,7 +500,7 @@ function updateCamera() {
   if (cameraMode === "follow" && UTILS.INTERSECTED?.aircraft) {
     const aircraft = UTILS.INTERSECTED?.aircraft
     const followCamPos = aircraft.followCam.getWorldPosition(new THREE.Vector3())
-    const followCamTargetPos = aircraft.followCamTarget.getWorldPosition(new THREE.Vector3())
+    const followCamTargetPos = aircraft.group.getWorldPosition(new THREE.Vector3())
     camera.position.lerp(followCamPos, 0.05)
     camera.lookAt(followCamTargetPos)
 
@@ -461,6 +509,17 @@ function updateCamera() {
     }
     light.position.copy(camera.position)
     light.target.position.copy(followCamTargetPos)
+
+    //
+    // Apply momentum dampening
+    //
+    if (isFollowCamAttached) {
+      const aircraftFollowCam = aircraft.followCam
+      aircraftFollowCam.userData.rotationVelocity *= DAMPING_FACTOR
+      aircraftFollowCam.userData.sphericalCoords.theta +=
+        aircraftFollowCam.userData.rotationVelocity
+    }
+
   } else {
     controls.update()
   }
@@ -482,7 +541,7 @@ function handleVisibilityChange() {
     animationFrameRequestId = window.requestAnimationFrame(animate)
   }
 }
-document.addEventListener('visibilitychange', handleVisibilityChange, false);
+document.addEventListener('visibilitychange', handleVisibilityChange, false)
 
 
 
@@ -589,7 +648,7 @@ function reloadMap() {
   console.log('[reloadMap...]')
   scene.remove(mapGroup)
   mapGroup = undefined
-  const loader = new THREE.FileLoader();
+  const loader = new THREE.FileLoader()
   loader.load(`geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}`,
     (data) => {
 

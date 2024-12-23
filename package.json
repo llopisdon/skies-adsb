@@ -1,6 +1,6 @@
 {
   "name": "skies-adsb",
-  "version": "1.2.5",
+  "version": "1.3.0",
   "description": "skies-adsb is a real-time 3D browser based web app for tracking aircraft using ADS-B data obtained from a RTL-SDR receiver.",
   "private": true,
   "type": "module",

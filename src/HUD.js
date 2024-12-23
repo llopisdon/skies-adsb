@@ -100,7 +100,7 @@ class _HUD {
   _showAircraftInfo() {
     if (!this.hud || this.aircraftInfoShown) return
     const aircraft = this.aircraft
-    console.log(aircraft.flightInfo)
+    console.log(aircraft?.flightInfo)
     this.hud.callsign.text = `${aircraft.flightInfo?.["ident"] ?? NOT_AVAILABLE
       }`
     this.hud.callsign.href = `https://www.google.com/search?q=flight status ${aircraft.flightInfo?.["ident"] ?? NOT_AVAILABLE

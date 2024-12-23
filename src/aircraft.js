@@ -49,6 +49,7 @@ const greenNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color
 
 const AIRCRAFT_TTL = 10.0
 
+const FOLLOW_CAM_DISTANCE = 24.0
 
 export class Aircraft {
   constructor(scene) {
@@ -109,11 +110,13 @@ export class Aircraft {
     // follow camera
     this.followCam = new THREE.Object3D()
     this.followCam.name = "follow_cam"
-    this.followCam.position.set(0, 6, 24)
-    this.followCamTarget = new THREE.Object3D()
-    this.followCamTarget.name = "follow_cam_target"
-    this.followCamTarget.position.set(0, -6, -UTILS.FOLLOW_CAM_DISTANCE)
-    this.followCam.add(this.followCamTarget)
+    this.followCam.position.set(0, 6, FOLLOW_CAM_DISTANCE)
+    this.followCam.userData = {
+      touchStartX: 0,
+      touchStartY: 0,
+      rotationVelocity: 0,
+      sphericalCoords: new THREE.Spherical(FOLLOW_CAM_DISTANCE, Math.PI / 2, 0),
+    }
     this.mesh.add(this.followCam)
 
     // lights
@@ -160,10 +163,10 @@ export class Aircraft {
   }
 
   resetFollowCameraTarget() {
-    this.followCam.rotation.y = 0
-    this.followCam.rotation.x = 0
-    this.followCamTarget.position.set(0, -6, -24)
-    this.followCamTarget.matrixWorldNeedsUpdate = true
+    this.followCam.userData.touchStartX = 0
+    this.followCam.userData.touchStartY = 0
+    this.followCam.userData.rotationVelocity = 0
+    this.followCam.sphericalCoords = new THREE.Spherical(FOLLOW_CAM_DISTANCE, Math.PI / 2, 0)
   }
 
   remove(scene) {
@@ -233,10 +236,6 @@ export class Aircraft {
       this.text.sync()
 
       this.group.position.set(xPos, yPos, zPos)
-      // this.group.matrixWorldNeedsUpdate = true
-      // this.mesh.matrixWorldNeedsUpdate = true
-      // this.followCam.matrixWorldNeedsUpdate = true
-      // this.followCamTarget.matrixWorldNeedsUpdate = true
     }
 
     // after each update reset timestamp
