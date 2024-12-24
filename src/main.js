@@ -103,7 +103,7 @@ let clock = new THREE.Clock()
 const orbitCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
 const followCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
 let camera = orbitCamera
-camera.position.z = 10
+camera.position.z = UTILS.FOLLOW_CAM_DISTANCE
 
 
 // controls
