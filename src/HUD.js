@@ -101,22 +101,22 @@ class _HUD {
     if (!this.hud || this.aircraftInfoShown) return
     const aircraft = this.aircraft
     console.log(aircraft?.flightInfo)
-    this.hud.callsign.text = `${aircraft.flightInfo?.["ident"] ?? NOT_AVAILABLE
+    this.hud.callsign.text = `${aircraft?.flightInfo?.["ident"] ?? NOT_AVAILABLE
       }`
-    this.hud.callsign.href = `https://www.google.com/search?q=flight status ${aircraft.flightInfo?.["ident"] ?? NOT_AVAILABLE
+    this.hud.callsign.href = `https://www.google.com/search?q=flight status ${aircraft?.flightInfo?.["ident"] ?? NOT_AVAILABLE
       }`
-    this.hud.airline.text = `${aircraft.flightInfo?.["airlineCallsign"] ?? NOT_AVAILABLE
-      } | ${aircraft.flightInfo?.["airline"] ?? NOT_AVAILABLE}`
-    this.hud.airline.href = `https://www.google.com/search?q=about ${aircraft.flightInfo?.["airlineCallsign"]} ${aircraft.flightInfo?.["airline"]}`
-    this.hud.aircraftType.text = `Type: ${aircraft.flightInfo?.["type"] ?? NOT_AVAILABLE
-      } | ${aircraft.flightInfo?.["manufacturer"] ?? NOT_AVAILABLE}`
-    this.hud.aircraftType.href = `https://www.google.com/search?q=about ${aircraft.flightInfo?.["type"]} ${aircraft.flightInfo?.["manufacturer"]}`
-    this.hud.origin_long.text = `Origin: ${aircraft.flightInfo?.["origin"] ?? NOT_AVAILABLE
-      }, ${aircraft.flightInfo?.["originName"] ?? NOT_AVAILABLE}`
-    this.hud.origin_long.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.["origin"]}`
-    this.hud.destination_long.text = `Dest: ${aircraft.flightInfo?.["destination"] ?? NOT_AVAILABLE
-      }, ${aircraft.flightInfo?.["destinationName"] ?? NOT_AVAILABLE}`
-    this.hud.destination_long.href = `https://www.google.com/search?q=aerodrome ${aircraft.flightInfo?.["destination"]}`
+    this.hud.airline.text = `${aircraft?.flightInfo?.["airlineCallsign"] ?? NOT_AVAILABLE
+      } | ${aircraft?.flightInfo?.["airline"] ?? NOT_AVAILABLE}`
+    this.hud.airline.href = `https://www.google.com/search?q=about ${aircraft?.flightInfo?.["airlineCallsign"]} ${aircraft?.flightInfo?.["airline"]}`
+    this.hud.aircraftType.text = `Type: ${aircraft?.flightInfo?.["type"] ?? NOT_AVAILABLE
+      } | ${aircraft?.flightInfo?.["manufacturer"] ?? NOT_AVAILABLE}`
+    this.hud.aircraftType.href = `https://www.google.com/search?q=about ${aircraft?.flightInfo?.["type"]} ${aircraft?.flightInfo?.["manufacturer"]}`
+    this.hud.origin_long.text = `Origin: ${aircraft?.flightInfo?.["origin"] ?? NOT_AVAILABLE
+      }, ${aircraft?.flightInfo?.["originName"] ?? NOT_AVAILABLE}`
+    this.hud.origin_long.href = `https://www.google.com/search?q=aerodrome ${aircraft?.flightInfo?.["origin"]}`
+    this.hud.destination_long.text = `Dest: ${aircraft?.flightInfo?.["destination"] ?? NOT_AVAILABLE
+      }, ${aircraft?.flightInfo?.["destinationName"] ?? NOT_AVAILABLE}`
+    this.hud.destination_long.href = `https://www.google.com/search?q=aerodrome ${aircraft?.flightInfo?.["destination"]}`
     this.aircraftInfoShown = true
   }
 
