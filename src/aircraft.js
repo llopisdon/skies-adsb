@@ -49,7 +49,6 @@ const greenNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color
 
 const AIRCRAFT_TTL = 10.0
 
-const FOLLOW_CAM_DISTANCE = 24.0
 
 export class Aircraft {
   constructor(scene) {
@@ -110,12 +109,12 @@ export class Aircraft {
     // follow camera
     this.followCam = new THREE.Object3D()
     this.followCam.name = "follow_cam"
-    this.followCam.position.set(0, 6, FOLLOW_CAM_DISTANCE)
+    this.followCam.position.set(0, 6, UTILS.FOLLOW_CAM_DISTANCE)
     this.followCam.userData = {
       touchStartX: 0,
       touchStartY: 0,
       rotationVelocity: 0,
-      sphericalCoords: new THREE.Spherical(FOLLOW_CAM_DISTANCE, Math.PI / 2, 0),
+      sphericalCoords: new THREE.Spherical(UTILS.FOLLOW_CAM_DISTANCE, Math.PI / 2, 0),
     }
     this.mesh.add(this.followCam)
 
@@ -166,7 +165,7 @@ export class Aircraft {
     this.followCam.userData.touchStartX = 0
     this.followCam.userData.touchStartY = 0
     this.followCam.userData.rotationVelocity = 0
-    this.followCam.sphericalCoords = new THREE.Spherical(FOLLOW_CAM_DISTANCE, Math.PI / 2, 0)
+    this.followCam.sphericalCoords = new THREE.Spherical(UTILS.FOLLOW_CAM_DISTANCE, Math.PI / 2, 0)
   }
 
   remove(scene) {
