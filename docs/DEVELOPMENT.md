@@ -93,7 +93,7 @@ JavaScript, HTML5, CSS, Python 3
 
 ## Tools
 
-[npm](https://www.npmjs.com/), [webpack](https://webpack.js.org/), [nvm](https://github.com/nvm-sh/nvm)
+[npm](https://www.npmjs.com/), [Vite](https://vite.dev/), [nvm](https://github.com/nvm-sh/nvm)
 
 ## Libraries
 
