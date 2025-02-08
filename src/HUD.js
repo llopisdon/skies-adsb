@@ -100,7 +100,7 @@ class _HUD {
   _showAircraftInfo() {
     if (!this.hud || this.aircraftInfoShown) return
     const aircraft = this.aircraft
-    console.log(aircraft?.flightInfo)
+    console.table(aircraft?.flightInfo)
     this.hud.callsign.text = `${aircraft?.flightInfo?.["ident"] ?? NOT_AVAILABLE
       }`
     this.hud.callsign.href = `https://www.google.com/search?q=flight status ${aircraft?.flightInfo?.["ident"] ?? NOT_AVAILABLE
@@ -168,7 +168,7 @@ class _HUD {
     this.aircraft = aircraft
     this.needsFetchAircraftInfo = true
     this.needsFetchAircraftPhoto = true
-    console.log(`show AIRCRAFT...`)
+    console.log(`[HUD] show aircraft: ${aircraft.hex} | ${aircraft?.callsign}`)
   }
 
   update() {
@@ -192,7 +192,8 @@ class _HUD {
       duration: 0.25,
     }
 
-    console.log(param)
+    console.log("HUD: enableHUD")
+    //console.table(param)
 
     gsap.to("#hud-left", param)
     gsap.to("#hud-dialog-container", param)
@@ -202,7 +203,7 @@ class _HUD {
   toggleRightActions() {
     this.isRightDialogShown = !this.isRightDialogShown
 
-    console.log("toggleRightActions...", this.isRightDialogShown)
+    console.log("[HUD] toggleRightActions - isRightDialogShown: ", this.isRightDialogShown)
 
     if (this.isHUDDialogShown) this.toggleDialog()
     if (this.isFollowCamActive) this.toggleFollow()
@@ -219,7 +220,7 @@ class _HUD {
         duration: 0.25,
       }
 
-    console.log(param)
+    // console.table(param)
 
     gsap.to("#hud-right", param)
   }
@@ -277,7 +278,8 @@ class _HUD {
       return
     }
 
-    console.log("~~~~ FETCH PHOTO ~~~~")
+    console.log("=============================================")
+    console.log("FETCH PHOTO:", aircraft.hex)
 
     if (aircraft.photoFuture) {
       if (aircraft.photo) {
@@ -298,12 +300,12 @@ class _HUD {
     aircraft.photoFuture = fetch(photoUrl)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
+        console.table(data)
         if (Array.isArray(data["photos"]) && data["photos"].length > 0) {
           const photo = data["photos"][0]
           if ("thumbnail" in photo) {
             aircraft.photo = photo
-            console.log(aircraft.photo)
+            console.table(aircraft.photo)
             HUD._showPhoto()
           }
         }
@@ -328,9 +330,10 @@ class _HUD {
       return
     }
 
-    console.log("~~~ FETCH FLIGHT INFO ~~~")
+    console.log("[HUD] Fetch Aircraft Flight Info: ", aircraft.callsign)
 
     if (aircraft.flightInfoFuture && aircraft.flightInfo) {
+      console.log("\tFlight already fetched:", aircraft.callsign)
       HUD._showAircraftInfo()
       this.needsFetchAircraftInfo = false
       return
@@ -349,7 +352,7 @@ class _HUD {
         HUD._showAircraftInfo()
       })
 
-    console.log("@@@@ FLIGHT INFO FETCHING.... @@@@")
+
 
     this.needsFetchAircraftInfo = false
   }

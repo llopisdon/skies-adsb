@@ -10,7 +10,7 @@
   "start_url": "/skies-adsb",
   "background_color": "#000",
   "theme_color": "#000",
-  
+
   "icons": [
     {
       "src": "static/icon512.png",

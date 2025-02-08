@@ -8,9 +8,13 @@ import * as THREE from 'three'
 // https://discourse.threejs.org/t/how-to-define-a-scene-background-with-gradients/3647/6
 //
 
+export const DAWN_DUSK = 'dawn_dusk'
+export const DAY = 'day'
+export const NIGHT = 'night'
+
 
 const gradients = {
-  'dawn+dusk':
+  [DAWN_DUSK]:
     [
       0, '#2d5277',
       0.45, '#4f809f',
@@ -28,7 +32,7 @@ const gradients = {
       1, '#181413'
     ],
 
-  'day':
+  [DAY]:
     [
       0, '#1f71a4',
       0.1, '#1f71a4',
@@ -42,7 +46,7 @@ const gradients = {
       1, '#000',
     ],
 
-  'night':
+  [NIGHT]:
     [
       0, '#000',
       0.3, '#2b2233',
@@ -64,12 +68,13 @@ const gradients = {
 }
 
 
+
 export class Skybox {
-  constructor(scene) {
+  constructor(scene, defaultSkybox = DAWN_DUSK) {
     this.mesh = null
     this.textures = {}
 
-    for (let [key, colorStop] of Object.entries(gradients)) {
+    Object.entries(gradients).forEach(([key, colorStop]) => {
       const ctx = document.createElement('canvas').getContext('2d')
       const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height)
       for (let i = 0; i < colorStop.length - 2; i += 2) {
@@ -79,14 +84,14 @@ export class Skybox {
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
       const texture = new THREE.CanvasTexture(ctx.canvas)
       this.textures[key] = texture
-    }
+    })
 
     const geometry = new THREE.IcosahedronGeometry(3000, 2)
     this.mesh = new THREE.Mesh(
       geometry,
       new THREE.MeshBasicMaterial(
         {
-          map: this.textures['dawn+dusk'],
+          map: this.textures[defaultSkybox.toLowerCase()],
           side: THREE.BackSide,
           depthWrite: false,
           fog: false

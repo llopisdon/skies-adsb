@@ -1,0 +1,14 @@
+[Unit]
+Description=skies-adsb Websockify Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/bash skies-adsb-websockify.sh
+WorkingDirectory=/home/pi/skies-adsb
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target

@@ -50,20 +50,20 @@ const handleADSBMessage = (event) => {
 }
 
 export function start(threeJsScene, threeJsClock) {
-  console.log("[start WebSocket connection...]")
+  console.log("[ADSB] start: OPEN WebSocket connection...")
   scene = threeJsScene
   clock = threeJsClock
   websocket = new WebSocket(UTILS.DATA_HOSTS["adsb"])
   websocket.addEventListener('error', (event) => {
-    console.log('Error Message from server ', event.data)
+    console.error('[ADSB] Error Message from server ', event.data)
   })
   websocket.addEventListener('message', handleADSBMessage)
 }
 
-export function close() {
-  console.log("[close WebSocket connection...]")
-  websocket.removeEventListener('message', handleADSBMessage)
-  websocket.close(1000)
+export function stop() {
+  console.log("[ADSB] stop: CLOSE WebSocket connection...")
+  websocket?.removeEventListener('message', handleADSBMessage)
+  websocket?.close(1000)
 }
 
 

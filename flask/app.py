@@ -4,7 +4,6 @@ from flask_cors import CORS
 import json
 import pprint
 import requests
-import xmltodict
 
 
 KEY_IDENT = 'ident'
@@ -21,13 +20,24 @@ CORS(app)
 
 pp = pprint.PrettyPrinter(indent=2)
 
+def create_flight_data(flight, aircraftTypeResult, airlineInfoResult):
+  return {
+    'ident': flight[KEY_IDENT],
+    'origin': flight[KEY_ORIGIN][KEY_CODE],    
+    'originName': flight[KEY_ORIGIN][KEY_NAME],
+    'originCity': flight[KEY_ORIGIN][KEY_CITY],
+    'destination': flight[KEY_DESTINATION][KEY_CODE],
+    'destinationName': flight[KEY_DESTINATION][KEY_NAME],
+    'destinationCity': flight[KEY_DESTINATION][KEY_CITY],
+    'manufacturer': aircraftTypeResult['manufacturer'],
+    'type': aircraftTypeResult['type'],
+    'description': aircraftTypeResult['description'],
+    'airline': airlineInfoResult['name'],
+    'airlineCallsign': airlineInfoResult['callsign']
+  }
+
 @app.route('/flightinfo/<callsign>')
 def flightinfo(callsign):
-  AERO_API_BASE_URL = 'https://aeroapi.flightaware.com/aeroapi/'
-
-  FLIGHTAWARE_HEADERS = {
-    'x-apikey': app.config["FLIGHTAWARE_API_KEY"]
-    }
 
   AIRLINE_CODE = callsign[0:3] if len(callsign) > 2 else ""
 
@@ -42,17 +52,38 @@ def flightinfo(callsign):
         KEY_ORIGIN: EMPTY_LOCATION,
         KEY_DESTINATION:EMPTY_LOCATION,
   }
+
+  EMPTY_AIRCRAFT_TYPE = {
+    'manufacturer': '',
+    'type': '',
+    'description': ''
+  }
   
-  print(f'~~~ FLIGHT INFO FOR: {callsign} ~~~~')
+  EMPTY_AIRLINE = {
+    'name': '',
+    'callsign': '',
+  }
+
+  if "FLIGHTAWARE_API_KEY" not in app.config or not app.config["FLIGHTAWARE_API_KEY"]:
+    print("WARNING: FlightAware API key not found or empty in configuration")
+    data = create_flight_data(EMPTY_FLIGHT, EMPTY_AIRCRAFT_TYPE, EMPTY_AIRLINE)
+    return jsonify(data)
+  
+  AERO_API_BASE_URL = 'https://aeroapi.flightaware.com/aeroapi/'
+
+  FLIGHTAWARE_HEADERS = {
+    'x-apikey': app.config["FLIGHTAWARE_API_KEY"]
+    }
+
+  print("##############################")
+
+  print(f"Fetching Flight Info for: {callsign}")
 
   flight = EMPTY_FLIGHT
   
-  FlightInfoExUrl = f'{AERO_API_BASE_URL}/flights/{callsign}'
+  FlightInfoExUrl = f"{AERO_API_BASE_URL}/flights/{callsign}"
   r = requests.get(FlightInfoExUrl, headers=FLIGHTAWARE_HEADERS)
   flightsJson = r.json()
-
-  print("@#@@")
-  
 
   if KEY_FLIGHTS in flightsJson and len(flightsJson[KEY_FLIGHTS]) > 0   :
     flight = flightsJson[KEY_FLIGHTS][0]
@@ -61,20 +92,12 @@ def flightinfo(callsign):
     if KEY_DESTINATION not in flight or flight[KEY_DESTINATION] == None:
       flight[KEY_DESTINATION] = EMPTY_LOCATION
 
-
-  print("FLIGHT: ")
-  print(flight)
+  print(f"FLIGHT:\n{flight}")
 
   print("==============================")
 
   aircraftType = flight['aircraft_type'] if 'aircraft_type' in flight else None
 
-  EMPTY_AIRCRAFT_TYPE = {
-    'manufacturer': '',
-    'type': '',
-    'description': ''
-  }
-  
   aircraftTypeResult = EMPTY_AIRCRAFT_TYPE
 
   if aircraftType != None:
@@ -89,13 +112,7 @@ def flightinfo(callsign):
     
   print(aircraftTypeResult)
 
-  print("==============================")
-
-
-  EMPTY_AIRLINE = {
-    'name': '',
-    'callsign': '',
-  }
+  print("------------------------------")
 
   airlineInfoResult = EMPTY_AIRLINE
 
@@ -109,54 +126,19 @@ def flightinfo(callsign):
 
   print(airlineInfoResult)
 
-  print("==============================")
-
-  NOT_AVAILABLE = "n/a"
-
-  data = {
-    'ident': flight[KEY_IDENT] or NOT_AVAILABLE,
-    'origin': flight[KEY_ORIGIN][KEY_CODE],    
-    'originName': flight[KEY_ORIGIN][KEY_NAME],
-    'originCity': flight[KEY_ORIGIN][KEY_CITY],
-    'destination': flight[KEY_DESTINATION][KEY_CODE],
-    'destinationName': flight[KEY_DESTINATION][KEY_NAME],
-    'destinationCity': flight[KEY_DESTINATION][KEY_CITY],
-    'manufacturer': aircraftTypeResult['manufacturer'],
-    'type': aircraftTypeResult['type'],
-    'description': aircraftTypeResult['description'],
-    'airline': airlineInfoResult['name'],
-    'airlineCallsign': airlineInfoResult['callsign']
-  }
-
+  print("******************************")
+  
+  data = create_flight_data(flight, aircraftTypeResult, airlineInfoResult)
   print(data)
-
   return jsonify(data)
 
 @app.route('/metar/<station>')
 def metar(station):
-  METAR_URL = f'https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&hoursBeforeNow=1&format=xml&stationString={station}'
-  print(METAR_URL)
+  METAR_URL = f"https://aviationweather.gov/api/data/metar?ids={station}&format=geojson"  
   r = requests.get(METAR_URL)
-  data = xmltodict.parse(r.text)
-  pp.pprint(data)
-  num_results = int(data['response']['data']['@num_results'])
-  if num_results == 0:
-    print("NO METAR")
-    return jsonify({})
-  elif num_results == 1:
-    print("ONE METAR")
-    metar = data['response']['data']['METAR']
-    print('###################')
-    pp.pprint(metar)
-    print('###################')
-    return jsonify(metar)
-  else:
-    print("MORE THAN ONE METAR")
-    metar = data['response']['data']['METAR'][0]
-    print('###################')
-    pp.pprint(metar)
-    print('###################')
-    return jsonify(metar)
+  return r.json()
 
 
-
+@app.route('/hello')
+def hello():
+  return jsonify({"text": "Hello, World!"})

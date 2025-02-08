@@ -1,27 +1,25 @@
 import SphericalMercator from '@mapbox/sphericalmercator'
 
+const ADSB_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
+  'localhost:30006' :
+  `${import.meta.env.VITE_SKIES_ADSB_RPI_HOST}:30006`
+
+const FLASK_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
+  'localhost:5000' :
+  `${import.meta.env.VITE_SKIES_ADSB_RPI_HOST}:5000`
 
 export const DATA_HOSTS = {
-  "adsb": `ws://${(import.meta.env.VITE_NODE_ENV === "development")
-    ? import.meta.env.VITE_SKIES_ADSB_HOST_DEV
-    : import.meta.env.VITE_SKIES_ADSB_HOST}`,
-  "flight_info": `http://${(import.meta.env.VITE_NODE_ENV === "development")
-    ? import.meta.env.VITE_SKIES_FLIGHTINFO_HOST_DEV
-    : import.meta.env.VITE_SKIES_FLIGHTINFO_HOST}/flightinfo`,
+  "adsb": `ws://${ADSB_HOST}`,
+  "flight_info": `http://${FLASK_HOST}/flightinfo`,
+  "metar": `http://${FLASK_HOST}/metar`,
   "photos": "https://api.planespotters.net/pub/photos/hex"
 }
 
-
-if (import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME) {
-  const cloudflareURL = new URL(`https://${import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_HOSTNAME}`)
-  const currentUrl = new URL(document.location.href)
-  if (currentUrl.hostname === cloudflareURL.hostname) {
-    DATA_HOSTS["adsb"] = import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_ADSB_HOST_URL
-    DATA_HOSTS["flight_info"] = import.meta.env.VITE_OPTIONAL_SKIES_CLOUDFLARE_FLASK_HOST_URL
-  }
-}
-
-console.log(DATA_HOSTS)
+console.log("DATA_HOSTS:")
+console.table(DATA_HOSTS)
+// Object.entries(DATA_HOSTS).forEach(([key, value]) => {
+//   console.log(`\t${key}: ${value}`)
+// })
 
 //
 // ADS-B sends back speed, velocity changes, and altitude in knots and feet.
@@ -29,9 +27,11 @@ console.log(DATA_HOSTS)
 // For display purposes all of the distance, heading, and bearing calculations
 // are calculated in meters using the ADS-B lat/long data.
 //
-// For right now the scale of 1 unit for ever 250 meters seems to look good. 
+// For right now the scale of 1 unit over 250 unit seems to look good. 
 //
-export const SCALE = 1.0 / 250.0
+// TODO improve documentation about how DEFAULT_ZOOM works
+//
+export const DEFAULT_ZOOM = 1.0 / 250.0
 
 
 export const sizes = {
@@ -47,6 +47,32 @@ export const INTERSECTED = {
 
 export const FOLLOW_CAM_DISTANCE = 24.0
 
+export function parseViteEnvBooleanSetting(value) {
+  if (value === undefined) return undefined
+  const setting = value.toLowerCase()
+  if (setting === "true") return true
+  if (setting === "false") return false
+  return undefined
+}
+
+export const settings = {
+  show_all_trails: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_ALL_TRAILS) ?? true,
+  show_aerodromes: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AERODROMES) ?? true,
+  show_origin_labels: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_ORIGINS) ?? true,
+  show_runways: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AERODROMES) ?? true,
+  show_airspace_class_b: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AIRSPACE_CLASS_B) ?? true,
+  show_airspace_class_c: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AIRSPACE_CLASS_C) ?? true,
+  show_airspace_class_d: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AIRSPACE_CLASS_D) ?? true,
+  show_urban_areas: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_URBAN_AREAS) ?? true,
+  show_roads: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_ROADS) ?? true,
+  show_lakes: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_LAKES) ?? true,
+  show_rivers: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_RIVERS) ?? true,
+  show_states_provinces: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_STATES_PROVINCES) ?? true,
+  show_counties: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_COUNTIES) ?? true,
+}
+
+console.log("UTIL SETTINGS: ")
+console.table(settings)
 
 export function isLandscape() {
   return sizes.width > sizes.height && sizes.height < 576
@@ -94,44 +120,39 @@ export function calcBearing(from, to) {
     Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1)
 
   const θ = Math.atan2(y, x)
-  const brng = (θ * 180 / Math.PI + 360) % 360 // in degrees
+  const bearning = (θ * 180 / Math.PI + 360) % 360 // in degrees
 
-  return brng
+  return bearning
 }
 
 const sphericalMercator = new SphericalMercator()
 
-export const origin = {
-  longitude: 0,
-  latitude: 0,
-  x: 0,
-  y: 0
-}
+let originX = undefined
+let originY = undefined
 
-export function initOrigin(lngLat) {
-  [origin.longitude, origin.latitude] = lngLat
-  let [mx, my] = sphericalMercator.forward(lngLat)
-  origin.x = Math.abs(mx)
-  origin.y = Math.abs(my)
+export async function setOrigin(lonLat) {
+  let [mx, my] = sphericalMercator.forward(lonLat)
+  originX = Math.abs(mx)
+  originY = Math.abs(my)
+  console.log("[UTIL] setOrigin:", lonLat, mx, my, originX, originY)
 }
 
 //
-// returns lon/lat into Web Mercator coordinates centered around the UTILS.origin
+// convert lon/lat into Web Mercator XY coordinates centered around the UTILS.origin
 //
 export function getXY(lonLat) {
-
   let [xx, yy] = sphericalMercator.forward(lonLat)
 
   if (xx < 0) {
-    xx += origin.x
+    xx += originX
   } else {
-    xx -= origin.x
+    xx -= originY
   }
 
   if (yy < 0) {
-    yy += origin.y
+    yy += originX
   } else {
-    yy -= origin.y
+    yy -= originY
   }
 
   return [xx, -yy]

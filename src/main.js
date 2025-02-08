@@ -10,6 +10,7 @@ import * as ADSB from './ADSB.js'
 import * as dat from 'dat.gui'
 import * as SKYBOX from './skybox.js'
 
+
 //
 // globals
 //
@@ -29,63 +30,61 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
 
-// stats
+
+//
+// dat.gui
+//
+
+// stats panel
 const stats = new Stats()
 stats.showPanel(0)
 document.body.appendChild(stats.dom)
 stats.dom.style.display = "none"
 
-
-// dat.gui
 const gui = new dat.GUI({
   hidable: true
 })
 gui.hide()
 let showDatGui = false
 
-let settings = {
-  longitude: "",
-  latitude: "",
-  "show stats": false,
-  skybox: 'dawn+dusk',
-  "show map": true,
-  "show grid": false,
-  poi: []
+
+const SETTINGS_SHOW_STATS = 'show stats'
+const SETTINGS_SKYBOX = 'skybox'
+const SETTINGS_SHOW_GRID = 'show polar grid'
+const SETTINGS_SHOW_ALL_TRAILS = 'show all trails'
+const SETTINGS_ORIGIN = 'origin'
+
+const DAT_GUI_SETTINGS = {
+  [SETTINGS_SHOW_STATS]: false,
+  [SETTINGS_SKYBOX]: SKYBOX.DAWN_DUSK,
+  [SETTINGS_SHOW_GRID]: false,
+  [SETTINGS_SHOW_ALL_TRAILS]: UTILS.settings.show_all_trails,
 }
 
-console.log(settings)
-
-const latitudeController = gui.add(settings, 'latitude')
-const longitudeController = gui.add(settings, 'longitude')
-
-const reloadMapButton = {
-  "set origin": function () {
-
-    UTILS.initOrigin([
-      settings.longitude,
-      settings.latitude,
-    ])
-
-    reloadMap()
-  }
-}
-gui.add(reloadMapButton, "set origin")
-
-const showMapController = gui.add(settings, 'show map').onChange(visible => {
-  if (mapGroup !== undefined) {
-    mapGroup.visible = visible
-  }
+MAPS.LAYER_NAMES.forEach(layer => {
+  DAT_GUI_SETTINGS[layer] = false
 })
-const showGridController = gui.add(settings, 'show grid').onChange(isVisible => {
-  console.log(`show grid: ${isVisible}`)
+
+DAT_GUI_SETTINGS[SETTINGS_ORIGIN] = []
+
+console.table("[DAT GUI Settings]: ")
+console.table(DAT_GUI_SETTINGS)
+
+gui.add(DAT_GUI_SETTINGS, SETTINGS_SHOW_GRID).onChange(isVisible => {
+  console.log(`[DAT GUI] - show grid: ${isVisible}`)
   polarGridHelper.visible = isVisible
 })
 
-gui.add(settings, 'skybox', ['dawn+dusk', 'day', 'night']).onChange(timeOfDay => {
+gui.add(DAT_GUI_SETTINGS, SETTINGS_SKYBOX, [
+  SKYBOX.DAWN_DUSK,
+  SKYBOX.DAY,
+  SKYBOX.NIGHT
+]).onChange(timeOfDay => {
+  console.log(`[DAT GUI] - skybox: ${timeOfDay}`)
   skybox.setTexture(timeOfDay)
 })
 
-gui.add(settings, 'show stats').onChange(showStats => {
+gui.add(DAT_GUI_SETTINGS, SETTINGS_SHOW_STATS).onChange(showStats => {
   if (showStats) {
     stats.dom.style.display = ""
   } else {
@@ -94,17 +93,41 @@ gui.add(settings, 'show stats').onChange(showStats => {
 })
 
 
+gui.add(DAT_GUI_SETTINGS, SETTINGS_SHOW_ALL_TRAILS)
+  .onChange(async showAllTrails => {
+    console.log("[DAT GUI] - showAllTrails toggle: ", showAllTrails)
+    await toggleAircraftTrails(showAllTrails)
+  })
+
+async function toggleAircraftTrails(showAllTrails) {
+  Object.values(AIRCRAFT.aircraft).forEach(aircraft => {
+    UTILS.settings.show_all_trails = showAllTrails
+    if (showAllTrails) {
+      aircraft.showTrail()
+    } else {
+      aircraft.hideTrail()
+      // keep the selected aircraft trail visible
+      UTILS.INTERSECTED?.aircraft?.showTrail()
+    }
+  })
+}
+
+
 // Clock
 let clock = new THREE.Clock()
 
 //
 // cameras
 //
-const orbitCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
-const followCamera = new THREE.PerspectiveCamera(75, UTILS.sizes.width / UTILS.sizes.height, 0.1, 10000)
+const CAMERA_FOV = 75
+const CAMERA_NEAR = 0.1
+const CAMERA_FAR = 10000
+const CAMERA_INITIAL_ASPECT = UTILS.sizes.width / UTILS.sizes.height
+const orbitCamera = new THREE.PerspectiveCamera(CAMERA_FOV, CAMERA_INITIAL_ASPECT, CAMERA_NEAR, CAMERA_FAR)
+const followCamera = orbitCamera.clone()
+
 let camera = orbitCamera
 camera.position.z = UTILS.FOLLOW_CAM_DISTANCE
-
 
 // controls
 const controls = new OrbitControls(camera, renderer.domElement)
@@ -121,7 +144,6 @@ controls.addEventListener('change', (event) => {
   light.target.position.copy(controls.target)
 })
 
-
 // axes helper
 const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
@@ -136,8 +158,8 @@ scene.add(light)
 scene.add(light.target)
 
 // skybox
-const skybox = new SKYBOX.Skybox(scene)
-
+const defaultSkybox = import.meta.env.VITE_SETTINGS_DEFAULT_SKYBOX
+const skybox = new SKYBOX.Skybox(scene, defaultSkybox)
 
 // polar grid
 const radius = 500
@@ -149,7 +171,6 @@ const color2 = color1
 const polarGridHelper = new THREE.PolarGridHelper(radius, radials, circles, divisions, color1, color2)
 polarGridHelper.visible = false
 scene.add(polarGridHelper)
-
 
 
 //
@@ -170,9 +191,7 @@ function draw(elapsedTime, deltaTime) {
   // aircraft
   //
 
-  for (const key in AIRCRAFT.aircraft) {
-
-    const aircraft = AIRCRAFT.aircraft[key]
+  Object.entries(AIRCRAFT.aircraft).forEach(([key, aircraft]) => {
 
     const aircraftHasExpired = aircraft.draw(scene, elapsedTime, cameraWorldPos)
 
@@ -182,18 +201,22 @@ function draw(elapsedTime, deltaTime) {
 
       if (groupIntersect.length > 0) {
 
-        console.log("---------------")
-        console.log(`key: ${key}`)
-        console.log(aircraft)
-        console.log(groupIntersect)
-        console.log(`hasValidTelemetry: ${aircraft.hasValidTelemetry()}`)
-        console.log("---------------")
+        // console.log("=============================================")
+        // console.log("Found Raycaster Intersection")
+        // console.log("---------------------------------------------")
+        // console.log("\t", aircraft)
+        // console.log("\t", groupIntersect)
+        // console.log(`\thasValidTelemetry: ${aircraft.hasValidTelemetry()}`)
+
         raycasterPointer.set(null, null)
 
         if (aircraft.hasValidTelemetry() && key !== UTILS.INTERSECTED.key) {
 
           if (UTILS.INTERSECTED?.key) {
             UTILS.INTERSECTED?.aircraft.resetFollowCameraTarget()
+            if (!UTILS.settings.show_all_trails) {
+              UTILS.INTERSECTED?.aircraft.hideTrail()
+            }
             UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftColor
           }
 
@@ -202,30 +225,39 @@ function draw(elapsedTime, deltaTime) {
           UTILS.INTERSECTED.mesh.material.color = AIRCRAFT.airCraftSelectedColor
           UTILS.INTERSECTED.aircraft = aircraft
 
-          console.log("!!! INTERSECT !!!")
+          aircraft.showTrail()
+
+          console.log(`[main] AIRCRAFT INTERSECTED - key: ${key} | callsign: ${aircraft?.callsign}`)
 
           HUD.show(aircraft)
 
-          console.log(UTILS.INTERSECTED)
+          // console.log(UTILS.INTERSECTED)
         }
+
+        // console.log("=============================================")
       }
     }
 
     if (aircraftHasExpired) {
-      if (aircraft.hex === UTILS.INTERSECTED.key) {
-        deselectAirCraftAndHideHUD()
-      }
-      aircraft.remove(scene)
+      removeAircraft(aircraft)
     }
-  }
+  })
 
-  for (const poiLabel of MAPS.poiLabels) {
-    poiLabel.lookAt(camera.position)
-  }
+  // Make sure the map origin labels are always facing the user's camera
+  MAPS.LAYER_GROUPS[MAPS.LAYER_ORIGINS]?.children?.forEach((child) => {
+    child.lookAt(camera.position)
+  })
 
   if (raycasterPointer?.x && raycasterPointer?.y) {
     raycasterPointer.set(null, null)
   }
+}
+
+function removeAircraft(aircraft) {
+  if (aircraft.hex === UTILS.INTERSECTED.key) {
+    deselectAirCraftAndHideHUD()
+  }
+  aircraft.remove(scene)
 }
 
 function deselectAirCraftAndHideHUD() {
@@ -234,11 +266,16 @@ function deselectAirCraftAndHideHUD() {
     UTILS.INTERSECTED.key = null
     UTILS.INTERSECTED.mesh = null
     const aircraft = UTILS.INTERSECTED.aircraft
+
+    if (!UTILS.settings.show_all_trails) {
+      aircraft.hideTrail()
+    }
+
     UTILS.INTERSECTED.aircraft = null
     if (cameraMode === CAMERA_FOLLOW) {
       const target = aircraft.group.getWorldPosition(new THREE.Vector3())
       aircraft.resetFollowCameraTarget()
-      resetGhostCamera(target)
+      resetOrbitCamera(target)
     }
 
     isFollowCamAttached = false
@@ -254,7 +291,7 @@ window.addEventListener('resize', () => {
   UTILS.sizes.width = window.innerWidth
   UTILS.sizes.height = window.innerHeight
 
-  console.log(`window resize - w: ${UTILS.sizes.width} h: ${UTILS.sizes.height}`)
+  console.log(`[main] window resize - w: ${UTILS.sizes.width} h: ${UTILS.sizes.height}`)
 
   orbitCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
   orbitCamera.updateProjectionMatrix()
@@ -400,7 +437,7 @@ function resetCameraToHome() {
     HUD.toggleFollow()
   }
   camera = orbitCamera
-  cameraMode = CAMERA_GHOST
+  cameraMode = CAMERA_ORBIT
   controls.enabled = true
   controls.reset()
 }
@@ -424,7 +461,6 @@ HUD.hud.settingsButton.addEventListener('click', (e) => {
 
 HUD.hud.closeButton.addEventListener('click', (e) => {
   if (!HUD.isVisible()) return
-  console.log("click - HUD.closeButton")
   deselectAirCraftAndHideHUD()
   e.stopPropagation()
 })
@@ -439,16 +475,16 @@ HUD.hud.infoButton.addEventListener('click', (e) => {
 // camera - toggle between orbit control camera and follow camera
 //
 
-const CAMERA_GHOST = "ghost"
+const CAMERA_ORBIT = "orbit"
 const CAMERA_FOLLOW = "follow"
 
-let cameraMode = CAMERA_GHOST
+let cameraMode = CAMERA_ORBIT
 
 HUD.hud.cameraButton.addEventListener('click', (e) => {
   if (!HUD.isVisible()) return
-  if (cameraMode === CAMERA_GHOST) {
-    console.log("INTERSECTED AIRCRAFT: ")
-    console.log(UTILS.INTERSECTED?.aircraft)
+  if (cameraMode === CAMERA_ORBIT) {
+    // console.log("INTERSECTED AIRCRAFT: ")
+    // console.log(UTILS.INTERSECTED?.aircraft)
     cameraMode = CAMERA_FOLLOW
     followCamera.position.copy(camera.position)
     followCamera.lookAt(camera.lookAt)
@@ -457,19 +493,19 @@ HUD.hud.cameraButton.addEventListener('click', (e) => {
   } else {
     deselectAirCraftAndHideHUD()
   }
-  console.log(`toggle camera... -> ${cameraMode}`)
+  console.log(`[HUD] toggle camera - mode: ${cameraMode}`)
   HUD.toggleFollow()
   e.stopPropagation()
 })
 
 
-function resetGhostCamera(target) {
+function resetOrbitCamera(target) {
   orbitCamera.position.copy(camera.position)
   controls.target.set(target.x, target.y, target.z)
   controls.update()
   controls.enabled = true
   camera = orbitCamera
-  cameraMode = CAMERA_GHOST
+  cameraMode = CAMERA_ORBIT
 }
 
 //
@@ -532,156 +568,16 @@ function updateCamera() {
 //
 function handleVisibilityChange() {
   if (document.visibilityState === "hidden") {
-    console.log("pause simulation...")
-    ADSB.close()
+    console.log("[main] handleVisibilityChange: PAUSE SIMULATION")
+    ADSB.stop()
     window.cancelAnimationFrame(animationFrameRequestId)
   } else {
-    console.log("resume simulation...")
+    console.log("[main] handleVisibilityChange: RESUME SIMULATION")
     ADSB.start(scene, clock)
     animationFrameRequestId = window.requestAnimationFrame(animate)
   }
 }
 document.addEventListener('visibilitychange', handleVisibilityChange, false)
-
-
-
-//
-// load maps, origin, and start websocket connection
-//
-
-let mapGroup = undefined
-let poi = undefined
-let poiController = undefined
-
-function loadFallbackGridPlane() {
-  gui.remove(showMapController)
-  showGridController.setValue(true)
-
-  //
-  // Fallback to default origin
-  //
-  UTILS.initOrigin([
-    import.meta.env.VITE_DEFAULT_ORIGIN_LONGITUDE,
-    import.meta.env.VITE_DEFAULT_ORIGIN_LATITUDE,
-  ])
-  console.error(`FALL BACK TO DEFAULT ORIGIN: `)
-  console.error(UTILS.origin)
-
-  longitudeController.setValue(import.meta.env.VITE_DEFAULT_ORIGIN_LONGITUDE)
-  latitudeController.setValue(import.meta.env.VITE_DEFAULT_ORIGIN_LATITUDE)
-
-  //
-  // Starting parsing ADSB messages
-  //
-
-  ADSB.start(scene, clock)
-
-  // enable HUD
-  HUD.enableHUD()
-
-  resetCameraToHome()
-}
-
-if (import.meta.env.VITE_OPTIONAL_GEOJSON_MAP) {
-
-  const loader = new THREE.FileLoader()
-  loader.load(`geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}`,
-    (data) => {
-
-      console.log(`[ ${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - loaded... ]`)
-
-      //
-      // init map and POI
-      //
-
-      const res = MAPS.init(scene, JSON.parse(data))
-      console.log(res)
-      mapGroup = res.mapGroup
-      poi = res.poi
-
-      console.log(Object.keys(poi))
-
-      poiController = gui.add(settings, 'poi', Object.keys(poi)).onChange(key => {
-        if (key !== MAPS.POI_KEY_CURRENT_LNG_LAT) {
-          console.log(poi[key])
-          const lng = poi[key].longitude
-          const lat = poi[key].latitude
-          UTILS.initOrigin([
-            lng, lat
-          ])
-          longitudeController.setValue(lng)
-          latitudeController.setValue(lat)
-        }
-        reloadMap()
-      })
-      poiController.setValue(res.originId)
-
-
-      //
-      // Starting parsing ADSB messages
-      //
-
-      ADSB.start(scene, clock)
-
-      // enable HUD
-      HUD.enableHUD()
-    },
-    (xhr) => {
-      if (xhr.total > 0) {
-        console.log(`${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
-      }
-    },
-    (err) => {
-      console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}'`)
-      console.error(err)
-      console.error('[***************]')
-
-      loadFallbackGridPlane()
-    }
-  )
-} else {
-  loadFallbackGridPlane()
-}
-
-function reloadMap() {
-  console.log('[reloadMap...]')
-  scene.remove(mapGroup)
-  mapGroup = undefined
-  const loader = new THREE.FileLoader()
-  loader.load(`geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}`,
-    (data) => {
-
-      console.log(`[ ${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - loaded... ]`)
-
-      //
-      // init map and POI
-      //
-
-      const res = MAPS.init(scene, JSON.parse(data), true)
-      mapGroup = res.mapGroup
-      console.log(res)
-
-      resetCameraToHome()
-    },
-    (xhr) => {
-      if (xhr.total > 0) {
-        console.log(`${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP} - ` + (xhr.loaded / xhr.total * 100) + '% loaded')
-      }
-    },
-    (err) => {
-      console.error(`[*** Error Loading Map ***]`)
-      console.error(`\tunable to load: 'geojson/${import.meta.env.VITE_OPTIONAL_GEOJSON_MAP}'`)
-      console.error(err)
-      console.error('[***************]')
-
-      loadFallbackGridPlane()
-    }
-  )
-}
-
-
-
 
 //
 // animate
@@ -704,4 +600,86 @@ const animate = function () {
   stats.end()
 }
 
-animate()
+//
+// stop ADSB, rebuild maps, update origin, update camera, update UI, start ADSB
+//
+async function updateOriginAndRebuildMapLayers(key) {
+
+  ADSB.stop()
+
+  console.log("[main] - updateOriginAndReloadMapLayers: ")
+  console.table(MAPS.ORIGINS[key])
+
+  // clear map layers
+  Object.entries(MAPS.LAYER_GROUPS).forEach(([key, layer]) => {
+    console.log(`\tremoving layer: ${key}`)
+    scene.remove(layer)
+  })
+
+  // clear aircraft
+  Object.values(AIRCRAFT.aircraft).forEach(aircraft => {
+    removeAircraft(aircraft)
+  })
+
+  // rebuild map layers with new origin
+  const lonLat = [
+    MAPS.ORIGINS[key].lon,
+    MAPS.ORIGINS[key].lat
+  ]
+
+  await UTILS.setOrigin(lonLat)
+
+  await MAPS.buildMapLayers(scene)
+
+  resetCameraToHome()
+
+  ADSB.start(scene, clock)
+
+  HUD.enableHUD()
+}
+
+//
+// Initialize Simulation - start rendering, 
+//
+
+async function initSimulation() {
+  console.log("[main] - initSimulation")
+
+  animate()
+
+  // Initialize Map data
+  const result = await MAPS.init()
+  if (!result) {
+    console.error("\tERROR: Failed to initialize map data!")
+    return
+  }
+
+  // build controller for changing origins
+  const datGuiOriginController = gui.add(
+    DAT_GUI_SETTINGS,
+    SETTINGS_ORIGIN,
+    Object.keys(MAPS.ORIGINS)
+  ).onChange(key => {
+    updateOriginAndRebuildMapLayers(key)
+  })
+
+  // build map layers toggle
+  console.log("[main] - buildMapLayersToggle gui")
+
+  const layersFolder = gui.addFolder('Map Layers')
+
+  Object.keys(MAPS.LAYER_GROUPS).forEach(key => {
+    DAT_GUI_SETTINGS[key] = MAPS.isLayerVisible(key)
+    layersFolder.add(DAT_GUI_SETTINGS, key).onChange(isVisible => {
+      const layer = MAPS.LAYER_GROUPS[key]
+      console.log(`[DAT GUI] toggle layer - visibility: ${key} | isVisible: ${isVisible}`)
+      layer.visible = isVisible
+      layer.needsUpdate = true
+    })
+  })
+
+  // select default origin as the simulation starting view point
+  datGuiOriginController.setValue(MAPS.DEFAULT_ORIGIN)
+}
+
+initSimulation()
