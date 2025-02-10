@@ -186,7 +186,7 @@ VITE_SKIES_ADSB_RPI_USERNAME=pi
 VITE_SKIES_ADSB_RPI_HOST=192.168.1.123
 
 # set default skybox to night
-VITE_DEFAULT_SKYBOX=NIGHT
+VITE_SETTINGS_DEFAULT_SKYBOX=NIGHT
 # by default do not show all aircraft trails at the same time
 VITE_SETTINGS_SHOW_ALL_TRAILS=false
 # by default do not show roads
