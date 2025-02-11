@@ -61,6 +61,8 @@ skies-adsb focuses on simplicity and avoids replicating features of existing pla
 
 - Generates GeoJSON map layers from Natural Earth, FAA, and OpenStreetMap data
 
+# Tech Stack
+
 ## Languages
 
 - JavaScript

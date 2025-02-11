@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3] - 2025-02-11
+
+### Changed
+
+- Updated project README.md
+- Updated DEVELOPMENT.md
+
 ## [2.0.2] - 2025-02-11
 
 ### Changed

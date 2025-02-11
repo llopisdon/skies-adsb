@@ -8,7 +8,14 @@ _image of the skies-adsb app running in a browser showing air traffic around KMI
 
 skies-adsb transforms your browser into a real-time 3D air traffic display. Using ADS-B data from an RTL-SDR receiver, you can explore local air traffic, surrounding airspace, and geography with customizable 3D maps.
 
-Built with WebGL, HTML5, CSS, and JavaScript, this web app runs on all major modern browsers including Chrome, Firefox, and Safari.
+Built with:
+
+- WebGL (Three.js)
+- HTML5
+- CSS
+- JavaScript
+
+Runs on all major modern browsers (Chrome, Firefox, Safari).
 
 ## Features
 
@@ -36,6 +43,12 @@ skies-adsb requires a build process prior to deployment and cannot be run direct
 
 For complete build and installation instructions, see [INSTALL.md](docs/INSTALL.md).
 
+### NOTE: Version 2.x Release
+
+There were breaking changes from **1.x** to **2.x.** You will need to reinstall the app if you were running the 1.x version.
+
+Please see the [CHANGELOG.md](CHANGELOG.md) for details.
+
 # Contributing
 
 ## Development
@@ -51,6 +64,14 @@ Use the issue tracker to:
 - Suggest improvements
 
 Please include relevant details and steps to reproduce when submitting issues.
+
+## Community Screenshots
+
+Please share screenshots of your skies-adsb installation in action! To submit a screenshot please open an issue and label it:
+
+```
+screenshot
+```
 
 # Support This Project
 
