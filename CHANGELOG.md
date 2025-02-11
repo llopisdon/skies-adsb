@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2] - 2025-02-11
+
+### Changed
+
+- Fixed typo in BUILD-MAPS.md
+
 ## [2.0.1] - 2025-02-11
 
 ### Added

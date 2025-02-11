@@ -77,7 +77,7 @@ To adjust the coverage area:
 cd /path/to/skies-adsb
 cd maps
 chmod +x build-map-layers.sh
-./build-map-layers.sh --default-origin-distance 5
+./build-map-layers.sh --origin-distance 5
 ```
 
 **Important:**
