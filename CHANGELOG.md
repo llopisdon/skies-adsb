@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.1] - 2025-02-11
+
+### Added
+
+- Build-map-layers.sh bash automation script
+
+### Changed
+
+- Misc documentation typo fixes
+- Updated map layer building instructions to use build-map-layers.sh script
+
 ## [2.0.0] - 2025-02-02
 
 ### Added
@@ -35,13 +46,13 @@
 
 ### Changed
 
-- misc refactoring of main.js
+- Misc refactoring of main.js
 
 ## [1.3.1] - 2024-12-24
 
 ### Changed
 
-- misc refactoring of aircraft.js
+- Misc refactoring of aircraft.js
 
 ## [1.3.0] - 2024-12-23
 

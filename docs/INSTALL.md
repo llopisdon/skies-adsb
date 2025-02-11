@@ -128,7 +128,7 @@ pip3 install websockify
 
 # Step 6 - Install Node.js and npm
 
-The skies-adsb web app requires Node.js and npm. If you already have these installed, you can skip to Step 6.
+The skies-adsb web app requires Node.js and npm. If you already have these installed, you can skip to Step 7.
 
 For a clean Node.js installation, use nvm (Node Version Manager) - the recommended way to install and manage Node.js:
 

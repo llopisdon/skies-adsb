@@ -75,9 +75,9 @@ This step is necessary to build map layers specific to your ADS-B installation l
 
 ```shell
 cd /path/to/skies-adsb
-source .venv/bin/activate
 cd maps
-python3 build-map-layers.py
+chmod +x build-map-layers.sh
+./build-map-layers.sh
 ```
 
 for more information see this document:

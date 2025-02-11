@@ -20,43 +20,28 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 DEFAULT_ORIGIN_DISTANCE = 2.0
 
 parser = argparse.ArgumentParser(description="Build map layers for an lat/lon origin and bounding box")
+parser.add_argument("--origin-lat", type=float, default=None, help="Latitude of origin")
+parser.add_argument("--origin-lon", type=float, default=None, help="Longitude of origin")
 parser.add_argument("--origin-distance", type=float, default=DEFAULT_ORIGIN_DISTANCE, help="Distance from origin (in degrees) used to build bounding box")
 parser.add_argument("--show-geopandas-warnings", type=bool, default=False, help="Show Geopandas warnings")
-parser.add_argument("--build-110m-maps-only", type=bool, default=False, help="Build 110m maps only")
+parser.add_argument("--build-110m-maps", type=bool, default=False, help="Build 110m maps instead of 10m maps")
 
 args = parser.parse_args()
-
-#
-# Load environment variables from .env file
-#
-def load_dot_env_file(env_path='../src/.env'):
-    env_vars = {}
-    try:
-        with open(env_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    key, value = line.split('=', 1)
-                    env_vars[key.strip()] = value.strip().strip('"\'')
-        return env_vars
-    except FileNotFoundError:
-        print(f"Warning: {env_path} file not found")
-        return {}
-    except Exception as e:
-        print(f"Error reading {env_path}: {e}")
-        return {}
-    
-dot_env_vars = load_dot_env_file()
 
 #
 # setup default origin latitude and longitude
 #
 
-ORIGIN_LAT = float(dot_env_vars.get("VITE_DEFAULT_ORIGIN_LATITUDE"))
-ORIGIN_LON = float(dot_env_vars.get("VITE_DEFAULT_ORIGIN_LONGITUDE"))
+origin_lat = os.environ.get("VITE_DEFAULT_ORIGIN_LATITUDE") or args.origin_lat
+origin_lon = os.environ.get("VITE_DEFAULT_ORIGIN_LONGITUDE") or args.origin_lon
 
-if ORIGIN_LAT is None or ORIGIN_LON is None:
-    print("Error: Default origin latitude and longitude not found in .env file")
+if origin_lat is not None and origin_lon is not None:
+    ORIGIN_LAT = float(origin_lat)
+    ORIGIN_LON = float(origin_lon)
+else:
+    print("Error: Default origin latitude and longitude not found.")
+    parser.print_help()
+    print()
     exit(1)
 
 print("############################################")
@@ -148,7 +133,7 @@ MAP_LAYERS_110M = [
     ("data/110m_physical/ne_110m_rivers_lake_centerlines.shp", "rivers"),
 ]
 
-if args.build_110m_maps_only:
+if args.build_110m_maps:
     MAP_LAYERS = MAP_LAYERS_110M
 else:
     MAP_LAYERS = MAP_LAYERS_10M
@@ -156,8 +141,8 @@ else:
 print("############################################")
 print("Generating Natural Earth Layers...")
 
-if (args.build_110m_maps_only):
-    print("\n\tBuilding 110m maps only")
+if (args.build_110m_maps):
+    print("\n\tBuilding 110m maps")
 else:
     print("\n\tBuilding 10m maps")
 

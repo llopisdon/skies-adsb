@@ -65,16 +65,19 @@ Map layers are built using the `build-map-layers.py` script. By default, it gene
 Example for your default origin:
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
-cd maps/
-python build-map-layers.py
+cd /path/to/skies-adsb
+cd maps
+chmod +x build-map-layers.sh
+./build-map-layers.sh
 ```
 
 To adjust the coverage area:
 
 ```shell
-python build-map-layers.py --default-origin-distance 5
+cd /path/to/skies-adsb
+cd maps
+chmod +x build-map-layers.sh
+./build-map-layers.sh --default-origin-distance 5
 ```
 
 **Important:**

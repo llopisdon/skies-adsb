@@ -229,9 +229,9 @@ This step is necessary to build map layers specific to your ADS-B installation l
 
 ```shell
 cd /path/to/skies-adsb
-source .venv/bin/activate
-cd /path/to/skies-adsb/maps
-python3 build-map-layers.py
+cd maps
+chmod +x build_map_layers.sh
+./build-map-layers.sh
 ```
 
 for more information see this document:
