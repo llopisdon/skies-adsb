@@ -14,6 +14,7 @@ Built with:
 - HTML5
 - CSS
 - JavaScript
+- Python 3
 
 Runs on all major modern browsers (Chrome, Firefox, Safari).
 
