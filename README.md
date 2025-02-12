@@ -10,11 +10,11 @@ skies-adsb transforms your browser into a real-time 3D air traffic display. Usin
 
 Built with:
 
-- WebGL (Three.js)
+- JavaScript
 - HTML5
 - CSS
-- JavaScript
 - Python 3
+- WebGL (Three.js)
 
 Runs on all major modern browsers (Chrome, Firefox, Safari).
 
