@@ -1,10 +1,8 @@
 # skies-adsb
 
-### ✈️ [Current Version: 2.0.4](CHANGELOG.md) 🚁
-
 ![Screenshot](docs/screenshot.png)
 
-_Image of the skies-adsb app running in a browser showing air traffic around KMIA in Miami, FL_
+_image of the skies-adsb app running in a browser showing air traffic around KMIA in Miami, FL_
 
 # Introduction
 
@@ -34,7 +32,7 @@ Runs on all major modern browsers (Chrome, Firefox, Safari).
 
 ![Gif Recording](docs/skies-adsb-v2-recording.gif)
 
-_Recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
+_recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
 
 ![Custom Map Layers](docs/custom-map-layers.png)
 
@@ -70,7 +68,7 @@ Please include relevant details and steps to reproduce when submitting issues.
 
 ## Community Screenshots
 
-Please share screenshots of your skies-adsb installation in action! To submit a screenshot please open an issue and label it:
+Please share screenshots of your skies-adsb installation in action! To submit a screenshot please open an issue, attach a screenshot, and label it:
 
 ```
 screenshot
