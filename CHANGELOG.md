@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.5] - 2025-02-15
+
+## Changed
+
+- Updated project README.md
+
 ## [2.0.4] - 2025-02-15
 
 ## Added
