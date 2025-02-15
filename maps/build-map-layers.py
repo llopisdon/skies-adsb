@@ -25,6 +25,7 @@ parser.add_argument("--origin-lon", type=float, default=None, help="Longitude of
 parser.add_argument("--origin-distance", type=float, default=DEFAULT_ORIGIN_DISTANCE, help="Distance from origin (in degrees) used to build bounding box")
 parser.add_argument("--show-geopandas-warnings", type=bool, default=False, help="Show Geopandas warnings")
 parser.add_argument("--build-110m-maps", type=bool, default=False, help="Build 110m maps instead of 10m maps")
+parser.add_argument("--skip-aerodromes", type=bool, default=False, help="Skip building aerodrome layers and origins")
 
 args = parser.parse_args()
 
@@ -215,8 +216,14 @@ OVERPASS_QUERIES = [
 ]
 
 for osm_value, output_file_name in OVERPASS_QUERIES:
-    print(f"\tRunning Overpass query for {osm_value}...")
-    generate_aerodrome_runway_geometry(osm_value, output_file_name)
+    if not args.skip_aerodromes:
+        print(f"\tRunning Overpass query for {osm_value}...")
+        generate_aerodrome_runway_geometry(osm_value, output_file_name)
+    else:
+        print(f"\tSkipping Overpass query for {osm_value}...")
+        with open(output_file_name, 'w') as f:
+            json.dump({}, f)
+
 
 print("============================================")
 
@@ -248,7 +255,12 @@ def get_aerodrome_origins_as_lat_lon():
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
+if not args.skip_aerodromes:
+    get_aerodrome_origins_as_lat_lon()
+else:
+    print(f"\tSkipping Overpass query for OSM Aerodrome Origins...")
+    with open(AERODROME_ORIGINS_FILENAME, 'w') as f:
+        json.dump({}, f)
 
-get_aerodrome_origins_as_lat_lon()
 
 print("============================================")

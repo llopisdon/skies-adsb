@@ -25,6 +25,7 @@ Follow each step carefully to set up the core dependencies and configuration nee
 - [Step 8 - Download Natural Earth Datasets](#step-8---download-natural-earth-datasets)
 - [Step 9 - Download FAA Airspace Shapefile](#step-9---download-faa-airspace-shapefile)
 - [Step 10 - Extract the Datasets](#step-10---extract-the-datasets)
+- [Step 11 - Configure Visualization Settings](#step-11---configure-visualization-settings)
 - [Next Steps](#next-steps)
 
 # Prerequisites
@@ -118,12 +119,7 @@ This step setups up a Python Virtual Environment with all the dependencies neede
 cd /path/to/skies-adsb
 python3 -m venv .venv
 source .venv/bin/activate
-pip3 install flask
-pip3 install flask-cors
-pip3 install geopandas
-pip3 install osmtogeojson
-pip3 install requests
-pip3 install websockify
+pip3 install flask flask-cors geopandas osmtogeojson requests websockify
 ```
 
 # Step 6 - Install Node.js and npm
@@ -214,6 +210,30 @@ The install-datasets.sh script will extract the Natural Earth and FAA Airspace d
 cd /path/to/skies-adsb/maps/data
 ./install-datasets.sh
 ```
+
+# Step 11 - Configure Visualization Settings
+
+The following table lists the default visualization settings in **src/utils.js**. These settings control various aspects of the 3D visualization including camera behavior, skybox dimensions, and aircraft tracking parameters.
+
+| Constant                        | Default Value | Description                                            |
+| ------------------------------- | ------------- | ------------------------------------------------------ |
+| DEFAULT_SCALE                   | 1.0 / 250.0   | Default scale for geometry                             |
+| CAMERA_FOV                      | 75            | Camera field of view in degrees                        |
+| CAMERA_NEAR                     | 0.1           | Camera Near clipping plane distance                    |
+| CAMERA_FAR                      | 10000.0       | Camera Far clipping plane distance                     |
+| SKYBOX_RADIUS                   | 3000.0        | Radius of the skybox (must be ≤ half of CAMERA_FAR)    |
+| FOLLOW_CAM_DISTANCE             | 24.0          | Default follow camera distance from aircraft           |
+| POLAR_GRID_RADIUS               | 3000.0        | Radius of the polar grid (should match SKYBOX_RADIUS)  |
+| POLAR_GRID_RADIALS              | 16            | Number of radial lines in the polar grid               |
+| POLAR_GRID_CIRCLES              | 5             | Number of concentric circles in the polar grid         |
+| POLAR_DIVISIONS                 | 64            | Number of divisions in the polar grid                  |
+| POLAR_GRID_COLOR_1              | "#81efff"     | Primary color for polar grid                           |
+| POLAR_GRID_COLOR_2              | "#81efff"     | Secondary color for polar grid                         |
+| AIRCRAFT_TTL                    | 15.0          | Aircraft time-to-live in seconds                       |
+| AIRCRAFT_TRAIL_UPDATE_FREQUENCY | 75            | Trail update frequency based on telemetry update count |
+| AIRCRAFT_MAX_TRAIL_POINTS       | 5000          | Maximum number of points in aircraft trail             |
+
+These values can be modified in the **src/util.js** file to adjust the visualization behavior to your preferences. Note that some values are interdependent (e.g., SKYBOX_RADIUS must be less than or equal to half of CAMERA_FAR).
 
 # Next Steps
 

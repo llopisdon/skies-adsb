@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as UTILS from './utils.js'
 
 //
 // skybox
@@ -86,7 +87,7 @@ export class Skybox {
       this.textures[key] = texture
     })
 
-    const geometry = new THREE.IcosahedronGeometry(3000, 2)
+    const geometry = new THREE.IcosahedronGeometry(UTILS.SKYBOX_RADIUS, 2)
     this.mesh = new THREE.Mesh(
       geometry,
       new THREE.MeshBasicMaterial(

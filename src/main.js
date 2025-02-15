@@ -2,8 +2,8 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'stats.js'
-import * as MAPS from './maps.js'
 import * as UTILS from './utils.js'
+import * as MAPS from './maps.js'
 import { HUD } from './HUD.js'
 import * as AIRCRAFT from './aircraft.js'
 import * as ADSB from './ADSB.js'
@@ -119,11 +119,9 @@ let clock = new THREE.Clock()
 //
 // cameras
 //
-const CAMERA_FOV = 75
-const CAMERA_NEAR = 0.1
-const CAMERA_FAR = 10000
 const CAMERA_INITIAL_ASPECT = UTILS.sizes.width / UTILS.sizes.height
-const orbitCamera = new THREE.PerspectiveCamera(CAMERA_FOV, CAMERA_INITIAL_ASPECT, CAMERA_NEAR, CAMERA_FAR)
+const orbitCamera = new THREE.PerspectiveCamera(
+  UTILS.CAMERA_FOV, CAMERA_INITIAL_ASPECT, UTILS.CAMERA_NEAR, UTILS.CAMERA_FAR)
 const followCamera = orbitCamera.clone()
 
 let camera = orbitCamera
@@ -149,8 +147,8 @@ const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
 
 // scene lighting
-const amientLight = new THREE.AmbientLight(0x4c4c4c)
-scene.add(amientLight)
+const ambientLight = new THREE.AmbientLight(0x4c4c4c)
+scene.add(ambientLight)
 
 const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.copy(camera.position)
@@ -162,13 +160,14 @@ const defaultSkybox = import.meta.env.VITE_SETTINGS_DEFAULT_SKYBOX
 const skybox = new SKYBOX.Skybox(scene, defaultSkybox)
 
 // polar grid
-const radius = 500
-const radials = 16
-const circles = 5
-const divisions = 64
-const color1 = "#81efff"
-const color2 = color1
-const polarGridHelper = new THREE.PolarGridHelper(radius, radials, circles, divisions, color1, color2)
+const polarGridHelper = new THREE.PolarGridHelper(
+  UTILS.POLAR_GRID_RADIUS,
+  UTILS.POLAR_GRID_RADIALS,
+  UTILS.POLAR_GRID_CIRCLES,
+  UTILS.POLAR_DIVISIONS,
+  UTILS.POLAR_GRID_COLOR_1,
+  UTILS.POLAR_GRID_COLOR_2
+)
 polarGridHelper.visible = false
 scene.add(polarGridHelper)
 
@@ -337,17 +336,8 @@ function onPointerDown(event) {
 document.addEventListener('pointerdown', onPointerDown)
 
 //
-// Follow Camera Touch Controls Constants
+// Follow Camera Touch Controls
 //
-
-const DAMPING_FACTOR = 0.95
-const VELOCITY_THRESHOLD = 0.001
-const DIRECTION_CHANGE_RESISTANCE = 0.7
-const VELOCITY_SMOOTHING = 0.3
-
-const minPolarAngle = Math.PI / 4 // 45 degrees
-const maxPolarAngle = (3 * Math.PI) / 4 // 135 degrees
-
 
 function onPointerMove(event) {
   if (event.isPrimary === false || !isFollowCamAttached) return
@@ -372,27 +362,27 @@ function onPointerMove(event) {
     Math.sign(targetVelocity) !==
     Math.sign(aircraftFollowCam.userData.rotationVelocity)
   ) {
-    targetVelocity *= DIRECTION_CHANGE_RESISTANCE
+    targetVelocity *= UTILS.FOLLOW_CAM_DIRECTION_CHANGE_RESISTANCE
   }
 
   // Smooth velocity transitions
   aircraftFollowCam.userData.rotationVelocity =
-    aircraftFollowCam.userData.rotationVelocity * (1 - VELOCITY_SMOOTHING) +
-    targetVelocity * VELOCITY_SMOOTHING
+    aircraftFollowCam.userData.rotationVelocity * (1 - UTILS.FOLLOW_CAM_VELOCITY_SMOOTHING) +
+    targetVelocity * UTILS.FOLLOW_CAM_VELOCITY_SMOOTHING
 
   // Apply minimum threshold
-  if (Math.abs(aircraftFollowCam.userData.rotationVelocity) < VELOCITY_THRESHOLD) {
+  if (Math.abs(aircraftFollowCam.userData.rotationVelocity) < UTILS.FOLLOW_CAM_VELOCITY_THRESHOLD) {
     aircraftFollowCam.userData.rotationVelocity = 0
   }
 
   // Update spherical coordinates with dampening
   aircraftFollowCam.userData.sphericalCoords.theta +=
-    aircraftFollowCam.userData.rotationVelocity * DAMPING_FACTOR
+    aircraftFollowCam.userData.rotationVelocity * UTILS.FOLLOW_CAM_DAMPING_FACTOR
   aircraftFollowCam.userData.sphericalCoords.phi = THREE.MathUtils.clamp(
     aircraftFollowCam.userData.sphericalCoords.phi +
-    deltaY * Math.PI * DAMPING_FACTOR,
-    minPolarAngle,
-    maxPolarAngle
+    deltaY * Math.PI * UTILS.FOLLOW_CAM_DAMPING_FACTOR,
+    UTILS.FOLLOW_CAM_MIN_POLAR_ANGLE,
+    UTILS.FOLLOW_CAM_MAX_POLAR_ANGLE
   )
 
   // Update position
@@ -547,11 +537,11 @@ function updateCamera() {
     light.target.position.copy(followCamTargetPos)
 
     //
-    // Apply momentum dampening
+    // Apply momentum damping
     //
     if (isFollowCamAttached) {
       const aircraftFollowCam = aircraft.followCam
-      aircraftFollowCam.userData.rotationVelocity *= DAMPING_FACTOR
+      aircraftFollowCam.userData.rotationVelocity *= UTILS.FOLLOW_CAM_DAMPING_FACTOR
       aircraftFollowCam.userData.sphericalCoords.theta +=
         aircraftFollowCam.userData.rotationVelocity
     }

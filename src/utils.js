@@ -1,4 +1,4 @@
-import SphericalMercator from '@mapbox/sphericalmercator'
+import { SphericalMercator } from '@mapbox/sphericalmercator'
 
 const ADSB_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
   'localhost:30006' :
@@ -29,9 +29,78 @@ console.table(DATA_HOSTS)
 //
 // For right now the scale of 1 unit over 250 unit seems to look good. 
 //
-// TODO improve documentation about how DEFAULT_ZOOM works
+// TODO improve documentation about how DEFAULT_SCALE works
 //
-export const DEFAULT_ZOOM = 1.0 / 250.0
+export const DEFAULT_SCALE = 1.0 / 250.0
+
+//
+// Camera Default Settings
+//
+// NOTE:
+// CAMERA_FAR should always be at least double the SKYBOX_RADIUS
+//
+export const CAMERA_FOV = 75
+export const CAMERA_NEAR = 0.1
+export const CAMERA_FAR = 10000.0
+
+//
+// Skybox Radius
+//
+// NOTE:
+// SKYBOX_RADIUS should be less than or equal to half of the camera far plane
+//
+export const SKYBOX_RADIUS = 3000.0
+
+//
+// Follow Camera Default Settings
+//
+// NOTE:
+// min polar angle: 45 degrees
+// max polar angle: 135 degrees
+//
+export const FOLLOW_CAM_DISTANCE = 24.0
+export const FOLLOW_CAM_DAMPING_FACTOR = 0.95
+export const FOLLOW_CAM_VELOCITY_THRESHOLD = 0.001
+export const FOLLOW_CAM_DIRECTION_CHANGE_RESISTANCE = 0.7
+export const FOLLOW_CAM_VELOCITY_SMOOTHING = 0.3
+export const FOLLOW_CAM_MIN_POLAR_ANGLE = Math.PI / 4
+export const FOLLOW_CAM_MAX_POLAR_ANGLE = (3 * Math.PI) / 4
+
+
+//
+// Polar Grid Default Settings
+//
+// NOTE: 
+// Polar Grid Radius should ideally match the SKYBOX_RADIUS
+//
+export const POLAR_GRID_RADIUS = 3000.0
+export const POLAR_GRID_RADIALS = 16
+export const POLAR_GRID_CIRCLES = 5
+export const POLAR_DIVISIONS = 64
+export const POLAR_GRID_COLOR_1 = "#81efff"
+export const POLAR_GRID_COLOR_2 = "#81efff"
+
+//
+// Aircraft Default Settings
+//
+
+//
+// Aircraft time-to-live in seconds
+//
+// NOTE: 
+// Adjust this value as needed. Use increments of +/- 5 seconds. 
+// If you find that aircraft are disappearing too quickly try increasing this value. 
+// If you find that aircraft are not disappearing quickly enough try decreasing this value. 
+// The best value is dependent on how much traffic you have in your area.
+//
+export const AIRCRAFT_TTL = 15.0
+// trail update frequency is based on number of valid telemetry updates that have occurred
+export const AIRCRAFT_TRAIL_UPDATE_FREQUENCY = 75
+export const AIRCRAFT_MAX_TRAIL_POINTS = 5000
+// guards against sudden jumps tail in altitude due to bad ADS-B data
+export const AIRCRAFT_TRAIL_UPDATE_Y_POS_THRESHOLD = 1000.0 * DEFAULT_SCALE
+
+
 
 
 export const sizes = {
@@ -45,7 +114,6 @@ export const INTERSECTED = {
   aircraft: null,
 }
 
-export const FOLLOW_CAM_DISTANCE = 24.0
 
 export function parseViteEnvBooleanSetting(value) {
   if (value === undefined) return undefined
@@ -120,9 +188,9 @@ export function calcBearing(from, to) {
     Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1)
 
   const θ = Math.atan2(y, x)
-  const bearning = (θ * 180 / Math.PI + 360) % 360 // in degrees
+  const bearing = (θ * 180 / Math.PI + 360) % 360 // in degrees
 
-  return bearning
+  return bearing
 }
 
 const sphericalMercator = new SphericalMercator()

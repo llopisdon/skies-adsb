@@ -25,10 +25,13 @@ Custom map layers are also supported. Please review the automated process before
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Table of Contents](#table-of-contents)
 - [Dependencies](#dependencies)
 - [Step 1 - Prerequisites](#step-1---prerequisites)
 - [Step 2 - Build Map Layers for Your Location](#step-2---build-map-layers-for-your-location)
 - [Appendix](#appendix)
+  - [Large Coverage Areas](#large-coverage-areas)
+  - [Creating Lower Resolution Maps](#creating-lower-resolution-maps)
   - [Map Layer Output Files](#map-layer-output-files)
     - [Natural Earth Layers](#natural-earth-layers)
     - [FAA Airspace Boundaries](#faa-airspace-boundaries)
@@ -71,6 +74,12 @@ chmod +x build-map-layers.sh
 ./build-map-layers.sh
 ```
 
+After building the layers, you can run the skies-adsb simulation.
+
+## Appendix
+
+### Large Coverage Areas
+
 To adjust the coverage area:
 
 ```shell
@@ -82,14 +91,21 @@ chmod +x build-map-layers.sh
 
 **Important:**
 
-- Coverage areas >2 degrees may hit Overpass API rate limits or timeout
-- For larger areas, use QGIS to:
-  1. Generate multiple 2x2 degree sections
-  2. Combine them into unified layers
+For coverage areas larger than 2 degrees, you will likely encounter Overpass API rate limits or timeout errors. To avoid these errors, skip building aerodromes (and runways and origins) using:
 
-After building the layers, you can run the skies-adsb simulation.
+```shell
+./build-map-layers.sh --origin-distance 5 --skip-aerodromes
+```
 
-## Appendix
+An alternative approach is to build 2-degree tiles and combine them into unified layers using QGIS. This advanced technique allows coverage of larger areas while avoiding API limits. For detailed instructions on working with map tiles in QGIS, please consult the [QGIS Documentation](https://www.qgis.org/resources/hub/).
+
+### Creating Lower Resolution Maps
+
+By default maps are created at 1:10m scale. You can also create maps at 1:110m scale. Example:
+
+```shell
+./build-map-layers.sh ---build-110m-maps
+```
 
 ### Map Layer Output Files
 

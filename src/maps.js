@@ -229,7 +229,7 @@ function parseGeoJsonFeature(feature, lineMaterial) {
   if (feature.geometry.type === "MultiLineString") {
     feature.geometry.coordinates.forEach((coordinates) => {
       const points = coordinates.map((coord) => {
-        let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_ZOOM)
+        let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_SCALE)
         return new THREE.Vector3(x, 0, y)
       })
 
@@ -242,7 +242,7 @@ function parseGeoJsonFeature(feature, lineMaterial) {
   if (feature.geometry.type === "MultiPolygon") {
     feature.geometry.coordinates.forEach((coordinates) => {
       const points = coordinates[0].map((coord) => {
-        let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_ZOOM)
+        let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_SCALE)
         return new THREE.Vector3(x, 0, y)
       })
 
@@ -256,7 +256,7 @@ function parseGeoJsonFeature(feature, lineMaterial) {
   if (feature.geometry.type === "LineString") {
     const coordinates = feature.geometry.coordinates
     const points = coordinates.map((coord) => {
-      let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_ZOOM)
+      let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_SCALE)
       return new THREE.Vector3(x, 0, y)
     })
 
@@ -268,7 +268,7 @@ function parseGeoJsonFeature(feature, lineMaterial) {
   if (feature.geometry.type === "Polygon") {
     const coordinates = feature.geometry.coordinates[0]
     const points = coordinates.map((coord) => {
-      let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_ZOOM)
+      let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_SCALE)
       return new THREE.Vector3(x, 0, y)
     })
 
@@ -295,7 +295,7 @@ function parseGeoJsonFeature(feature, lineMaterial) {
 
       if (coordinates) {
         const points = coordinates.map((coord) => {
-          let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_ZOOM)
+          let [x, y] = UTILS.getXY(coord).map(val => val * UTILS.DEFAULT_SCALE)
           return new THREE.Vector3(x, 0, y)
         })
 
@@ -395,7 +395,7 @@ async function buildOriginLabelsLayer(scene, originsData) {
     group.userData.center = origin.center
     group.userData.type = LAYER_ORIGINS
     const [x, y] = UTILS.getXY([origin.center.lon, origin.center.lat])
-    group.position.set(x * UTILS.DEFAULT_ZOOM, 0, y * UTILS.DEFAULT_ZOOM)
+    group.position.set(x * UTILS.DEFAULT_SCALE, 0, y * UTILS.DEFAULT_SCALE)
 
     const label = new Text()
     label.text = origin.id

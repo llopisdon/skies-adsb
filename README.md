@@ -1,8 +1,10 @@
 # skies-adsb
 
+### ✈️ [Current Version: 2.0.4](CHANGELOG.md) 🚁
+
 ![Screenshot](docs/screenshot.png)
 
-_image of the skies-adsb app running in a browser showing air traffic around KMIA in Miami, FL_
+_Image of the skies-adsb app running in a browser showing air traffic around KMIA in Miami, FL_
 
 # Introduction
 
@@ -32,7 +34,7 @@ Runs on all major modern browsers (Chrome, Firefox, Safari).
 
 ![Gif Recording](docs/skies-adsb-v2-recording.gif)
 
-_recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
+_Recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
 
 ![Custom Map Layers](docs/custom-map-layers.png)
 

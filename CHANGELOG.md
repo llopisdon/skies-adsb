@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.4] - 2025-02-15
+
+## Added
+
+- Added documentation for enabling remote access to Raspberry Pi dump1090-mutability
+- Added documentation for customizing default visualization settings
+- Added documentation for create map layers for larger coverage areas
+- Added --skip-aerodromes option to build-map-layers.py script
+
+## Changed
+
+- Refactored many default settings to be user configurable via src/utils.js file
+- Updated instructions on how to work with existing ADS-B receivers
+- Updated project README.md
+- Update Vite to 5.4.14
+- Update @mapbox/sphericalmercator to 2.0.1
+
 ## [2.0.3] - 2025-02-11
 
 ### Changed

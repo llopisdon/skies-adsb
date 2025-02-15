@@ -18,13 +18,8 @@ This document describes how to setup and deploy the skies-adsb app to a Raspberr
 - [Step 1 - Prerequisites](#step-1---prerequisites)
 - [Step 2 - Raspberry Pi (RPI) Setup](#step-2---raspberry-pi-rpi-setup)
 - [Step 3 - Setup src/.env file variables](#step-3---setup-srcenv-file-variables)
-  - [Available environment variables:](#available-environment-variables)
-    - [Required](#required)
-    - [Optional Default Settings](#optional-default-settings)
 - [Step 4 - Build your map layers](#step-4---build-your-map-layers)
 - [Step 5 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script](#step-5---optional-use-existing-ads-b-receiver--customize-rpi-installsh-script)
-  - [Using An Existing ADS-B receiver](#using-an-existing-ads-b-receiver)
-  - [Customizing the Installation](#customizing-the-installation)
 - [Step 6 - Deploy and run the RPI skies-adsb setup.sh Script](#step-6---deploy-and-run-the-rpi-skies-adsb-setupsh-script)
 - [Step 7 - Install the RTL-SDR receiver](#step-7---install-the-rtl-sdr-receiver)
 - [Step 8 - Build and Deploy the skies-adsb web app to the Raspberry Pi](#step-8---build-and-deploy-the-skies-adsb-web-app-to-the-raspberry-pi)
@@ -273,7 +268,11 @@ To use an existing receiver (like [readsb](https://github.com/wiedehopf/readsb) 
 
 ```shell
 optional_do_upgrade_rpi
+echo
+
 #optional_install_dump1090
+#echo
+
 do_setup_app
 ```
 
@@ -402,14 +401,77 @@ ss -tlp
 you should see something like:
 
 ```shell
-LISTEN  0       511              0.0.0.0:30001          0.0.0.0:*
-LISTEN  0       511              0.0.0.0:30002          0.0.0.0:*
-LISTEN  0       511              0.0.0.0:30003          0.0.0.0:*
-LISTEN  0       511              0.0.0.0:30004          0.0.0.0:*
-LISTEN  0       511              0.0.0.0:30005          0.0.0.0:*
+LISTEN    0          1024                 0.0.0.0:80                 0.0.0.0:*
+LISTEN    0          511                127.0.0.1:30104              0.0.0.0:*
+LISTEN    0          100                  0.0.0.0:30006              0.0.0.0:*        users:(("websockify",pid=460,fd=3))
+LISTEN    0          128                  0.0.0.0:22                 0.0.0.0:*
+LISTEN    0          128                  0.0.0.0:5000               0.0.0.0:*        users:(("flask",pid=464,fd=3))
+LISTEN    0          511                127.0.0.1:30001              0.0.0.0:*
+LISTEN    0          511                127.0.0.1:30003              0.0.0.0:*
+LISTEN    0          511                127.0.0.1:30002              0.0.0.0:*
+LISTEN    0          511                127.0.0.1:30005              0.0.0.0:*
+LISTEN    0          511                127.0.0.1:30004              0.0.0.0:*
+LISTEN    0          1024                    [::]:80                    [::]:*
+LISTEN    0          128                     [::]:22                    [::]:*
 ```
 
 Now lets setup the workstation build environment so we can build and deploy the skies-adsb web app.
+
+### Step 7b - OPTIONAL: Configure dump1090-mutability Remote Access
+
+By default, **dump1090-mutability** only accepts connections from **localhost**. To allow connections to **port 30003** from other machines on your network, follow these steps to reconfigure **dump1090-mutability**:
+
+```shell
+ssh pi@raspberrypi.local
+sudo dpkg-reconfigure dump1090-mutability
+```
+
+**WARNING:** Only modify these settings if you understand the security implications of allowing remote connections.
+
+![Screenshot](configure_dump1090-mutability.png)
+
+be sure to select "Yes" for "Start dump1090 automatically".
+
+Continue the configuration with the default settings (unless you know what you are doing) and you will reach the following screen:
+
+![Screenshot](configure_dump1090-mutability-bind-1.png)
+
+Clear out the value there so it looks like this:
+
+![Screenshot](configure_dump1090-mutability-bind-2.png)
+
+press **OK** and continue with the **dump1090-mutability** configuration.
+
+Once the configuration is finished you can verify that **dump1090-mutability** can be accessed remotely as follows:
+
+```shell
+ssh pi@raspberrypi.local
+ss -tlp
+```
+
+You should see something like:
+
+```shell
+State     Recv-Q     Send-Q         Local Address:Port          Peer Address:Port    Process
+LISTEN    0          1024                 0.0.0.0:80                 0.0.0.0:*
+LISTEN    0          511                  0.0.0.0:30005              0.0.0.0:*
+LISTEN    0          511                  0.0.0.0:30004              0.0.0.0:*
+LISTEN    0          100                  0.0.0.0:30006              0.0.0.0:*        users:(("websockify",pid=460,fd=3))
+LISTEN    0          511                  0.0.0.0:30001              0.0.0.0:*
+LISTEN    0          511                  0.0.0.0:30003              0.0.0.0:*
+LISTEN    0          511                  0.0.0.0:30002              0.0.0.0:*
+LISTEN    0          128                  0.0.0.0:22                 0.0.0.0:*
+LISTEN    0          128                  0.0.0.0:5000               0.0.0.0:*        users:(("flask",pid=464,fd=3))
+LISTEN    0          511                  0.0.0.0:30104              0.0.0.0:*
+LISTEN    0          1024                    [::]:80                    [::]:*
+LISTEN    0          511                     [::]:30005                 [::]:*
+LISTEN    0          511                     [::]:30004                 [::]:*
+LISTEN    0          511                     [::]:30001                 [::]:*
+LISTEN    0          511                     [::]:30003                 [::]:*
+LISTEN    0          511                     [::]:30002                 [::]:*
+LISTEN    0          128                     [::]:22                    [::]:*
+LISTEN    0          511                     [::]:30104                 [::]:*
+```
 
 ## Step 8 - Build and Deploy the skies-adsb web app to the Raspberry Pi
 

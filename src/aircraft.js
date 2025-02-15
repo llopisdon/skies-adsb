@@ -42,21 +42,6 @@ const whiteColor = new THREE.Color(0xffffff)
 const redNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff0000 })
 const greenNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 })
 
-//
-// Aircraft time-to-live in seconds
-//
-// NOTE: 
-// Adjust this value as needed. Use increments of +/- 5 seconds. 
-// If you find that aircraft are disappearing too quickly try increasing this value. 
-// If you find that aircraft are not disappearing quickly enough try decreasing this value. 
-// The best value is dependent on how much traffic you have in your area.
-//
-const AIRCRAFT_TTL = 15.0
-
-// trail update frequency is based on number of valid telemetry updates that have occurred
-const AIRCRAFT_TRAIL_UPDATE_FREQUENCY = 75
-const AIRCRAFT_MAX_TRAIL_POINTS = 5000
-const AIRCRAFT_TRAIL_UPDATE_Y_POS_THRESHOLD = 1000.0 * UTILS.DEFAULT_ZOOM
 
 export class Aircraft {
   constructor(scene, hexIdent) {
@@ -175,7 +160,7 @@ export class Aircraft {
     // set up trail
     this.curTrailLength = 0
     this.lastTrailUpdate = 0
-    this.maxTrailPoints = AIRCRAFT_MAX_TRAIL_POINTS
+    this.maxTrailPoints = UTILS.AIRCRAFT_MAX_TRAIL_POINTS
     this.trailGeometry = new THREE.BufferGeometry()
     this.trailPositions = new Float32Array(this.maxTrailPoints * 3)
     this.trailGeometry.setAttribute(
@@ -267,11 +252,11 @@ export class Aircraft {
         this.mesh.visible = true
       }
 
-      [this.pos.x, this.pos.z] = UTILS.getXY(this.pos.lngLat).map(val => val * UTILS.DEFAULT_ZOOM)
+      [this.pos.x, this.pos.z] = UTILS.getXY(this.pos.lngLat).map(val => val * UTILS.DEFAULT_SCALE)
 
       // position is in world coordinates
       const xPos = this.pos.x
-      const yPos = this.pos.y * UTILS.DEFAULT_ZOOM
+      const yPos = this.pos.y * UTILS.DEFAULT_SCALE
       const zPos = this.pos.z
 
       this.heightLinePos.setY(1, -yPos)
@@ -292,8 +277,8 @@ export class Aircraft {
       // i have noticed that there are sometimes ADS-B errors that cause the aircraft to jump
       // by a large amount in a single frame
       const diff = this.group.position.y - prevYpos
-      if (diff < AIRCRAFT_TRAIL_UPDATE_Y_POS_THRESHOLD) {
-        if (this.lastTrailUpdate % AIRCRAFT_TRAIL_UPDATE_FREQUENCY == 0) {
+      if (diff < UTILS.AIRCRAFT_TRAIL_UPDATE_Y_POS_THRESHOLD) {
+        if (this.lastTrailUpdate % UTILS.AIRCRAFT_TRAIL_UPDATE_FREQUENCY == 0) {
           this.updateTrail(this.group.position)
         }
         this.lastTrailUpdate += 1
@@ -364,7 +349,7 @@ export class Aircraft {
 
     const ttl = elapsedTime - this.timestamp
 
-    return ttl > AIRCRAFT_TTL
+    return ttl > UTILS.AIRCRAFT_TTL
   }
 
   getAircraftTypeKey() {

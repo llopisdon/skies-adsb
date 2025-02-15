@@ -11,13 +11,18 @@ This guide describes how to set up skies-adsb locally to connect with an existin
 
 ## Table of Contents
 
-- [Step 1 - Prerequisites](#step-1---prerequisites)
-- [Step 2 - Setup Environment VITE_USE_EXISTING_ADSB Variable](#step-2---setup-environment-vite_use_existing_adsb-variable)
-  - [Example .env file](#example-env-file)
-  - [Enable Flight Status](#enable-flight-status)
-- [Step 3 - Build your map layers](#step-3---build-your-map-layers)
-  - [Test your map layers](#test-your-map-layers)
-- [Step 4 - Start skies-adsb](#step-4---start-skies-adsb)
+1. [Step 1 - Prerequisites](#step-1---prerequisites)
+2. [Step 2 - Setup Environment VITE_USE_EXISTING_ADSB Variable](#step-2---setup-environment-vite_use_existing_adsb-variable)
+
+- [Example .env file](#example-env-file)
+- [Check ADS-B Port 30003 Connection](#check-ads-b-port-30003-connection)
+- [Enable Flight Status](#enable-flight-status)
+
+3. [Step 3 - Build your map layers](#step-3---build-your-map-layers)
+
+- [Test your map layers](#test-your-map-layers)
+
+4. [Step 4 - Start skies-adsb](#step-4---start-skies-adsb)
 
 # Step 1 - Prerequisites
 
@@ -60,6 +65,31 @@ VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
 
 VITE_USE_EXISTING_ADSB=localhost:30003
 ```
+
+## Check ADS-B Port 30003 Connection
+
+Before proceeding, verify that your ADS-B receiver allows connections on port 30003:
+
+```shell
+nmap -p 30003 <YOUR-ADSB-IP-ADDRESS>
+```
+
+Example:
+
+```shell
+nmap -p 30003 192.168.1.123
+```
+
+You should see something like:
+
+```shell
+
+PORT      STATE SERVICE
+30003/tcp open  amicon-fpsu-ra
+
+```
+
+**Note:** Some ADS-B receivers only allow connections from localhost by default. You may need to configure your receiver to accept external connections.
 
 ## Enable Flight Status
 
