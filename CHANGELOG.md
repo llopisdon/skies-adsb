@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.6] - 2025-02-15
+
+## Changed
+
+- Update docs/INSTALL.md repo url
+
 ## [2.0.5] - 2025-02-15
 
 ## Changed

@@ -61,7 +61,7 @@ On your workstation clone the skies-adsb GitHub repository:
 
 ```shell
 cd /path/to/your/git/projects
-git clone https://github.com/llopisdon/skies-adsb.git
+git clone https://github.com/machineinteractive/skies-adsb.git
 ```
 
 # Step 2 - Create src/.env File
