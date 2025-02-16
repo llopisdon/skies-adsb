@@ -25,7 +25,8 @@ Follow each step carefully to set up the core dependencies and configuration nee
 - [Step 8 - Download Natural Earth Datasets](#step-8---download-natural-earth-datasets)
 - [Step 9 - Download FAA Airspace Shapefile](#step-9---download-faa-airspace-shapefile)
 - [Step 10 - Extract the Datasets](#step-10---extract-the-datasets)
-- [Step 11 - Configure Visualization Settings](#step-11---configure-visualization-settings)
+- [Step 11 - Build your map layers](#step-11---build-your-map-layers)
+- [Step 12 - Configure Visualization Settings](#step-12---configure-visualization-settings)
 - [Next Steps](#next-steps)
 
 # Prerequisites
@@ -228,7 +229,7 @@ cd /path/to/skies-adsb/maps/data
 ./install-datasets.sh
 ```
 
-## Step 11 - Build your map layers
+# Step 11 - Build your map layers
 
 This step is necessary to build map layers specific to your ADS-B installation location. Without map layers, you'll only see a skybox and aircraft. If you prefer not to use map layers, the simulation includes a reference polar grid that can be toggled on/off via the settings GUI.
 

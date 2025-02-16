@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.9] - 2025-02-16
+
+## Changed
+
+- Fixed INSTALL.md table of contents.
+
 ## [2.0.8] - 2025-02-16
 
 ## Changed
