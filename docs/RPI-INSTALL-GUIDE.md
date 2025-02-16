@@ -118,7 +118,7 @@ From the Raspberry Pi Imager:
 2. Select the 64-bit Raspberry Pi OS Lite as your OS image
 3. Select your Storage
 4. Press Next
-5. You will be presented with a dialog "Use OS customisation"
+5. You will be presented with a dialog "Use OS customization"
 6. Press "Edit Settings"
 7. Set the hostname to something like: raspberrypi.local
 8. Set your username and password. You must use the username: pi

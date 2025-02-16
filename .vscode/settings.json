@@ -1,10 +1,25 @@
 {
   "cSpell.words": [
     "ADSB",
+    "dpkg",
+    "FLIGHTAWARE",
     "geolocation",
+    "Geospatial",
+    "Guardia",
+    "Imager",
+    "KLGA",
+    "KMIA",
+    "MMMX",
+    "nmap",
+    "osmtogeojson",
     "QGIS",
+    "raspberrypi",
     "raycaster",
+    "Shapefile",
+    "Shapefiles",
     "SKYBOX",
-    "VITE"
+    "VITE",
+    "WEBROOT",
+    "websockify"
   ]
 }
