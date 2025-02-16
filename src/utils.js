@@ -1,11 +1,13 @@
 import { SphericalMercator } from '@mapbox/sphericalmercator'
 
+const ADSB_LOCALHOST = window.location.hostname
+
 const ADSB_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
-  'localhost:30006' :
+  `${ADSB_LOCALHOST}:30006` :
   `${import.meta.env.VITE_SKIES_ADSB_RPI_HOST}:30006`
 
 const FLASK_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
-  'localhost:5000' :
+  `${ADSB_LOCALHOST}:5000` :
   `${import.meta.env.VITE_SKIES_ADSB_RPI_HOST}:5000`
 
 export const DATA_HOSTS = {

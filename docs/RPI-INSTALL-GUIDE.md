@@ -18,12 +18,11 @@ This document describes how to setup and deploy the skies-adsb app to a Raspberr
 - [Step 1 - Prerequisites](#step-1---prerequisites)
 - [Step 2 - Raspberry Pi (RPI) Setup](#step-2---raspberry-pi-rpi-setup)
 - [Step 3 - Setup src/.env file variables](#step-3---setup-srcenv-file-variables)
-- [Step 4 - Build your map layers](#step-4---build-your-map-layers)
-- [Step 5 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script](#step-5---optional-use-existing-ads-b-receiver--customize-rpi-installsh-script)
-- [Step 6 - Deploy and run the RPI skies-adsb setup.sh Script](#step-6---deploy-and-run-the-rpi-skies-adsb-setupsh-script)
-- [Step 7 - Install the RTL-SDR receiver](#step-7---install-the-rtl-sdr-receiver)
-- [Step 8 - Build and Deploy the skies-adsb web app to the Raspberry Pi](#step-8---build-and-deploy-the-skies-adsb-web-app-to-the-raspberry-pi)
-- [Step 9 - Test the skies-adsb Installation](#step-9---test-the-skies-adsb-installation)
+- [Step 4 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script](#step-4---optional-use-existing-ads-b-receiver--customize-rpi-installsh-script)
+- [Step 5 - Deploy and run the RPI skies-adsb setup.sh Script](#step-5---deploy-and-run-the-rpi-skies-adsb-setupsh-script)
+- [Step 6 - Install the RTL-SDR receiver](#step-6---install-the-rtl-sdr-receiver)
+- [Step 7 - Build and Deploy the skies-adsb web app to the Raspberry Pi](#step-7---build-and-deploy-the-skies-adsb-web-app-to-the-raspberry-pi)
+- [Step 8 - Test the skies-adsb Installation](#step-8---test-the-skies-adsb-installation)
 
 ## Terms Used
 
@@ -193,12 +192,12 @@ VITE_SETTINGS_SHOW_ROADS=false
 ### Required
 
 <!-- prettier-ignore -->
-| Variable Name | Explanation | Value | Platform | Example |
-|---------------|-------------|-------|----------|---------|
-| VITE_DEFAULT_ORIGIN_LATITUDE | Default latitude for default origin location (from Step 1) | number | All | 25.7919 |
-| VITE_DEFAULT_ORIGIN_LONGITUDE | Default longitude for default origin location (from Step 1) | number | All | -80.2871 |
-| VITE_SKIES_ADSB_RPI_USERNAME | Default RPI username with sudo privileges | string | RPI | pi |
-| VITE_SKIES_ADSB_RPI_HOST | Default RPI IP address | string | RPI | 192.168.1.123 |
+| Variable Name | Explanation | Value | Default | Platform | Example |
+|---------------|-------------|-------|---------|-----------|---------|
+| VITE_DEFAULT_ORIGIN_LATITUDE | Default latitude for default origin location (from Step 1) | number | none | All | 25.7919 |
+| VITE_DEFAULT_ORIGIN_LONGITUDE | Default longitude for default origin location (from Step 1) | number | none | All | -80.2871 |
+| VITE_SKIES_ADSB_RPI_USERNAME | Default RPI username with sudo privileges | string | pi | RPI | pi |
+| VITE_SKIES_ADSB_RPI_HOST | Default RPI IP address | string | none | RPI | 192.168.1.123 |
 
 ### Optional Default Settings
 
@@ -218,47 +217,13 @@ VITE_SETTINGS_SHOW_ROADS=false
 | VITE_SETTINGS_SHOW_STATES_PROVINCES | Controls display of state/province boundaries                  | boolean                           | true      |
 | VITE_SETTINGS_SHOW_COUNTIES         | Controls visibility of county boundaries                       | boolean                           | true      |
 
-## Step 4 - Build your map layers
-
-This step is necessary to build map layers specific to your ADS-B installation location. Without map layers, you'll only see a skybox and aircraft. If you prefer not to use map layers, the simulation includes a reference polar grid that can be toggled on/off via the settings GUI.
-
-```shell
-cd /path/to/skies-adsb
-cd maps
-chmod +x build_map_layers.sh
-./build-map-layers.sh
-```
-
-for more information see this document:
-
-[Build Map Layers Guide](BUILD-MAPS.md)
-
-![Custom Map Layers](custom-map-layers.png)
-
-_Examples of custom map layers: Miami International (KMIA), LaGuardia (KLGA), and Mexico City International (MMMX) airports_
-
-![Reference Polar Grid](screenshot-grid.png)
-
-_Reference Polar Grid_
-
-## Test your map layers
-
-At this point you can see what your map layers look like by running the following command:
-
-```shell
-cd /path/to/skies-adsb
-npx vite --open
-```
-
-This will launch the Vite development HTTP server and launch a web browser.
-
-## Step 5 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script
+## Step 4 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script
 
 Skip this section if setting up a new ADS-B receiver. This section is for installing skies-adsb on an existing ADS-B receiver running Raspbian.
 
 ### Using An Existing ADS-B receiver
 
-The skies-adsb app works with any receiver that outputs [SBS1 BaseStation formatted data](http://woodair.net/sbs/article/barebones42_socket_data.htm).
+The skies-adsb app works with any receiver that outputs [SBS BaseStation formatted data](http://woodair.net/sbs/article/barebones42_socket_data.htm).
 
 By default, the RPI **install.sh** script uses [adsbxchange/dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability) since it's included in Raspberry Pi OS. The setup assumes the receiver is on the same RPI as the web app.
 
@@ -280,7 +245,7 @@ do_setup_app
 
 ```bash
 #!/usr/bin/env bash
-websockify 0.0.0.0:30006 <YOUR-ADS-B-RECEIVER-IP-ADDRESS>:<YOUR-ADS-B-RECEIVER-SBS1-PORT>
+websockify 0.0.0.0:30006 <YOUR-ADS-B-RECEIVER-IP-ADDRESS>:<SBS-PORT>
 ```
 
 ### Customizing the Installation
@@ -295,7 +260,7 @@ WEBROOT="/var/www/html/skies-adsb"
 
 Change this path as needed for your environment.
 
-## Step 6 - Deploy and run the RPI skies-adsb setup.sh Script
+## Step 5 - Deploy and run the RPI skies-adsb setup.sh Script
 
 With the .env file created in _step 3_ you are ready to set up the RPI to host the skies-adsb app.
 
@@ -362,7 +327,7 @@ sudo journalctl -u skies-adsb-flask
 
 Now lets setup your RTL-SDR receiver.
 
-## Step 7 - Install the RTL-SDR receiver
+## Step 6 - Install the RTL-SDR receiver
 
 By using a R820T2 based RTL-SDR receiver everything should work out of the box thanks to the [dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability) package installed on the RPI in Step 6.
 
@@ -417,7 +382,7 @@ LISTEN    0          128                     [::]:22                    [::]:*
 
 Now lets setup the workstation build environment so we can build and deploy the skies-adsb web app.
 
-### Step 7b - OPTIONAL: Configure dump1090-mutability Remote Access
+### Step 6b - OPTIONAL: Configure dump1090-mutability Remote Access
 
 By default, **dump1090-mutability** only accepts connections from **localhost**. To allow connections to **port 30003** from other machines on your network, follow these steps to reconfigure **dump1090-mutability**:
 
@@ -473,7 +438,7 @@ LISTEN    0          128                     [::]:22                    [::]:*
 LISTEN    0          511                     [::]:30104                 [::]:*
 ```
 
-## Step 8 - Build and Deploy the skies-adsb web app to the Raspberry Pi
+## Step 7 - Build and Deploy the skies-adsb web app to the Raspberry Pi
 
 Build the skies-adsb web app as follows:
 
@@ -490,7 +455,7 @@ chmod +x deploy_web_app.sh
 ./deploy_web_app.sh
 ```
 
-## Step 9 - Test the skies-adsb Installation
+## Step 8 - Test the skies-adsb Installation
 
 At this point from your workstation you should be able to open a web browser and navigate to:
 

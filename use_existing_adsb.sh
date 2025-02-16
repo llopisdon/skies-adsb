@@ -38,4 +38,4 @@ sleep 1
 #
 # start the application local HTTP development server
 #
-npx vite --open
+npx vite --host

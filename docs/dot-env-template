@@ -1,14 +1,22 @@
 #
-# Required Settings
+# Required Settings for all skies-adsb setups
 #
 
 #VITE_DEFAULT_ORIGIN_LATITUDE=
 #VITE_DEFAULT_ORIGIN_LONGITUDE=
 
-#VITE_USE_EXISTING_ADSB=
+#
+# Required for Raspberry Pi Setup
+#
 
-#VITE_SKIES_ADSB_RPI_USERNAME=
+#VITE_SKIES_ADSB_RPI_USERNAME=pi
 #VITE_SKIES_ADSB_RPI_HOST=
+
+#
+# Required for Localhost Setup
+#
+
+#VITE_USE_EXISTING_ADSB=
 
 #
 # Optional Default Settings

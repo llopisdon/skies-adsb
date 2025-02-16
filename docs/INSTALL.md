@@ -16,12 +16,12 @@ Follow each step carefully to set up the core dependencies and configuration nee
   - [Required Software](#required-software)
   - [Development Environment](#development-environment)
 - [Step 1 - Clone the skies-adsb repository](#step-1---clone-the-skies-adsb-repository)
-- [Step 2 - Create src/.env File](#step-2---create-srcenv-file)
-- [Step 3 - Setup Flask Server](#step-3---setup-flask-server)
-- [Step 4 - Set Your Geolocation Coordinates](#step-4---set-your-geolocation-coordinates)
-- [Step 5 - Setup Python environment](#step-5---setup-python-environment)
-- [Step 6 - Install Node.js and npm](#step-6---install-nodejs-and-npm)
-- [Step 7 - Initialize the Node.js Dependencies](#step-7---initialize-the-nodejs-dependencies)
+- [Step 2 - Setup Python environment](#step-2---setup-python-environment)
+- [Step 3 - Install Node.js and npm](#step-3---install-nodejs-and-npm)
+- [Step 4 - Initialize the Node.js Dependencies](#step-4---initialize-the-nodejs-dependencies)
+- [Step 5 - Create src/.env File](#step-5---create-srcenv-file)
+- [Step 6 - Setup Flask Server](#step-6---setup-flask-server)
+- [Step 7 - Set Your Geolocation Coordinates](#step-7---set-your-geolocation-coordinates)
 - [Step 8 - Download Natural Earth Datasets](#step-8---download-natural-earth-datasets)
 - [Step 9 - Download FAA Airspace Shapefile](#step-9---download-faa-airspace-shapefile)
 - [Step 10 - Extract the Datasets](#step-10---extract-the-datasets)
@@ -64,7 +64,48 @@ cd /path/to/your/git/projects
 git clone https://github.com/machineinteractive/skies-adsb.git
 ```
 
-# Step 2 - Create src/.env File
+# Step 2 - Setup Python environment
+
+This step setups up a Python Virtual Environment with all the dependencies needed to run the Python scripts included with the app.
+
+```shell
+cd /path/to/skies-adsb
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install flask flask-cors geopandas osmtogeojson requests websockify
+deactivate
+```
+
+# Step 3 - Install Node.js and npm
+
+The skies-adsb web app requires Node.js and npm. If you already have these installed, you can skip to Step 7.
+
+For a clean Node.js installation, use nvm (Node Version Manager) - the recommended way to install and manage Node.js:
+
+1. Install nvm by following the official instructions at:
+
+https://github.com/nvm-sh/nvm
+
+2. Once nvm is installed, install the latest Node.js version:
+
+```shell
+nvm install node
+```
+
+3. Logout and login again before continuing to Step 4
+
+# Step 4 - Initialize the Node.js Dependencies
+
+Install required node modules by running:
+
+```shell
+cd /path/to/skies-adsb
+npm install
+```
+
+This will install all dependencies specified in package.json.
+
+# Step 5 - Create src/.env File
 
 The src/.env file is used to store numerous environment variables which are necessary for building and running skies-adsb.
 
@@ -73,13 +114,27 @@ cd /path/to/skies-adsb
 cp docs/dot-env-template src/.env
 ```
 
-# Step 3 - Setup Flask Server
+# Step 6 - Setup Flask Server
 
 The Flask server acts as a proxy for aviation-related APIs to fetch realtime aircraft and weather information.
 
-Configure the Flask server by following the detailed instructions in the [Flask README](/flask/README.md).
+Create the Flask server configuration file:
 
-# Step 4 - Set Your Geolocation Coordinates
+```shell
+cd /path/to/skies-adsb
+cp docs/flask-config-template.json flask/config.json
+```
+
+This creates the minimum necessary config.json for the Flask server.
+
+For additional functionality like FlightAware AeroAPI integration to get flight status information, see the instructions in the [Flask README](/flask/README.md).
+
+**Note:** Use of the FlightAware AeroAPI is optional (paid service):
+
+- It is required for flight status information
+- It is not needed for basic ADS-B data visualization
+
+# Step 7 - Set Your Geolocation Coordinates
 
 The skies-adsb app uses geolocation coordinates as a reference point for:
 
@@ -110,44 +165,6 @@ Example using Miami International Airport (KMIA):
 VITE_DEFAULT_ORIGIN_LATITUDE=25.7955406
 VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
 ```
-
-# Step 5 - Setup Python environment
-
-This step setups up a Python Virtual Environment with all the dependencies needed to run the Python scripts included with the app.
-
-```shell
-cd /path/to/skies-adsb
-python3 -m venv .venv
-source .venv/bin/activate
-pip3 install flask flask-cors geopandas osmtogeojson requests websockify
-```
-
-# Step 6 - Install Node.js and npm
-
-The skies-adsb web app requires Node.js and npm. If you already have these installed, you can skip to Step 7.
-
-For a clean Node.js installation, use nvm (Node Version Manager) - the recommended way to install and manage Node.js:
-
-1. Install nvm by following the official instructions at:
-
-https://github.com/nvm-sh/nvm
-
-2. Once nvm is installed, install the latest Node.js version:
-
-```shell
-nvm install node
-```
-
-# Step 7 - Initialize the Node.js Dependencies
-
-Install required node modules by running:
-
-```shell
-cd /path/to/skies-adsb
-npm install
-```
-
-This will install all dependencies specified in package.json.
 
 # Step 8 - Download Natural Earth Datasets
 
@@ -211,7 +228,41 @@ cd /path/to/skies-adsb/maps/data
 ./install-datasets.sh
 ```
 
-# Step 11 - Configure Visualization Settings
+## Step 11 - Build your map layers
+
+This step is necessary to build map layers specific to your ADS-B installation location. Without map layers, you'll only see a skybox and aircraft. If you prefer not to use map layers, the simulation includes a reference polar grid that can be toggled on/off via the settings GUI.
+
+```shell
+cd /path/to/skies-adsb
+cd maps
+chmod +x build_map_layers.sh
+./build-map-layers.sh
+```
+
+for more information see this document:
+
+[Build Map Layers Guide](BUILD-MAPS.md)
+
+![Custom Map Layers](custom-map-layers.png)
+
+_Examples of custom map layers: Miami International (KMIA), LaGuardia (KLGA), and Mexico City International (MMMX) airports_
+
+![Reference Polar Grid](screenshot-grid.png)
+
+_Reference Polar Grid_
+
+## Test your map layers
+
+At this point you can see what your map layers look like by running the following command:
+
+```shell
+cd /path/to/skies-adsb
+npx vite --host
+```
+
+This will launch the Vite development HTTP server.
+
+# Step 12 - Configure Visualization Settings
 
 The following table lists the default visualization settings in **src/utils.js**. These settings control various aspects of the 3D visualization including camera behavior, skybox dimensions, and aircraft tracking parameters.
 
@@ -240,6 +291,6 @@ These values can be modified in the **src/util.js** file to adjust the visualiza
 At this point, choose one of the following guides to complete your installation:
 
 - [Raspberry Pi Installation Guide](RPI-INSTALL-GUIDE.md) - For setting up skies-adsb on a new or existing ADS-B receiver
-- [localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md) - For running skies-adsb locally without modifying your ADS-B receiver
+- [Localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md) - For running skies-adsb locally without modifying your ADS-B receiver
 
 Select the guide that matches your intended setup.

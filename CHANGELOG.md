@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.7] - 2025-02-16
+
+## Changed
+
+- Updated use_existing_adsb.sh script
+  - added --host option when launching Vite in order to automatically setup Network IP for development server
+  - removed --open option in order to prevent failure if run in a headless setup
+- Updated utils.js to use window.location.hostname instead of hardcoded localhost string for Localhost setups
+- Updated RPI and Localhost installation guides and consolidated redundant sections into the docs/INSTALL.md guide
+- Misc documentation clean up
+
 ## [2.0.6] - 2025-02-15
 
 ## Changed

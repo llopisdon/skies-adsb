@@ -1,28 +1,25 @@
-# localhost Setup Guide
+# Localhost Setup Guide
 
 This guide describes how to set up skies-adsb locally to connect with an existing ADS-B receiver. The setup:
 
-- Runs as a web app and Flask server on your localhost
-- Creates a websocket proxy to forward ADS-B data to localhost:30006
-- Works with any ADS-B receiver that outputs [SBS-1 BaseStation data](http://woodair.net/sbs/article/barebones42_socket_data.htm)
+- Runs locally as a web and Flask server application
+- Creates a websocket proxy to forward ADS-B data
+- Compatible with ADS-B receivers using SBS format
 - Doesn't modify your existing ADS-B receiver installation
+
+This has been tested on a Linux workstation and a headless Raspberry Pi Zero 2 W.
 
 **Note:** skies-adsb was developed under Linux. This document assumes your workstation is running Linux or macOS.
 
 ## Table of Contents
 
-1. [Step 1 - Prerequisites](#step-1---prerequisites)
-2. [Step 2 - Setup Environment VITE_USE_EXISTING_ADSB Variable](#step-2---setup-environment-vite_use_existing_adsb-variable)
-
-- [Example .env file](#example-env-file)
-- [Check ADS-B Port 30003 Connection](#check-ads-b-port-30003-connection)
-- [Enable Flight Status](#enable-flight-status)
-
-3. [Step 3 - Build your map layers](#step-3---build-your-map-layers)
-
-- [Test your map layers](#test-your-map-layers)
-
-4. [Step 4 - Start skies-adsb](#step-4---start-skies-adsb)
+- [Step 1 - Prerequisites](#step-1---prerequisites)
+- [Step 2 - Setup src/.env file variables](#step-2---setup-srcenv-file-variables)
+  - [Required Environment Variables](#required-environment-variables)
+  - [Example .env file](#example-env-file)
+  - [Check ADS-B SBS Port 30003 Connection](#check-ads-b-sbs-port-30003-connection)
+  - [Enable Flight Status](#enable-flight-status)
+- [Step 3 - Start skies-adsb](#step-3---start-skies-adsb)
 
 # Step 1 - Prerequisites
 
@@ -32,7 +29,15 @@ This guide assumes that you have set up your local environment as described here
 
 Please follow the steps in the install guide above before continuing.
 
-# Step 2 - Setup Environment VITE_USE_EXISTING_ADSB Variable
+# Step 2 - Setup src/.env file variables
+
+## Required Environment Variables
+
+| Variable Name          | Explanation                                              | Value                                    | Default |
+| ---------------------- | -------------------------------------------------------- | ---------------------------------------- | ------- |
+| VITE_USE_EXISTING_ADSB | Specifies the IP address and port of your ADS-B receiver | `<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>` | None    |
+
+**NOTE: typically SBS port is on 30003**
 
 ```shell
 cd /path/to/skies-adsb/src
@@ -40,8 +45,8 @@ cd /path/to/skies-adsb/src
 
 add the following variables to the **.env** file:
 
-```shell
-VITE_USE_EXISTING_ADSB=<ADS-B RECEIVER IP ADDRESS>:<ADS-B RECEIVER SBS-1 PORT>
+```shells
+VITE_USE_EXISTING_ADSB=<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>
 ```
 
 ## Example .env file
@@ -66,7 +71,7 @@ VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
 VITE_USE_EXISTING_ADSB=localhost:30003
 ```
 
-## Check ADS-B Port 30003 Connection
+## Check ADS-B SBS Port 30003 Connection
 
 Before proceeding, verify that your ADS-B receiver allows connections on port 30003:
 
@@ -99,39 +104,7 @@ If you wish to enable flight status with FlightAware AeroAPI then please follow 
 
 **note: skip the last part called "Run the Flask Server".\***
 
-# Step 3 - Build your map layers
-
-This step is necessary to build map layers specific to your ADS-B installation location. Without map layers, you'll only see a skybox and aircraft. If you prefer not to use map layers, the simulation includes a reference polar grid that can be toggled on/off via the settings GUI.
-
-```shell
-cd /path/to/skies-adsb
-cd maps
-chmod +x build-map-layers.sh
-./build-map-layers.sh
-```
-
-for more information see this document:
-
-[Build Map Layers Guide](BUILD-MAPS.md)
-
-![Custom Map Layers](custom-map-layers.png)
-_Examples of custom map layers: Miami International (KMIA), LaGuardia (KLGA), and Mexico City International (MMMX) airports_
-
-![Reference Polar Grid](screenshot-grid.png)
-_Reference Polar Grid_
-
-## Test your map layers
-
-At this point you can see what your map layers look like by running the following command:
-
-```shell
-cd /path/to/skies-adsb
-npx vite --open
-```
-
-This will launch the Vite development HTTP server and launch a web browser.
-
-# Step 4 - Start skies-adsb
+# Step 3 - Start skies-adsb
 
 ```shell
 cd /path/to/skies-adsb
@@ -142,9 +115,19 @@ cd /path/to/skies-adsb
 
 The script will:
 
-- Start the web app in development mode on localhost:5173
-- Start the Flask app in development mode on localhost:5000
-- Create a websocket proxy at localhost:30006 to forward ADS-B data from your receiver
-- Launch your default browser automatically
+| Action                 | Description                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| Start web app          | In development mode on localhost:5173 and `<LOCALHOST-NETWORK-IP>:5173`                                |
+| Start Flask app        | In development mode on localhost:5000 and `<LOCALHOST-NETWORK-IP>:5000`                                |
+| Create websocket proxy | Sets up on localhost:30006 and `<LOCALHOST-NETWORK-IP>:30006` to forward ADS-B data from your receiver |
+
+For example, if your localhost IP address is 192.168.1.123 you should see an output similar to below:
+
+```shell
+  VITE v5.4.14  ready in 1888 ms
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.1.123:5173/
+  ➜  press h + enter to show help
+```
 
 Once running, you should see live aircraft traffic in your local area.
