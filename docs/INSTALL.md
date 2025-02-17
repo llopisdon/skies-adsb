@@ -3,7 +3,7 @@
 This guide provides step-by-step instructions for installing skies-adsb. The instructions outlined here apply to both:
 
 - [Raspberry Pi Installation Guide](RPI-INSTALL-GUIDE.md)
-- [localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md)
+- [Localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md)
 
 Follow each step carefully to set up the core dependencies and configuration needed to deploy and run the application.
 

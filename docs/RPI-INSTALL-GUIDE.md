@@ -2,7 +2,7 @@
 
 This document describes how to setup and deploy the skies-adsb app to a Raspberry Pi Zero 2 W (or newer 64-bit Raspberry Pi model) connected to a RTL-SDR receiver on your home network.
 
-**Note:** if you have an existing RPI ADS-B installation this guide will make changes to the RPI setup. If you do not wish to alter your RPI setup then please use the [localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md) instead.
+**Note:** if you have an existing RPI ADS-B installation this guide will make changes to the RPI setup. If you do not wish to alter your RPI setup then please use the [Localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md) instead.
 
 **Note:** skies-adsb was developed under Linux. This document assumes your workstation is running Linux or macOS.
 
