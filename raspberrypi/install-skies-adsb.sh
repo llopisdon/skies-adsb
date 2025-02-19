@@ -4,12 +4,11 @@
 # this is the skies-adsb install script for the Raspberry Pi
 #
 
-# if ! grep -q "Raspberry Pi" /proc/cpuinfo; then
-#   echo "This script must be run on a Raspberry Pi"
-#   exit 1
-# fi
+if ! grep -q "Raspberry Pi" /proc/cpuinfo; then
+  echo "This script must be run on a Raspberry Pi"
+  exit 1
+fi
 
-# Process command line options
 while getopts ":srde:" opt; do
   case $opt in
   s)
@@ -24,7 +23,7 @@ while getopts ":srde:" opt; do
   e)
     ADSB_DRIVER="existing"
     ADSB_HOST_PORT="$OPTARG"
-    # Validate IP:port format
+    # validate IP:port format
     if ! echo "$ADSB_HOST_PORT" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+$'; then
       echo "Error: -e requires valid IP:port format (e.g. 192.168.1.123:30003)"
       exit 1

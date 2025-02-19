@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.1] - 2025-02-19
+
+### Changed
+
+- Fixed script initialization issue in install-skies-adsb.sh
+
 ## [2.1.0] - 2025-02-19
 
 ### Added
