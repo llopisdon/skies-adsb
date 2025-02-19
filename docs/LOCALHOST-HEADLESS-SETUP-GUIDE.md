@@ -1,6 +1,6 @@
 # Localhost Setup Guide
 
-This guide describes how to set up skies-adsb locally to connect with an existing ADS-B receiver. The setup:
+This guide describes how to set up skies-adsb locally (or headless) to connect with an existing ADS-B receiver. The setup:
 
 - Runs locally as a web and Flask server application
 - Creates a websocket proxy to forward ADS-B data

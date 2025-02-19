@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.1.0] - 2025-02-19
+
+### Added
+
+- Added readsb RTL-SDR driver option in installation process
+
+### Changed
+
+- Fixed aircraft TTL bug caused by improper type check
+- Simplified Raspberry Pi installation process
+  - Removed need for manual script editing
+  - Added command line options
+  - Renamed `install.sh` to `install-skies-adsb.sh`
+- Updated documentation
+  - Updated INSTALL.md and RPI-INSTALL-GUIDE.md
+  - Renamed LOCALHOST-SETUP-GUIDE.md to LOCALHOST-HEADLESS-SETUP-GUIDE.md
+
 ## [2.0.9] - 2025-02-16
 
 ## Changed

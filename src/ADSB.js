@@ -37,10 +37,8 @@ const handleADSBMessage = (event) => {
 
     let data = result.split(",")
     let hexIdent = data[HEX_IDENT]
-
     if (!(hexIdent in AIRCRAFT.aircraft)) {
-      const aircraft = new AIRCRAFT.Aircraft(scene)
-      aircraft.hex = hexIdent
+      const aircraft = new AIRCRAFT.Aircraft(scene, hexIdent)
       AIRCRAFT.aircraft[hexIdent] = aircraft
     }
 

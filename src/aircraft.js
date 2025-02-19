@@ -46,7 +46,7 @@ const greenNavigationLightMaterial = new THREE.PointsMaterial({ size: 0.5, color
 export class Aircraft {
   constructor(scene, hexIdent) {
     this.hex = hexIdent
-    this.sqwk = null
+    this.squawk = null
     this.flight = null
     this.alt = null
     this.spd = null
@@ -192,6 +192,8 @@ export class Aircraft {
     } else {
       this.hideTrail()
     }
+
+    //console.log(`[aircraft] - add: hexIdent: ${hexIdent} | ${this.hex} | ${this.callsign} | ${this.timestamp}`)
   }
 
   resetFollowCameraTarget() {
@@ -202,7 +204,7 @@ export class Aircraft {
   }
 
   remove(scene) {
-    console.log(`[aircraft] - remove: ${this.hex} | ${this.callsign}`)
+    console.log(`[aircraft] - remove: ${this.hex} | ${this.callsign} | ${this.timestamp}`)
     scene.remove(this.text)
     this.text.dispose()
     scene.remove(this.group)
@@ -231,7 +233,7 @@ export class Aircraft {
     }
 
     if (data[ADSB.SQUAWK] !== "") {
-      this.sqwk = data[ADSB.SQUAWK]
+      this.squawk = data[ADSB.SQUAWK]
     }
 
     if (data[ADSB.IS_ON_GROUND] !== "") {
@@ -250,6 +252,7 @@ export class Aircraft {
 
       if (!this.mesh.visible) {
         this.mesh.visible = true
+        this.mesh.needsUpdate = true
       }
 
       [this.pos.x, this.pos.z] = UTILS.getXY(this.pos.lngLat).map(val => val * UTILS.DEFAULT_SCALE)
@@ -284,7 +287,7 @@ export class Aircraft {
         this.lastTrailUpdate += 1
         this.updateTrailHead(this.group.position)
       } else {
-        console.log("[aircraft] - skip trail update! - bad alt: ", this.hex, this.callsign, prevYpos, diff)
+        //console.log(`[aircraft] - skip trail update! - bad alt - hex: ${this.hex} callsign: ${this.callsign} prevY: ${prevYpos} diff: ${diff}`)
       }
     }
 
@@ -338,6 +341,11 @@ export class Aircraft {
   }
 
   draw(scene, elapsedTime, cameraPosition) {
+
+    if (!this.mesh.visible) {
+      return
+    }
+
     this.updateText(cameraPosition)
 
     // animate strobe light
@@ -346,10 +354,13 @@ export class Aircraft {
     this.strobeLight.material.needsUpdate = true
     this.strobeLightTop.material.color.copy(blackColor).lerp(whiteColor, alpha)
     this.strobeLightTop.material.needsUpdate = true
+  }
 
-    const ttl = elapsedTime - this.timestamp
-
-    return ttl > UTILS.AIRCRAFT_TTL
+  hasExpired(elapsedTime) {
+    if (!this.mesh.visible) {
+      return false
+    }
+    return elapsedTime - this.timestamp > UTILS.AIRCRAFT_TTL
   }
 
   getAircraftTypeKey() {
@@ -368,12 +379,12 @@ export class Aircraft {
   }
 
   hasValidTelemetry() {
-    return this.pos?.y && this.pos.lngLat?.[0] && this.pos.lngLat?.[1]
+    return Number.isFinite(this.pos?.y) && Number.isFinite(this.pos.lngLat?.[0]) && Number.isFinite(this.pos.lngLat?.[1])
   }
 
   _log() {
     console.log("================")
-    console.log(`hex: ${this.hex} | sqwk: ${this.sqwk} | cs: ${this.callsign} | alt: ${this.alt} | spd: ${this.spd} | hdg: ${this.hdg} | lng: ${this.pos.lngLat[0]} | lat: ${this.pos.lngLat[1]}`)
+    console.log(`hex: ${this.hex} | sqwk: ${this.squawk} | cs: ${this.callsign} | alt: ${this.alt} | spd: ${this.spd} | hdg: ${this.hdg} | lng: ${this.pos.lngLat[0]} | lat: ${this.pos.lngLat[1]}`)
     console.log(this.pos)
     console.log("################")
   }

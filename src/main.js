@@ -237,7 +237,7 @@ function draw(elapsedTime, deltaTime) {
       }
     }
 
-    if (aircraftHasExpired) {
+    if (aircraft.hasExpired(elapsedTime)) {
       removeAircraft(aircraft)
     }
   })

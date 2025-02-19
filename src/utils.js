@@ -95,7 +95,7 @@ export const POLAR_GRID_COLOR_2 = "#81efff"
 // If you find that aircraft are not disappearing quickly enough try decreasing this value. 
 // The best value is dependent on how much traffic you have in your area.
 //
-export const AIRCRAFT_TTL = 15.0
+export const AIRCRAFT_TTL = 20.0
 // trail update frequency is based on number of valid telemetry updates that have occurred
 export const AIRCRAFT_TRAIL_UPDATE_FREQUENCY = 75
 export const AIRCRAFT_MAX_TRAIL_POINTS = 5000

@@ -9,9 +9,10 @@ This document describes how to setup a development environment to hack on skies-
 - [Prerequisites](#prerequisites)
 - [Application Architecture](#application-architecture)
   - [The application consists of three main components:](#the-application-consists-of-three-main-components)
-    - [Web Frontend (skies-adsb/src)](#web-frontend-skies-adsbsrc)
-    - [Backend Service (skies-adsb/flask)](#backend-service-skies-adsbflask)
-    - [Map Generator (skies-adsb/maps)](#map-generator-skies-adsbmaps)
+    - [Web Frontend (skies-adsb/src)](#web-frontend-skies-adbsrc)
+    - [Backend Service (skies-adsb/flask)](#backend-service-skies-adbflask)
+    - [Map Generator (skies-adsb/maps)](#map-generator-skies-adbmaps)
+- [Tech Stack](#tech-stack)
   - [Languages](#languages)
   - [Frameworks](#frameworks)
   - [Development Tools](#development-tools)
@@ -110,7 +111,7 @@ If you wish to contribute to skies-adsb please fork the project and submit chang
 - Excellent integration with project tooling
 - Download from: https://code.visualstudio.com/
 
-2. Follow the localhost setup guide here: [LOCALHOST-SETUP-GUIDE](LOCALHOST-SETUP-GUIDE.md)
+2. Follow the Localhost+Headless Setup Guide here: [Localhost+Headless Setup Guide](LOCALHOST-HEADLESS-SETUP-GUIDE.md)
 
 3. Once setup is complete, start the development server:
 

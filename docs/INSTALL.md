@@ -2,8 +2,8 @@
 
 This guide provides step-by-step instructions for installing skies-adsb. The instructions outlined here apply to both:
 
-- [Raspberry Pi Installation Guide](RPI-INSTALL-GUIDE.md)
-- [Localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md)
+- New Raspberry Pi installations running 64-bit OS
+- Localhost or headless installations on existing systems
 
 Follow each step carefully to set up the core dependencies and configuration needed to deploy and run the application.
 
@@ -289,9 +289,9 @@ These values can be modified in the **src/util.js** file to adjust the visualiza
 
 # Next Steps
 
-At this point, choose one of the following guides to complete your installation:
+After completing the base installation, follow one of these guides to finalize your setup:
 
-- [Raspberry Pi Installation Guide](RPI-INSTALL-GUIDE.md) - For setting up skies-adsb on a new or existing ADS-B receiver
-- [Localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md) - For running skies-adsb locally without modifying your ADS-B receiver
+- [Raspberry Pi Installation Guide](RPI-INSTALL-GUIDE.md) - Configure skies-adsb on a 64-bit Raspberry Pi ADS-B receiver
+- [Localhost+Headless Setup Guide](LOCALHOST-HEADLESS-SETUP-GUIDE.md) - Run skies-adsb locally or headless on your system
 
-Select the guide that matches your intended setup.
+Choose the guide that matches your deployment scenario.

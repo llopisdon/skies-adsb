@@ -2,7 +2,7 @@
 
 This document describes how to setup and deploy the skies-adsb app to a Raspberry Pi Zero 2 W (or newer 64-bit Raspberry Pi model) connected to a RTL-SDR receiver on your home network.
 
-**Note:** if you have an existing RPI ADS-B installation this guide will make changes to the RPI setup. If you do not wish to alter your RPI setup then please use the [Localhost Setup Guide](LOCALHOST-SETUP-GUIDE.md) instead.
+**Note:** if you have an existing RPI ADS-B installation this guide will make changes to the RPI setup. If you do not wish to alter your RPI setup then please use the [Localhost+Headless Setup Guide](LOCALHOST-HEADLESS-SETUP-GUIDE.md) instead.
 
 **Note:** skies-adsb was developed under Linux. This document assumes your workstation is running Linux or macOS.
 
@@ -13,14 +13,16 @@ This document describes how to setup and deploy the skies-adsb app to a Raspberr
 - [What You Will Need & Shopping List](#what-you-will-need--shopping-list)
 - [Hardware and reference materials used to build this project](#hardware-and-reference-materials-used-to-build-this-project)
   - [Recommended Hardware](#recommended-hardware)
+  - [Outdoor Setup](#outdoor-setup)
+  - [Indoor Setup](#indoor-setup)
   - [Other hardware used](#other-hardware-used)
   - [Learning about RTL-SDR and ADS-B](#learning-about-rtl-sdr-and-ads-b)
 - [Step 1 - Prerequisites](#step-1---prerequisites)
 - [Step 2 - Raspberry Pi (RPI) Setup](#step-2---raspberry-pi-rpi-setup)
 - [Step 3 - Setup src/.env file variables](#step-3---setup-srcenv-file-variables)
-- [Step 4 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script](#step-4---optional-use-existing-ads-b-receiver--customize-rpi-installsh-script)
-- [Step 5 - Deploy and run the RPI skies-adsb setup.sh Script](#step-5---deploy-and-run-the-rpi-skies-adsb-setupsh-script)
-- [Step 6 - Install the RTL-SDR receiver](#step-6---install-the-rtl-sdr-receiver)
+- [Step 4 - Choose and Configure ADS-B Driver](#step-4---choose-and-configure-ads-b-driver)
+- [Step 5 - Deploy and run the RPI skies-adsb install-skies-adsb.sh Script](#step-5---deploy-and-run-the-rpi-skies-adsb-install-skies-adsbsh-script)
+- [Step 6 - Connect your RTL-SDR receiver](#step-6---connect-your-rtl-sdr-receiver)
 - [Step 7 - Build and Deploy the skies-adsb web app to the Raspberry Pi](#step-7---build-and-deploy-the-skies-adsb-web-app-to-the-raspberry-pi)
 - [Step 8 - Test the skies-adsb Installation](#step-8---test-the-skies-adsb-installation)
 
@@ -40,7 +42,7 @@ The minimum hardware needed to build this project is:
 
 - 1 Raspberry Pi Zero 2 W or newer 64-bit Raspberry Pi model
 - 1 32gb microSD card
-- 1 RTL-SDR Receiver that works with [dump1090-mutability](https://github.com/adsb-related-code/dump1090-mutability)
+- 1 RTL-SDR Receiver that works with [readsb](https://github.com/wiedehopf/readsb) or [dump1090-mutability](https://github.com/adsb-related-code/dump1090-mutability)
 - 1 ADS-B 1090MHz Antenna (see recommendations below)
 - a Linux or Mac workstation for Raspberry Pi setup
 
@@ -55,9 +57,23 @@ The minimum hardware needed to build this project is:
 |--------|------|
 | 1 | [CanaKit Raspberry Pi Zero 2 W - Pi Zero 2 W Starter MAX Kit](https://www.canakit.com/raspberry-pi-zero-2-w.html) |
 | 1 | [ADSBexchange.com Blue R820T2 RTL2832U, 0.5 PPM TCXO ADS-B SDR w/Amp and 1090 Mhz Filter, Antenna & Software on Industrial MicroSD](https://store.adsbexchange.com/) |
+
+### Outdoor Setup
+
+<!-- prettier-ignore -->
+| Amount | Item |
+|--------|------|
+| 1 | [5.5dBi 1090/978 N-Type Female Antenna - 26-inch](https://a.co/d/flkLEo5) |
+| 1 | [10ft SMA Male to N Male Pure Cable](https://a.co/d/d6f23F3) |
+| 1 | [IP54 Waterproof Box with Large Capacity Outdoor Weatherproof Box](https://a.co/d/9MidpWv) |
+
+## Indoor Setup
+
+<!-- prettier-ignore -->
+| Amount | Item |
+|--------|------|
 | 1 | [AirNav RadarBox ADS-B 1090 MHz XBoost Antenna with SMA Connector](https://www.radarbox.com/store) |
 | 1 | [Proxicast 6 ft Ultra Flexible SMA Male - SMA Male Low Loss Coax Jumper Cable for 3G/4G/LTE/Ham/ADS-B/GPS/RF Radios & Antennas (Not for TV or WiFi) - 50 Ohm](https://amazon.com/gp/product/B07R2CWDPJ/) |
-| 1 | [6ft Tripod](https://amazon.com/gp/product/B005I2YL7I/) |
 
 ### Other hardware used
 
@@ -71,11 +87,12 @@ The minimum hardware needed to build this project is:
 
 ### Learning about RTL-SDR and ADS-B
 
-| Amount | Item                                                                                                                           |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| 1      | [The Hobbyist's Guide to the RTL-SDR: Really Cheap Software Defined Radio](https://amazon.com/gp/product/B00KCDF1QI/)          |
-| 1      | [RTL-SDR for Everyone: Second Edition 2016 Guide including Raspberry Pi 2](https://amazon.com/gp/product/B01C9KZKAI/)          |
-| 1      | [Airband Radio on the RTL-SDR: Tips and tricks for capturing voice and data on a revolutionary device](https://a.co/d/3EMAZcR) |
+<!-- prettier-ignore -->
+| Amount | Item |
+| ------ | ---- |
+| 1 | [The Hobbyist's Guide to the RTL-SDR: Really Cheap Software Defined Radio](https://amazon.com/gp/product/B00KCDF1QI/) |
+| 1 | [RTL-SDR for Everyone: Second Edition 2016 Guide including Raspberry Pi 2](https://amazon.com/gp/product/B01C9KZKAI/) |
+| 1 | [Airband Radio on the RTL-SDR: Tips and tricks for capturing voice and data on a revolutionary device](https://a.co/d/3EMAZcR) |
 
 ## Step 1 - Prerequisites
 
@@ -201,8 +218,9 @@ VITE_SETTINGS_SHOW_ROADS=false
 
 ### Optional Default Settings
 
-| Variable Name                       | Explanation                                                    | Value                             | Default   |
-| ----------------------------------- | -------------------------------------------------------------- | --------------------------------- | --------- |
+<!-- prettier-ignore -->
+| Variable Name | Explanation | Value | Default |
+|---------------|-------------|-------|---------|
 | VITE_SETTINGS_DEFAULT_SKYBOX        | Set Default Skybox Theme                                       | string (DAWN_DUSK, DAY, or NIGHT) | DAWN_DUSK |
 | VITE_SETTINGS_SHOW_ALL_TRAILS       | Controls visibility of aircraft trails for all tracked flights | boolean                           | true      |
 | VITE_SETTINGS_SHOW_AERODROMES       | Controls visibility of aerodrome and runways locations         | boolean                           | true      |
@@ -217,52 +235,51 @@ VITE_SETTINGS_SHOW_ROADS=false
 | VITE_SETTINGS_SHOW_STATES_PROVINCES | Controls display of state/province boundaries                  | boolean                           | true      |
 | VITE_SETTINGS_SHOW_COUNTIES         | Controls visibility of county boundaries                       | boolean                           | true      |
 
-## Step 4 - OPTIONAL: Use Existing ADS-B receiver / Customize RPI install.sh Script
+## Step 4 - Choose and Configure ADS-B Driver
 
-Skip this section if setting up a new ADS-B receiver. This section is for installing skies-adsb on an existing ADS-B receiver running Raspbian.
+You have three driver options for the RTL-SDR:
 
-### Using An Existing ADS-B receiver
+1. dump1090-mutability (default) - Included in Raspberry Pi OS
+2. readsb - More modern (actively developed) driver - Not included with Raspberry Pi OS but compatible and easily installed
+3. existing - Use an existing receiver
 
-The skies-adsb app works with any receiver that outputs [SBS BaseStation formatted data](http://woodair.net/sbs/article/barebones42_socket_data.htm).
+### dump1090-mutability (default)
 
-By default, the RPI **install.sh** script uses [adsbxchange/dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability) since it's included in Raspberry Pi OS. The setup assumes the receiver is on the same RPI as the web app.
+This driver comes preinstalled with Raspberry Pi OS (Raspbian). It works out of the box with minimal configuration needed. You can customize settings after installation if desired - see the configuration section below.
 
-To use an existing receiver (like [readsb](https://github.com/wiedehopf/readsb) or [flightaware/dump1090](https://github.com/flightaware/dump1090)):
+The dump1090-mutability driver provides basic ADS-B decoding capabilities and is a good choice for getting started quickly.
 
-1. Comment out the **optional_install_dump1090** function in **/path/to/skies-adsb/raspberrypi/install.sh**:
+### readsb
 
-```shell
-optional_do_upgrade_rpi
-echo
+This is an actively developed and modern RTL-SDR driver that works with Debian-based systems like Raspberry Pi OS. The default configuration works well out of the box, though it can be customized if needed (see documentation links below).
 
-#optional_install_dump1090
-#echo
+**Important Note for RTL-SDR Blog V4 SDR Users:**
+If you're using a RTL-SDR Blog V4 SDR, you'll need to install additional drivers first:
 
-do_setup_app
-```
+1. See installation instructions at:
 
-2. Modify **skies-adsb-websockify.sh**:
+- https://github.com/wiedehopf/adsb-scripts/wiki/Automatic-installation-for-readsb#installation
+- https://www.rtl-sdr.com/V4/
 
-```bash
-#!/usr/bin/env bash
-websockify 0.0.0.0:30006 <YOUR-ADS-B-RECEIVER-IP-ADDRESS>:<SBS-PORT>
-```
+Note: In outdoor setups, readsb has shown better reliability with fewer dropped positions compared to dump1090-mutability.
 
-### Customizing the Installation
+### existing - Using An Existing ADS-B receiver
 
-To skip optional dependencies, comment out any bash function calls prefixed with `optional_do_xyz` in the install script.
+The skies-adsb app works with any receiver that outputs [SBS BaseStation formatted data](http://woodair.net/sbs/article/barebones42_socket_data.htm) on a TCP socket. To use an existing receiver, you'll need its IP address and SBS output port number.
 
-The default skies-adsb web root directory is `/var/www/html/skies-adsb`. You can customize this by modifying the `WEBROOT` variable in `/path/to/skies-adsb/deploy_web_app.sh`:
+For example, if your receiver outputs SBS data on IP 192.168.1.100 port 30003, you would use:
 
 ```shell
-WEBROOT="/var/www/html/skies-adsb"
+./install-skies-adsb.sh -e 192.168.1.100:30003
 ```
 
-Change this path as needed for your environment.
+This will configure skies-adsb to receive data from your existing ADS-B receiver instead of setting up a new RTL-SDR receiver.
 
-## Step 5 - Deploy and run the RPI skies-adsb setup.sh Script
+## Step 5 - Deploy and run the RPI skies-adsb install-skies-adsb.sh Script
 
 With the .env file created in _step 3_ you are ready to set up the RPI to host the skies-adsb app.
+
+### Deploy files to RPI
 
 Copy the setup files over to the RPI as follows:
 
@@ -272,15 +289,59 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
-SSH into the RPI and run the setup script:
+### Run install-skies-adsb.sh script
+
+SSH into the RPI and run the **install-skies-adsb.sh** script:
+
+This script will setup the RPI to run skies-adsb.
+
+**NOTE: by default the install script will update and upgrade your Raspberry Pi before installing dependencies.**
+
+<!-- prettier-ignore -->
+| Command | Description | Optional Argument |
+| ------- | ----------- | ---------------- |
+| -s | Skip Raspberry Pi update + upgade | none |
+| -d | Install RTL-SDR dump1090-mutability driver - Basic ADS-B decoder included with Raspberry Pi OS | none |
+| -r | Install RTL-SDR readsb driver - Modern, actively developed ADS-B decoder with enhanced features | none |
+| -e | Use existing ADS-B receiver | `<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>` |
+
+Example Install with dump1090-mutability driver:
 
 ```shell
-ssh pi@raspberrypi.local
-chmod +x install.sh
-./install.sh
+./install-skies-adsb.sh -d
 ```
 
-At some point in the dump1090-mutability config dialog will pop up:
+Example Install with readsb driver:
+
+```shell
+./install-skies-adsb.sh -r
+```
+
+Example Use existing ADS-B receiver:
+
+```shell
+./install-skies-adsb.sh -e <ADS-B RECEIVER IP ADDRESS>:<SBS PORT>
+
+example:
+
+./install-skies-adsb.sh -e 192.168.1.123:30003
+```
+
+Example multiple arguments skip upgrade and install readsb driver:
+
+```shell
+./install-skies-adsb.sh -s -r
+```
+
+### OPTIONAL: Configure dump1090-mutability
+
+If you selected the option:
+
+```shell
+./install-skies-adsb.sh -d
+```
+
+At some point in the installation process the dump1090-mutability config dialog will pop up:
 
 ![Screenshot](configure_dump1090-mutability.png)
 
@@ -290,7 +351,9 @@ be sure to select "Yes" for "Start dump1090 automatically". If you make a mistak
 sudo dpkg-reconfigure dump1090-mutability
 ```
 
-When the setup script is complete it will reboot the RPI. When the RPI boots up again ssh into the RPI and verify that the flask and websocket proxy are listening on ports 5000 and 30006 respectively.
+### Post install-skies-adsb.sh Verification
+
+When the **install-skies-adsb.sh script** finishes it will reboot the RPI. When the RPI boots up again ssh into the RPI and verify that the flask and websocket proxy are listening on ports 5000 and 30006 respectively.
 
 ```shell
 ssh pi@raspberrypi.local
@@ -327,9 +390,11 @@ sudo journalctl -u skies-adsb-flask
 
 Now lets setup your RTL-SDR receiver.
 
-## Step 6 - Install the RTL-SDR receiver
+## Step 6 - Connect your RTL-SDR receiver
 
-By using a R820T2 based RTL-SDR receiver everything should work out of the box thanks to the [dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability) package installed on the RPI in Step 6.
+If you did not install a RTL-SDR driver in **Step 5** you can skip this step and proceed to **Step 7**
+
+By using a R820T2 based RTL-SDR receiver everything should work out of the box thanks to the [readsb](https://github.com/wiedehopf/readsb) or [dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability) package installed on the RPI in Step 5.
 
 Now lets verify that the receiver works.
 
@@ -383,6 +448,8 @@ LISTEN    0          128                     [::]:22                    [::]:*
 Now lets setup the workstation build environment so we can build and deploy the skies-adsb web app.
 
 ### Step 6b - OPTIONAL: Configure dump1090-mutability Remote Access
+
+**NOTE: This step is only if you installed the dump1090-mutability package.**
 
 By default, **dump1090-mutability** only accepts connections from **localhost**. To allow connections to **port 30003** from other machines on your network, follow these steps to reconfigure **dump1090-mutability**:
 
@@ -454,6 +521,16 @@ cd /path/to/skies-adsb
 chmod +x deploy_web_app.sh
 ./deploy_web_app.sh
 ```
+
+### Customizing the skies-adsb WEBROOT
+
+The default skies-adsb web root directory is `/var/www/html/skies-adsb`. You can customize this by modifying the `WEBROOT` variable in `deploy_web_app.sh`:
+
+```shell
+WEBROOT="/var/www/html/skies-adsb"
+```
+
+Change this path as needed for your environment.
 
 ## Step 8 - Test the skies-adsb Installation
 
