@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.2] - 2025-02-19
+
+### Changed
+
+- Update DEVELOPMENT.md Flask app update instructions
+
 ## [2.1.1] - 2025-02-19
 
 ### Changed

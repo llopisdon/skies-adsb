@@ -175,30 +175,10 @@ cd /path/to/skies-adsb
 
 To update the Flask app or services on your RPI:
 
-1. Edit raspberrypi/install.sh and comment out these lines:
-
-```shell
-#optional_do_upgrade_rpi
-#echo
-#optional_install_dump1090
-#echo
-```
-
-2. Deploy changes to the RPI:
-
 ```shell
 cd /path/to/skies-adsb/raspberrypi
-./deploy.sh
+./update_flask_app.sh
 ```
-
-3. SSH to the RPI and run install:
-
-```shell
-ssh pi@raspberrypi.local
-./install.sh
-```
-
-This will update the Flask app and services while preserving your existing **dump1090** installation.
 
 # Notes
 
