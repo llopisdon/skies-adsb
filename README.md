@@ -1,6 +1,6 @@
 # skies-adsb
 
-### ✈️ [Current Version: 2.1.3](CHANGELOG.md) 🚁
+### ✈️ [Current Version: 2.1.4](CHANGELOG.md) 🚁
 
 ![Screenshot](docs/screenshot.png)
 
@@ -63,10 +63,12 @@ For development setup and guidelines, see [DEVELOPMENT.md](docs/DEVELOPMENT.md).
 Use the issue tracker to:
 
 - Report bugs
-- Request features
+- Request features (Please no requests for Docker containers--see below)
 - Suggest improvements
 
 Please include relevant details and steps to reproduce when submitting issues.
+
+### NOTE: I'm not currently accepting requests for Docker containers. While I appreciate the interest in Docker containers, I've chosen to focus my development efforts in other areas. See: [Issue #6](https://github.com/machineinteractive/skies-adsb/issues/6)
 
 ## Community Screenshots
 
