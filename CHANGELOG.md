@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.4] - 2025-02-19
+
+### Changed
+
+- Update project README.md with Docker container notice.
+
 ## [2.1.3] - 2025-02-19
 
 ### Changed
