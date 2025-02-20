@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.5] - 2025-02-20
+
+### Changed
+
+- Update project README.md with link to SDR Enthusiasts compatible Docker container
+
 ## [2.1.4] - 2025-02-19
 
 ### Changed

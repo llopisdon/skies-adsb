@@ -68,7 +68,9 @@ Use the issue tracker to:
 
 Please include relevant details and steps to reproduce when submitting issues.
 
-### NOTE: I'm not currently accepting requests for Docker containers. While I appreciate the interest in Docker containers, I've chosen to focus my development efforts in other areas. See: [Issue #6](https://github.com/machineinteractive/skies-adsb/issues/6)
+### Docker
+
+Thank you for your interest in Docker. While I appreciate the interest in Docker containers, my development efforts are currently focused on core functionality. For a Docker container compatible with the SDR Enthusiasts project, check out: https://github.com/kx1t/docker-skies-adsb, a collaborative effort by @kx1t, @tubalainen, and @bbttxu.
 
 ## Community Screenshots
 
