@@ -175,7 +175,7 @@ setup_app_finish() {
 #
 # Main Installation Steps
 # ----------------------
-# Comment out any optional functions you don't want to run
+# Order is important.
 #
 
 echo "Starting skies-adsb installation..."

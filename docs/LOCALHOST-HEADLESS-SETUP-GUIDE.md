@@ -1,9 +1,9 @@
-# Localhost Setup Guide
+# Localhost & Headless Setup Guide
 
-This guide describes how to set up skies-adsb locally (or headless) to connect with an existing ADS-B receiver. The setup:
+This guide describes how to set up skies-adsb to connect to an existing ADS-B receiver, either on your local machine or a headless system. The setup:
 
-- Runs locally as a web and Flask server application
-- Creates a websocket proxy to forward ADS-B data
+- Runs locally as a web app and Flask application
+- Creates a local websocket proxy to forward ADS-B data
 - Compatible with ADS-B receivers using SBS format
 - Doesn't modify your existing ADS-B receiver installation
 
@@ -33,8 +33,9 @@ Please follow the steps in the install guide above before continuing.
 
 ## Required Environment Variables
 
-| Variable Name          | Explanation                                              | Value                                    | Default |
-| ---------------------- | -------------------------------------------------------- | ---------------------------------------- | ------- |
+<!-- prettier-ignore -->
+| Variable Name | Explanation | Value | Default |
+| ------------- | ----------- | ------| ------- |
 | VITE_USE_EXISTING_ADSB | Specifies the IP address and port of your ADS-B receiver | `<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>` | None    |
 
 **NOTE: typically SBS port is on 30003**
@@ -115,8 +116,9 @@ cd /path/to/skies-adsb
 
 The script will:
 
-| Action                 | Description                                                                                            |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+<!-- prettier-ignore -->
+| Action | Description |
+| -------| ----------- |
 | Start web app          | In development mode on localhost:5173 and `<LOCALHOST-NETWORK-IP>:5173`                                |
 | Start Flask app        | In development mode on localhost:5000 and `<LOCALHOST-NETWORK-IP>:5000`                                |
 | Create websocket proxy | Sets up on localhost:30006 and `<LOCALHOST-NETWORK-IP>:30006` to forward ADS-B data from your receiver |
