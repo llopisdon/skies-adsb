@@ -1,6 +1,6 @@
 # skies-adsb
 
-### ✈️ [Current Version: 2.1.5](CHANGELOG.md) 🚁
+### ✈️ [Current Version: 2.1.6](CHANGELOG.md) 🚁
 
 ![Screenshot](docs/screenshot.png)
 
@@ -70,7 +70,7 @@ Please include relevant details and steps to reproduce when submitting issues.
 
 ### Docker
 
-Thank you for your interest in Docker. While I appreciate the interest in Docker containers, my development efforts are currently focused on core functionality. For a Docker container compatible with the SDR Enthusiasts project, check out:
+Thank you for your interest in Docker. While I appreciate the interest in Docker containers, my development efforts are currently focused on core functionality. For a Docker container compatible with the [SDR Enthusiasts project](https://github.com/sdr-enthusiasts), check out:
 
 https://github.com/kx1t/docker-skies-adsb
 

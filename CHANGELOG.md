@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.6] - 2025-02-20
+
+### Changed
+
+- Misc documentation clean up
+
 ## [2.1.5] - 2025-02-20
 
 ### Changed
