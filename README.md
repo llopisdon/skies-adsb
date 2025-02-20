@@ -70,7 +70,11 @@ Please include relevant details and steps to reproduce when submitting issues.
 
 ### Docker
 
-Thank you for your interest in Docker. While I appreciate the interest in Docker containers, my development efforts are currently focused on core functionality. For a Docker container compatible with the SDR Enthusiasts project, check out: https://github.com/kx1t/docker-skies-adsb, a collaborative effort by @kx1t, @tubalainen, and @bbttxu.
+Thank you for your interest in Docker. While I appreciate the interest in Docker containers, my development efforts are currently focused on core functionality. For a Docker container compatible with the SDR Enthusiasts project, check out:
+
+https://github.com/kx1t/docker-skies-adsb
+
+a collaborative effort by [@kx1t, @tubalainen, and @bbttxu](https://github.com/machineinteractive/skies-adsb/issues/6).
 
 ## Community Screenshots
 
