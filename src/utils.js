@@ -213,14 +213,16 @@ export async function setOrigin(lonLat) {
 export function getXY(lonLat) {
   let [xx, yy] = sphericalMercator.forward(lonLat)
 
+  //console.log(lonLat)
+
   if (xx < 0) {
     xx += originX
   } else {
-    xx -= originY
+    xx -= originX
   }
 
   if (yy < 0) {
-    yy += originX
+    yy += originY
   } else {
     yy -= originY
   }

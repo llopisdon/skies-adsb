@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.7] - 2025-02-20
+
+### Changed
+
+- Fixed error in UTILS.getXY due to typo
+
 ## [2.1.6] - 2025-02-20
 
 ### Changed
