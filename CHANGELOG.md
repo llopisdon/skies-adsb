@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.8] - 2025-02-24
+
+### Changed
+
+- Updated troika-three-text library to 0.52.3
+- Fixed bug in Aircraft.hasExpired() causing incorrect aircraft expiration
+
 ## [2.1.7] - 2025-02-20
 
 ### Changed

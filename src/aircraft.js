@@ -204,8 +204,8 @@ export class Aircraft {
   }
 
   remove(scene) {
-    console.log(`[aircraft] - remove: ${this.hex} | ${this.callsign} | ${this.timestamp}`)
-    scene.remove(this.text)
+    //console.log(`[aircraft] - remove: ${this.hex} | ${this.callsign} | ${this.timestamp}`)
+    this.group.remove(this.text)
     this.text.dispose()
     scene.remove(this.group)
     scene.remove(this.trailLine)
@@ -269,8 +269,7 @@ export class Aircraft {
       const groundSpeed = (this?.hdg) ? this.spd + ' kt' : '-'
       const altitude = (this?.alt) ? this.alt + "'" : '-'
 
-      this.text.text = `${this.callsign || '-'}\n${this.hex}\n${heading}\n${groundSpeed}\n${altitude}`
-      this.text.sync()
+      this.text.text = `${this.callsign || '-'}\n${this.hex}\n${heading}\n${groundSpeed}\n${altitude}\n`
 
       const prevYpos = this.group.position.y
       this.group.position.set(xPos, yPos, zPos)
@@ -357,10 +356,7 @@ export class Aircraft {
   }
 
   hasExpired(elapsedTime) {
-    if (!this.mesh.visible) {
-      return false
-    }
-    return elapsedTime - this.timestamp > UTILS.AIRCRAFT_TTL
+    return (elapsedTime - this.timestamp) > UTILS.AIRCRAFT_TTL
   }
 
   getAircraftTypeKey() {

@@ -1,0 +1,14 @@
+Bump to version 2.1.8
+
+- Updated troika-three-text library to 0.52.3
+- Fixed bug in Aircraft.hasExpired() causing incorrect aircraft expiration
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch fps-fix
+# Changes to be committed:
+#	modified:   CHANGELOG.md
+#	modified:   package.json
+#

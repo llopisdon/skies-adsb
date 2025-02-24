@@ -75,7 +75,7 @@ export const FOLLOW_CAM_MAX_POLAR_ANGLE = (3 * Math.PI) / 4
 // NOTE: 
 // Polar Grid Radius should ideally match the SKYBOX_RADIUS
 //
-export const POLAR_GRID_RADIUS = 3000.0
+export const POLAR_GRID_RADIUS = SKYBOX_RADIUS
 export const POLAR_GRID_RADIALS = 16
 export const POLAR_GRID_CIRCLES = 5
 export const POLAR_DIVISIONS = 64

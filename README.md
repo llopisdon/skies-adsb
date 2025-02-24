@@ -1,6 +1,6 @@
 # skies-adsb
 
-### ✈️ [Current Version: 2.1.7](CHANGELOG.md) 🚁
+### ✈️ [Current Version: 2.1.8](CHANGELOG.md) 🚁
 
 ![Screenshot](docs/screenshot.png)
 
