@@ -66,6 +66,7 @@ The minimum hardware needed to build this project is:
 | 1 | [5.5dBi 1090/978 N-Type Female Antenna - 26-inch](https://a.co/d/flkLEo5) |
 | 1 | [10ft SMA Male to N Male Pure Cable](https://a.co/d/d6f23F3) |
 | 1 | [IP54 Waterproof Box with Large Capacity Outdoor Weatherproof Box](https://a.co/d/9MidpWv) |
+| 1 | 1/2" x 10' PVC Pipe (cut as needed to form stand for antenna)
 
 ## Indoor Setup
 
@@ -180,28 +181,28 @@ Please refer to the tables below for descriptions of what each variable does.
 Create a src/.env file with these minimum required variables:
 
 ```shell
-VITE_DEFAULT_ORIGIN_LATITUDE=<YOUR LATITUDE>
-VITE_DEFAULT_ORIGIN_LONGITUDE=<YOUR LONGITUDE>
+SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE=<YOUR LATITUDE>
+SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE=<YOUR LONGITUDE>
 
-VITE_SKIES_ADSB_RPI_USERNAME=<Default RPI username>
-VITE_SKIES_ADSB_RPI_HOST=<Default RPI IP address>
+SKIES_ADSB_RPI_USERNAME=<Default RPI username>
+SKIES_ADSB_RPI_HOST=<Default RPI IP address>
 ```
 
 ### Example src/.env file:
 
 ```shell
-VITE_DEFAULT_ORIGIN_LATITUDE=25.7919
-VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2871
+SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE=25.7919
+SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE=-80.2871
 
-VITE_SKIES_ADSB_RPI_USERNAME=pi
-VITE_SKIES_ADSB_RPI_HOST=192.168.1.123
+SKIES_ADSB_RPI_USERNAME=pi
+SKIES_ADSB_RPI_HOST=192.168.1.123
 
 # set default skybox to night
-VITE_SETTINGS_DEFAULT_SKYBOX=NIGHT
+SKIES_ADSB_SETTINGS_DEFAULT_SKYBOX=NIGHT
 # by default do not show all aircraft trails at the same time
-VITE_SETTINGS_SHOW_ALL_TRAILS=false
+SKIES_ADSB_SETTINGS_SHOW_ALL_TRAILS=false
 # by default do not show roads
-VITE_SETTINGS_SHOW_ROADS=false
+SKIES_ADSB_SETTINGS_SHOW_ROADS=false
 ```
 
 ## Available environment variables:
@@ -211,29 +212,14 @@ VITE_SETTINGS_SHOW_ROADS=false
 <!-- prettier-ignore -->
 | Variable Name | Explanation | Value | Default | Platform | Example |
 |---------------|-------------|-------|---------|-----------|---------|
-| VITE_DEFAULT_ORIGIN_LATITUDE | Default latitude for default origin location (from Step 1) | number | none | All | 25.7919 |
-| VITE_DEFAULT_ORIGIN_LONGITUDE | Default longitude for default origin location (from Step 1) | number | none | All | -80.2871 |
-| VITE_SKIES_ADSB_RPI_USERNAME | Default RPI username with sudo privileges | string | pi | RPI | pi |
-| VITE_SKIES_ADSB_RPI_HOST | Default RPI IP address | string | none | RPI | 192.168.1.123 |
+| SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE | Default latitude for default origin location (from Step 1) | number | none | All | 25.7919 |
+| SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE | Default longitude for default origin location (from Step 1) | number | none | All | -80.2871 |
+| SKIES_ADSB_RPI_USERNAME | Default RPI username with sudo privileges | string | pi | RPI | pi |
+| SKIES_ADSB_RPI_HOST | Default RPI IP address | string | none | RPI | 192.168.1.123 |
 
-### Optional Default Settings
+### Optional
 
-<!-- prettier-ignore -->
-| Variable Name | Explanation | Value | Default |
-|---------------|-------------|-------|---------|
-| VITE_SETTINGS_DEFAULT_SKYBOX        | Set Default Skybox Theme                                       | string (DAWN_DUSK, DAY, or NIGHT) | DAWN_DUSK |
-| VITE_SETTINGS_SHOW_ALL_TRAILS       | Controls visibility of aircraft trails for all tracked flights | boolean                           | true      |
-| VITE_SETTINGS_SHOW_AERODROMES       | Controls visibility of aerodrome and runways locations         | boolean                           | true      |
-| VITE_SETTINGS_SHOW_ORIGINS          | Controls display of origin name labels                         | boolean                           | true      |
-| VITE_SETTINGS_SHOW_AIRSPACE_CLASS_B | Controls visibility of Class B airspace boundaries             | boolean                           | true      |
-| VITE_SETTINGS_SHOW_AIRSPACE_CLASS_C | Controls visibility of Class C airspace boundaries             | boolean                           | true      |
-| VITE_SETTINGS_SHOW_AIRSPACE_CLASS_D | Controls visibility of Class D airspace boundaries             | boolean                           | true      |
-| VITE_SETTINGS_SHOW_URBAN_AREAS      | Controls display of urban area boundaries                      | boolean                           | true      |
-| VITE_SETTINGS_SHOW_ROADS            | Controls visibility of major roads and highways                | boolean                           | true      |
-| VITE_SETTINGS_SHOW_LAKES            | Controls visibility of lakes and large water bodies            | boolean                           | true      |
-| VITE_SETTINGS_SHOW_RIVERS           | Controls visibility of rivers and waterways                    | boolean                           | true      |
-| VITE_SETTINGS_SHOW_STATES_PROVINCES | Controls display of state/province boundaries                  | boolean                           | true      |
-| VITE_SETTINGS_SHOW_COUNTIES         | Controls visibility of county boundaries                       | boolean                           | true      |
+Please see the [INSTALL.md](INSTALL.md) guide for all the available optional environment variables.
 
 ## Step 4 - Choose and Configure ADS-B Driver
 

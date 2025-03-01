@@ -8,8 +8,8 @@
 
 source src/.env
 
-if [ -z $VITE_USE_EXISTING_ADSB ]; then
-  echo "VITE_USE_EXISTING_ADSB not found. Please set VITE_USE_EXISTING_ADSB in .env file."
+if [ -z $SKIES_ADSB_USE_EXISTING_ADSB ]; then
+  echo "SKIES_ADSB_USE_EXISTING_ADSB not found. Please set SKIES_ADSB_USE_EXISTING_ADSB in .env file."
   exit 1
 fi
 
@@ -31,7 +31,7 @@ export FLASK_ENV=development && cd flask && flask run -h 0.0.0.0 &
 
 sleep 1
 
-websockify 30006 $VITE_USE_EXISTING_ADSB &
+websockify 30006 $SKIES_ADSB_USE_EXISTING_ADSB &
 
 sleep 1
 

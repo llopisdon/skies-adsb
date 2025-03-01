@@ -76,7 +76,7 @@ install_readsb() {
 
   source ~/skies-adsb/src/.env
 
-  sudo readsb-set-location $VITE_DEFAULT_ORIGIN_LATITUDE $VITE_DEFAULT_ORIGIN_LONGITUDE
+  sudo readsb-set-location $SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE $SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE
 
   echo
   echo "readsb installation complete!"

@@ -42,11 +42,10 @@ document.body.appendChild(stats.dom)
 stats.dom.style.display = "none"
 
 const gui = new dat.GUI({
-  hidable: true
+  hidable: true,
 })
 gui.hide()
 let showDatGui = false
-
 
 const SETTINGS_SHOW_STATS = 'show stats'
 const SETTINGS_SKYBOX = 'skybox'
@@ -54,9 +53,11 @@ const SETTINGS_SHOW_GRID = 'show polar grid'
 const SETTINGS_SHOW_ALL_TRAILS = 'show all trails'
 const SETTINGS_ORIGIN = 'origin'
 
+const defaultSkybox = import.meta.env.SKIES_ADSB_SETTINGS_DEFAULT_SKYBOX?.toLowerCase() ?? SKYBOX.DAWN_DUSK
+
 const DAT_GUI_SETTINGS = {
   [SETTINGS_SHOW_STATS]: false,
-  [SETTINGS_SKYBOX]: SKYBOX.DAWN_DUSK,
+  [SETTINGS_SKYBOX]: defaultSkybox,
   [SETTINGS_SHOW_GRID]: false,
   [SETTINGS_SHOW_ALL_TRAILS]: UTILS.settings.show_all_trails,
 }
@@ -69,6 +70,14 @@ DAT_GUI_SETTINGS[SETTINGS_ORIGIN] = []
 
 console.table("[DAT GUI Settings]: ")
 console.table(DAT_GUI_SETTINGS)
+
+gui.add(DAT_GUI_SETTINGS, SETTINGS_SHOW_STATS).onChange(showStats => {
+  if (showStats) {
+    stats.dom.style.display = ""
+  } else {
+    stats.dom.style.display = "none"
+  }
+})
 
 gui.add(DAT_GUI_SETTINGS, SETTINGS_SHOW_GRID).onChange(isVisible => {
   console.log(`[DAT GUI] - show grid: ${isVisible}`)
@@ -84,12 +93,72 @@ gui.add(DAT_GUI_SETTINGS, SETTINGS_SKYBOX, [
   skybox.setTexture(timeOfDay)
 })
 
-gui.add(DAT_GUI_SETTINGS, SETTINGS_SHOW_STATS).onChange(showStats => {
-  if (showStats) {
-    stats.dom.style.display = ""
-  } else {
-    stats.dom.style.display = "none"
+
+const autoOrbitSettingsFolder = gui.addFolder('Auto Orbit Settings')
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'min_radius',
+  UTILS.CAMERA_AUTO_ORBIT_SETTINGS_MIN_RADIUS,
+  UTILS.CAMERA_AUTO_ORBIT_SETTINGS_MAX_RADIUS
+).onChange(value => {
+  UTILS.settings.auto_orbit.min_radius = value
+  if (UTILS.settings.auto_orbit.min_radius > UTILS.settings.auto_orbit.max_radius) {
+    UTILS.settings.auto_orbit.max_radius = UTILS.settings.auto_orbit.min_radius
+    gui.updateDisplay()
   }
+  resetAutoOrbitCamera()
+})
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'max_radius',
+  UTILS.CAMERA_AUTO_ORBIT_SETTINGS_MIN_RADIUS,
+  UTILS.CAMERA_AUTO_ORBIT_SETTINGS_MAX_RADIUS
+).onChange(value => {
+  UTILS.settings.auto_orbit.max_radius = value
+  if (UTILS.settings.auto_orbit.max_radius < UTILS.settings.auto_orbit.min_radius) {
+    UTILS.settings.auto_orbit.min_radius = UTILS.settings.auto_orbit.max_radius
+    gui.updateDisplay()
+  }
+  resetAutoOrbitCamera()
+})
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'radius_speed',
+  UTILS.CAMERA_AUTO_ORBIT_MIN_RADIUS_SPEED,
+  UTILS.CAMERA_AUTO_ORBIT_MAX_RADIUS_SPEED
+).onChange(value => {
+  UTILS.settings.auto_orbit.radius_speed = value
+  resetAutoOrbitCamera()
+})
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'vertical_speed',
+  UTILS.CAMERA_AUTO_ORBIT_MIN_VERTICAL_SPEED,
+  UTILS.CAMERA_AUTO_ORBIT_MAX_VERTICAL_SPEED
+).onChange(value => {
+  UTILS.settings.auto_orbit.vertical_speed = value
+  resetAutoOrbitCamera()
+})
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'horizontal_speed',
+  UTILS.CAMERA_AUTO_ORBIT_MIN_HORIZONTAL_SPEED,
+  UTILS.CAMERA_AUTO_ORBIT_MAX_HORIZONTAL_SPEED
+).onChange(value => {
+  UTILS.settings.auto_orbit.horizontal_speed = value
+  resetAutoOrbitCamera()
+})
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'min_phi',
+  UTILS.CAMERA_AUTO_ORBIT_MIN_PHI,
+  UTILS.CAMERA_AUTO_ORBIT_MAX_PHI
+).onChange(value => {
+  UTILS.settings.auto_orbit.min_phi = value
+  if (UTILS.settings.auto_orbit.min_phi > UTILS.settings.auto_orbit.max_phi) {
+    UTILS.settings.auto_orbit.max_phi = UTILS.settings.auto_orbit.min_phi
+    gui.updateDisplay()
+  }
+  resetAutoOrbitCamera()
+})
+autoOrbitSettingsFolder.add(UTILS.settings.auto_orbit, 'max_phi',
+  UTILS.CAMERA_AUTO_ORBIT_MIN_PHI,
+  UTILS.CAMERA_AUTO_ORBIT_MAX_PHI
+).onChange(value => {
+  UTILS.settings.auto_orbit.max_phi = value
+  if (UTILS.settings.auto_orbit.max_phi < UTILS.settings.auto_orbit.min_phi) {
+    UTILS.settings.auto_orbit.min_phi = UTILS.settings.auto_orbit.max_phi
+    gui.updateDisplay()
+  }
+  resetAutoOrbitCamera()
 })
 
 
@@ -119,16 +188,40 @@ let clock = new THREE.Clock()
 //
 // cameras
 //
+
 const CAMERA_INITIAL_ASPECT = UTILS.sizes.width / UTILS.sizes.height
+
 const orbitCamera = new THREE.PerspectiveCamera(
   UTILS.CAMERA_FOV, CAMERA_INITIAL_ASPECT, UTILS.CAMERA_NEAR, UTILS.CAMERA_FAR)
+orbitCamera.position.z = UTILS.FOLLOW_CAM_DISTANCE
+
 const followCamera = orbitCamera.clone()
 
-let camera = orbitCamera
-camera.position.z = UTILS.FOLLOW_CAM_DISTANCE
+const autoOrbitCamera = orbitCamera.clone()
+
+const autoOrbitCameraObject = new THREE.Object3D()
+scene.add(autoOrbitCameraObject)
+
+
+const cameras = {
+  [UTILS.CAMERA_MODE_ORBIT]: {
+    cam: orbitCamera,
+    mode: UTILS.CAMERA_MODE_ORBIT,
+  },
+  [UTILS.CAMERA_MODE_FOLLOW]: {
+    cam: followCamera,
+    mode: UTILS.CAMERA_MODE_FOLLOW,
+  },
+  [UTILS.CAMERA_MODE_AUTO_ORBIT]: {
+    cam: autoOrbitCamera,
+    mode: UTILS.CAMERA_MODE_AUTO_ORBIT,
+  }
+}
+
+let camera = cameras[UTILS.CAMERA_MODE_ORBIT]
 
 // controls
-const controls = new OrbitControls(camera, renderer.domElement)
+const controls = new OrbitControls(orbitCamera, renderer.domElement)
 
 //
 // track if mouse click causes camera changes via OrbitControls
@@ -138,7 +231,7 @@ const controls = new OrbitControls(camera, renderer.domElement)
 // https://www.html5rocks.com/en/mobile/touchandmouse/
 //
 controls.addEventListener('change', (event) => {
-  light.position.copy(camera.position)
+  light.position.copy(camera.cam.position)
   light.target.position.copy(controls.target)
 })
 
@@ -151,12 +244,10 @@ const ambientLight = new THREE.AmbientLight(0x4c4c4c)
 scene.add(ambientLight)
 
 const light = new THREE.DirectionalLight(0xffffff, 1)
-light.position.copy(camera.position)
 scene.add(light)
 scene.add(light.target)
 
 // skybox
-const defaultSkybox = import.meta.env.VITE_SETTINGS_DEFAULT_SKYBOX
 const skybox = new SKYBOX.Skybox(scene, defaultSkybox)
 
 // polar grid
@@ -180,11 +271,11 @@ const cameraWorldPos = new THREE.Vector3()
 
 function draw(elapsedTime, deltaTime) {
 
-  camera.getWorldPosition(cameraWorldPos)
+  camera.cam.getWorldPosition(cameraWorldPos)
 
   HUD.update()
 
-  raycaster.setFromCamera(raycasterPointer, camera)
+  raycaster.setFromCamera(raycasterPointer, camera.cam)
 
   //
   // aircraft
@@ -244,7 +335,7 @@ function draw(elapsedTime, deltaTime) {
 
   // Make sure the map origin labels are always facing the user's camera
   MAPS.LAYER_GROUPS[MAPS.LAYER_ORIGINS]?.children?.forEach((child) => {
-    child.lookAt(camera.position)
+    child.lookAt(camera.cam.position)
   })
 
   if (raycasterPointer?.x && raycasterPointer?.y) {
@@ -253,6 +344,9 @@ function draw(elapsedTime, deltaTime) {
 }
 
 function removeAircraft(aircraft) {
+
+  //console.log("removeAircraft: ", aircraft.hex)
+
   if (aircraft.hex === UTILS.INTERSECTED.key) {
     deselectAirCraftAndHideHUD()
   }
@@ -271,7 +365,7 @@ function deselectAirCraftAndHideHUD() {
     }
 
     UTILS.INTERSECTED.aircraft = null
-    if (cameraMode === CAMERA_FOLLOW) {
+    if (camera.mode === UTILS.CAMERA_MODE_FOLLOW) {
       const target = aircraft.group.getWorldPosition(new THREE.Vector3())
       aircraft.resetFollowCameraTarget()
       resetOrbitCamera(target)
@@ -297,6 +391,9 @@ window.addEventListener('resize', () => {
 
   followCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
   followCamera.updateProjectionMatrix()
+
+  autoOrbitCamera.aspect = UTILS.sizes.width / UTILS.sizes.height
+  autoOrbitCamera.updateProjectionMatrix()
 
   renderer.setSize(UTILS.sizes.width, UTILS.sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -422,24 +519,40 @@ function onPointerUp(event) {
 // HUD
 //
 
-function resetCameraToHome() {
-  if (cameraMode === CAMERA_FOLLOW) {
-    HUD.toggleFollow()
-  }
-  camera = orbitCamera
-  cameraMode = CAMERA_ORBIT
-  controls.enabled = true
-  controls.reset()
-}
-
-
+//
+// homeButton - reset camera to home position and reset orbit controls
+//
 HUD.hud.homeButton.addEventListener('click', (e) => {
   resetCameraToHome()
   e.stopPropagation()
 })
 
+//
+// autoOrbitButton - toggle between auto orbit camera and orbit control camera
+//
+HUD.hud.autoOrbitButton.addEventListener('click', (e) => {
+  HUD.toggleAutoOrbitButton()
+
+  if (camera.mode === UTILS.CAMERA_MODE_FOLLOW) {
+    HUD.toggleFollowButton()
+  }
+
+  if (camera.mode === UTILS.CAMERA_MODE_AUTO_ORBIT) {
+    camera = cameras[UTILS.CAMERA_MODE_ORBIT]
+    resetCameraToHome()
+  } else {
+    camera = cameras[UTILS.CAMERA_MODE_AUTO_ORBIT]
+  }
+
+  e.stopPropagation()
+})
+
+
+//
+// settingsButton - show dat.gui settings dialog
+//
 HUD.hud.settingsButton.addEventListener('click', (e) => {
-  HUD.toggleSettings()
+  HUD.toggleSettingsButton()
   showDatGui = !showDatGui
   if (showDatGui) {
     gui.show()
@@ -449,54 +562,49 @@ HUD.hud.settingsButton.addEventListener('click', (e) => {
   e.stopPropagation()
 })
 
+//
+// closeButton - deselect aircraft and hide right side HUD
+//
 HUD.hud.closeButton.addEventListener('click', (e) => {
   if (!HUD.isVisible()) return
   deselectAirCraftAndHideHUD()
   e.stopPropagation()
 })
 
+//
+// infoButton - toggle selected aircraft info dialog
+//
 HUD.hud.infoButton.addEventListener('click', (e) => {
   if (!HUD.isVisible()) return
-  HUD.toggleDialog()
+  HUD.toggleAircraftInfoDialogButton()
   e.stopPropagation()
 })
 
 //
-// camera - toggle between orbit control camera and follow camera
+// cameraButton - toggle between orbit control camera and follow camera
 //
-
-const CAMERA_ORBIT = "orbit"
-const CAMERA_FOLLOW = "follow"
-
-let cameraMode = CAMERA_ORBIT
-
 HUD.hud.cameraButton.addEventListener('click', (e) => {
+
   if (!HUD.isVisible()) return
-  if (cameraMode === CAMERA_ORBIT) {
+  if (camera.mode !== UTILS.CAMERA_MODE_FOLLOW) {
+
+    if (camera.mode === UTILS.CAMERA_MODE_AUTO_ORBIT) {
+      HUD.toggleAutoOrbitButton()
+    }
+
     // console.log("INTERSECTED AIRCRAFT: ")
-    // console.log(UTILS.INTERSECTED?.aircraft)
-    cameraMode = CAMERA_FOLLOW
-    followCamera.position.copy(camera.position)
-    followCamera.lookAt(camera.lookAt)
-    camera = followCamera
+    // console.log(UTILS.INTERSECTED?.aircraft)    
+    followCamera.position.copy(camera.cam.position)
+    followCamera.lookAt(camera.cam.lookAt)
+    camera = cameras[UTILS.CAMERA_MODE_FOLLOW]
     controls.enabled = false
   } else {
     deselectAirCraftAndHideHUD()
   }
-  console.log(`[HUD] toggle camera - mode: ${cameraMode}`)
-  HUD.toggleFollow()
+  console.log(`[HUD] toggle camera - mode: ${camera.mode}`)
+  HUD.toggleFollowButton()
   e.stopPropagation()
 })
-
-
-function resetOrbitCamera(target) {
-  orbitCamera.position.copy(camera.position)
-  controls.target.set(target.x, target.y, target.z)
-  controls.update()
-  controls.enabled = true
-  camera = orbitCamera
-  cameraMode = CAMERA_ORBIT
-}
 
 //
 // fullscreen toggle on double click event listener
@@ -519,21 +627,44 @@ HUD.hud.fullscreenButton.addEventListener('click', (e) => {
   e.stopPropagation()
 })
 
+function resetCameraToHome() {
 
+  switch (camera.mode) {
+    case UTILS.CAMERA_MODE_FOLLOW:
+      HUD.toggleFollowButton()
+      break
+    case UTILS.CAMERA_MODE_AUTO_ORBIT:
+      HUD.toggleAutoOrbitButton()
+      break
+  }
 
-function updateCamera() {
+  camera = cameras[UTILS.CAMERA_MODE_ORBIT]
+  controls.enabled = true
+  controls.reset()
+}
 
-  if (cameraMode === "follow" && UTILS.INTERSECTED?.aircraft) {
+function resetOrbitCamera(target) {
+  console.log("[main] - resetOrbitCamera")
+  orbitCamera.position.copy(camera.cam.position)
+  controls.target.set(target.x, target.y, target.z)
+  controls.update()
+  controls.enabled = true
+  camera = cameras[UTILS.CAMERA_MODE_ORBIT]
+}
+
+function updateCamera(elapsedTime, deltaTime) {
+
+  if (camera.mode === UTILS.CAMERA_MODE_FOLLOW && UTILS.INTERSECTED?.aircraft) {
     const aircraft = UTILS.INTERSECTED?.aircraft
     const followCamPos = aircraft.followCam.getWorldPosition(new THREE.Vector3())
     const followCamTargetPos = aircraft.group.getWorldPosition(new THREE.Vector3())
-    camera.position.lerp(followCamPos, 0.05)
-    camera.lookAt(followCamTargetPos)
+    camera.cam.position.lerp(followCamPos, 0.05)
+    camera.cam.lookAt(followCamTargetPos)
 
-    if (camera.position.distanceToSquared(followCamPos) < 1.0) {
+    if (camera.cam.position.distanceToSquared(followCamPos) < 1.0) {
       isFollowCamAttached = true
     }
-    light.position.copy(camera.position)
+    light.position.copy(camera.cam.position)
     light.target.position.copy(followCamTargetPos)
 
     //
@@ -549,6 +680,41 @@ function updateCamera() {
   } else {
     controls.update()
   }
+
+  updateAutoOrbitCamera(elapsedTime, deltaTime)
+}
+
+
+function updateAutoOrbitCamera(elapsedTime, deltaTime) {
+
+  const MIN_RADIUS = UTILS.settings.auto_orbit.min_radius
+  const MAX_RADIUS = UTILS.settings.auto_orbit.max_radius
+  const RADIUS_SPEED = UTILS.settings.auto_orbit.radius_speed
+  const VERTICAL_SPEED = UTILS.settings.auto_orbit.vertical_speed
+  const HORIZONTAL_SPEED = UTILS.settings.auto_orbit.horizontal_speed
+
+  const MIN_ALTITUDE = THREE.MathUtils.degToRad(UTILS.settings.auto_orbit.min_phi)
+  const MAX_ALTITUDE = THREE.MathUtils.degToRad(UTILS.settings.auto_orbit.max_phi)
+
+  const radius = MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * (0.5 + 0.5 * Math.sin(elapsedTime * RADIUS_SPEED))
+  const verticalAngle = MIN_ALTITUDE + (MAX_ALTITUDE - MIN_ALTITUDE) * (0.5 + 0.5 * Math.sin(elapsedTime * VERTICAL_SPEED))
+
+  const horizontalAngle = Math.sin(elapsedTime * HORIZONTAL_SPEED) * Math.PI * 2
+
+  autoOrbitCameraObject.position.setFromSphericalCoords(
+    radius,
+    verticalAngle,
+    horizontalAngle
+  )
+
+  const worldPosition = new THREE.Vector3()
+  autoOrbitCameraObject.getWorldPosition(worldPosition)
+  autoOrbitCamera.position.copy(worldPosition)
+  autoOrbitCamera.lookAt(0, 0, 0)
+}
+
+function resetAutoOrbitCamera() {
+  updateAutoOrbitCamera(0, 0)
 }
 
 
@@ -581,11 +747,11 @@ const animate = function () {
 
   animationFrameRequestId = requestAnimationFrame(animate)
 
-  updateCamera()
+  updateCamera(elapsedTime, deltaTime)
 
   draw(elapsedTime, deltaTime)
 
-  renderer.render(scene, camera)
+  renderer.render(scene, camera.cam)
 
   stats.end()
 }
@@ -626,6 +792,18 @@ async function updateOriginAndRebuildMapLayers(key) {
   ADSB.start(scene, clock)
 
   HUD.enableHUD()
+
+  // select default camera mode on map load
+  let cameraMode = import.meta.env.SKIES_ADSB_DEFAULT_CAMERA_MODE?.toLowerCase()
+  const defaultCameraModes = [UTILS.CAMERA_MODE_ORBIT, UTILS.CAMERA_MODE_AUTO_ORBIT]
+  if (!defaultCameraModes.includes(cameraMode)) {
+    console.warn(`[main] - invalid default camera mode: ${cameraMode} | using orbit camera`)
+    cameraMode = UTILS.CAMERA_MODE_ORBIT
+  }
+  camera = cameras[cameraMode]
+  if (cameraMode === UTILS.CAMERA_MODE_AUTO_ORBIT) {
+    HUD.toggleAutoOrbitButton()
+  }
 }
 
 //

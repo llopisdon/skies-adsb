@@ -34,6 +34,7 @@ class _HUD {
       rightButtonContainer: document.getElementById("hud-right"),
 
       homeButton: document.getElementById("home"),
+      autoOrbitButton: document.getElementById("360"),
       settingsButton: document.getElementById("settings"),
       fullscreenButton: document.getElementById("full-screen"),
       cameraButton: document.getElementById("camera"),
@@ -205,8 +206,8 @@ class _HUD {
 
     console.log("[HUD] toggleRightActions - isRightDialogShown: ", this.isRightDialogShown)
 
-    if (this.isHUDDialogShown) this.toggleDialog()
-    if (this.isFollowCamActive) this.toggleFollow()
+    if (this.isHUDDialogShown) this.toggleAircraftInfoDialogButton()
+    if (this.isFollowCamActive) this.toggleFollowButton()
 
     const param = this.isRightDialogShown
       ? {
@@ -225,8 +226,17 @@ class _HUD {
     gsap.to("#hud-right", param)
   }
 
-  toggleSettings() {
-    let settingsButton = this.hud.settingsButton
+  toggleAutoOrbitButton() {
+    let autoOrbitButton = this.hud.autoOrbitButton
+    if (autoOrbitButton.classList.contains("active")) {
+      autoOrbitButton.classList.remove("active")
+    } else {
+      autoOrbitButton.classList.add("active")
+    }
+  }
+
+  toggleSettingsButton() {
+    const settingsButton = this.hud.settingsButton
     if (settingsButton.classList.contains("active")) {
       settingsButton.classList.remove("active")
     } else {
@@ -234,18 +244,18 @@ class _HUD {
     }
   }
 
-  toggleFollow() {
-    let follow = this.hud.cameraButton
+  toggleFollowButton() {
+    const followButton = this.hud.cameraButton
     this.isFollowCamActive = !this.isFollowCamActive
 
     if (this.isFollowCamActive) {
-      follow.classList.add("active")
+      followButton.classList.add("active")
     } else {
-      follow.classList.remove("active")
+      followButton.classList.remove("active")
     }
   }
 
-  toggleDialog() {
+  toggleAircraftInfoDialogButton() {
     this.isHUDDialogShown = !this.isHUDDialogShown
     let info = this.hud.infoButton
     if (info.classList.contains("active")) {

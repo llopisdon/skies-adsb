@@ -6,9 +6,9 @@ ENV_FILE=../src/.env
 
 source $ENV_FILE
 
-if [ -z "$VITE_DEFAULT_ORIGIN_LATITUDE" ] || [ -z "$VITE_DEFAULT_ORIGIN_LONGITUDE" ]; then
+if [ -z "$SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE" ] || [ -z "$SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE" ]; then
   echo "Error: Required environment variables are not set"
-  echo "Please set VITE_DEFAULT_ORIGIN_LATITUDE and VITE_DEFAULT_ORIGIN_LONGITUDE"
+  echo "Please set SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE and SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE"
   exit 1
 fi
 

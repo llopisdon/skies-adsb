@@ -2,13 +2,13 @@ import { SphericalMercator } from '@mapbox/sphericalmercator'
 
 const ADSB_LOCALHOST = window.location.hostname
 
-const ADSB_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
+const ADSB_HOST = import.meta.env.SKIES_ADSB_USE_EXISTING_ADSB ?
   `${ADSB_LOCALHOST}:30006` :
-  `${import.meta.env.VITE_SKIES_ADSB_RPI_HOST}:30006`
+  `${import.meta.env.SKIES_ADSB_RPI_HOST}:30006`
 
-const FLASK_HOST = import.meta.env.VITE_USE_EXISTING_ADSB ?
+const FLASK_HOST = import.meta.env.SKIES_ADSB_USE_EXISTING_ADSB ?
   `${ADSB_LOCALHOST}:5000` :
-  `${import.meta.env.VITE_SKIES_ADSB_RPI_HOST}:5000`
+  `${import.meta.env.SKIES_ADSB_RPI_HOST}:5000`
 
 export const DATA_HOSTS = {
   "adsb": `ws://${ADSB_HOST}`,
@@ -44,6 +44,30 @@ export const DEFAULT_SCALE = 1.0 / 250.0
 export const CAMERA_FOV = 75
 export const CAMERA_NEAR = 0.1
 export const CAMERA_FAR = 10000.0
+
+export const CAMERA_AUTO_ORBIT_DEFAULT_MIN_RADIUS = 25
+export const CAMERA_AUTO_ORBIT_DEFAULT_MAX_RADIUS = 250
+export const CAMERA_AUTO_ORBIT_DEFAULT_RADIUS_SPEED = 0.009
+export const CAMERA_AUTO_ORBIT_DEFAULT_VERTICAL_SPEED = 0.009
+export const CAMERA_AUTO_ORBIT_DEFAULT_HORIZONTAL_SPEED = 0.009
+export const CAMERA_AUTO_ORBIT_DEFAULT_MIN_PHI = 0
+export const CAMERA_AUTO_ORBIT_DEFAULT_MAX_PHI = 90
+
+export const CAMERA_AUTO_ORBIT_SETTINGS_MIN_RADIUS = 10.0
+export const CAMERA_AUTO_ORBIT_SETTINGS_MAX_RADIUS = 1000.0
+export const CAMERA_AUTO_ORBIT_MIN_RADIUS_SPEED = 0.0
+export const CAMERA_AUTO_ORBIT_MAX_RADIUS_SPEED = 0.5
+export const CAMERA_AUTO_ORBIT_MIN_VERTICAL_SPEED = 0.001
+export const CAMERA_AUTO_ORBIT_MAX_VERTICAL_SPEED = 0.1
+export const CAMERA_AUTO_ORBIT_MIN_HORIZONTAL_SPEED = 0.001
+export const CAMERA_AUTO_ORBIT_MAX_HORIZONTAL_SPEED = 0.1
+export const CAMERA_AUTO_ORBIT_MIN_PHI = 0
+export const CAMERA_AUTO_ORBIT_MAX_PHI = 90
+
+export const CAMERA_MODE_ORBIT = "orbit"
+export const CAMERA_MODE_FOLLOW = "follow"
+export const CAMERA_MODE_AUTO_ORBIT = "auto_orbit"
+
 
 //
 // Skybox Radius
@@ -103,8 +127,6 @@ export const AIRCRAFT_MAX_TRAIL_POINTS = 2500
 export const AIRCRAFT_TRAIL_UPDATE_Y_POS_THRESHOLD = 1000.0 * DEFAULT_SCALE
 
 
-
-
 export const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
@@ -116,7 +138,6 @@ export const INTERSECTED = {
   aircraft: null,
 }
 
-
 export function parseViteEnvBooleanSetting(value) {
   if (value === undefined) return undefined
   const setting = value.toLowerCase()
@@ -125,20 +146,61 @@ export function parseViteEnvBooleanSetting(value) {
   return undefined
 }
 
+export function parseViteEnvNumberSetting(value, min, max) {
+  if (value === undefined) return undefined
+  const setting = parseFloat(value)
+  if (isNaN(setting)) return undefined
+
+  if (min !== undefined && setting < min) return min
+  if (max !== undefined && setting > max) return max
+
+  return setting
+}
+
+
 export const settings = {
-  show_all_trails: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_ALL_TRAILS) ?? true,
-  show_aerodromes: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AERODROMES) ?? true,
-  show_origin_labels: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_ORIGINS) ?? true,
-  show_runways: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AERODROMES) ?? true,
-  show_airspace_class_b: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AIRSPACE_CLASS_B) ?? true,
-  show_airspace_class_c: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AIRSPACE_CLASS_C) ?? true,
-  show_airspace_class_d: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_AIRSPACE_CLASS_D) ?? true,
-  show_urban_areas: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_URBAN_AREAS) ?? true,
-  show_roads: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_ROADS) ?? true,
-  show_lakes: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_LAKES) ?? true,
-  show_rivers: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_RIVERS) ?? true,
-  show_states_provinces: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_STATES_PROVINCES) ?? true,
-  show_counties: parseViteEnvBooleanSetting(import.meta.env.VITE_SETTINGS_SHOW_COUNTIES) ?? true,
+
+  // auto orbit camera
+  auto_orbit: {
+    min_radius: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_MIN_RADIUS,
+      CAMERA_AUTO_ORBIT_SETTINGS_MIN_RADIUS, CAMERA_AUTO_ORBIT_SETTINGS_MAX_RADIUS
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_MIN_RADIUS,
+    max_radius: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_MAX_RADIUS,
+      CAMERA_AUTO_ORBIT_SETTINGS_MIN_RADIUS, CAMERA_AUTO_ORBIT_SETTINGS_MAX_RADIUS
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_MAX_RADIUS,
+    radius_speed: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_RADIUS_SPEED,
+      CAMERA_AUTO_ORBIT_MIN_RADIUS_SPEED, CAMERA_AUTO_ORBIT_MAX_RADIUS_SPEED
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_RADIUS_SPEED,
+    vertical_speed: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_VERTICAL_SPEED,
+      CAMERA_AUTO_ORBIT_MIN_VERTICAL_SPEED, CAMERA_AUTO_ORBIT_MAX_VERTICAL_SPEED
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_VERTICAL_SPEED,
+    horizontal_speed: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_HORIZONTAL_SPEED,
+      CAMERA_AUTO_ORBIT_MIN_HORIZONTAL_SPEED, CAMERA_AUTO_ORBIT_MAX_HORIZONTAL_SPEED
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_HORIZONTAL_SPEED,
+    min_phi: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_MIN_PHI,
+      CAMERA_AUTO_ORBIT_MIN_PHI, CAMERA_AUTO_ORBIT_MAX_PHI
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_MIN_PHI,
+    max_phi: parseViteEnvNumberSetting(import.meta.env.SKIES_ADSB_SETTINGS_AUTO_ORBIT_MAX_PHI,
+      CAMERA_AUTO_ORBIT_MIN_PHI, CAMERA_AUTO_ORBIT_MAX_PHI
+    ) ?? CAMERA_AUTO_ORBIT_DEFAULT_MAX_PHI,
+  },
+
+  // trails
+  show_all_trails: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_ALL_TRAILS) ?? true,
+
+  // map layers
+  show_aerodromes: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_AERODROMES) ?? true,
+  show_origin_labels: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_ORIGINS) ?? true,
+  show_runways: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_AERODROMES) ?? true,
+  show_airspace_class_b: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_AIRSPACE_CLASS_B) ?? true,
+  show_airspace_class_c: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_AIRSPACE_CLASS_C) ?? true,
+  show_airspace_class_d: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_AIRSPACE_CLASS_D) ?? true,
+  show_urban_areas: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_URBAN_AREAS) ?? true,
+  show_roads: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_ROADS) ?? true,
+  show_lakes: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_LAKES) ?? true,
+  show_rivers: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_RIVERS) ?? true,
+  show_states_provinces: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_STATES_PROVINCES) ?? true,
+  show_counties: parseViteEnvBooleanSetting(import.meta.env.SKIES_ADSB_SETTINGS_SHOW_COUNTIES) ?? true,
 }
 
 console.log("UTIL SETTINGS: ")

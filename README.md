@@ -1,6 +1,6 @@
 # skies-adsb
 
-### ✈️ [Current Version: 2.1.8](CHANGELOG.md) 🚁
+### ✈️ [Current Version: 2.2.0](CHANGELOG.md) 🚁
 
 ![Screenshot](docs/screenshot.png)
 
@@ -32,7 +32,7 @@ Runs on all major modern browsers (Chrome, Firefox, Safari).
 - Touch-friendly mobile web interface
 - Install as PWA on mobile or desktop
 
-![Gif Recording](docs/skies-adsb-v2-recording.gif)
+![Gif Recording](docs/skies-adsb-v2.2.0-recording.gif)
 
 _Recording of the skies-adsb app running in a browser demonstrating the use of the onscreen controls_
 
@@ -74,7 +74,9 @@ Thank you for your interest in Docker. While I appreciate the interest in Docker
 
 https://github.com/kx1t/docker-skies-adsb
 
-a collaborative effort by [@kx1t, @tubalainen, and @bbttxu](https://github.com/machineinteractive/skies-adsb/issues/6).
+see:
+
+https://github.com/machineinteractive/skies-adsb/issues/6
 
 ## Community Screenshots
 

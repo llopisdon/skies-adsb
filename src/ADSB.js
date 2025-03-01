@@ -37,6 +37,12 @@ const handleADSBMessage = (event) => {
 
     let data = result.split(",")
     let hexIdent = data[HEX_IDENT]
+
+    if (!/^[0-9A-F]{6}$/i.test(hexIdent)) {
+      //console.warn(`[ADSB] Invalid Hex Ident - msg_type: ${data[MSG_TYPE]} hex: ${hexIdent}`)
+      return
+    }
+
     if (!(hexIdent in AIRCRAFT.aircraft)) {
       const aircraft = new AIRCRAFT.Aircraft(scene, hexIdent)
       AIRCRAFT.aircraft[hexIdent] = aircraft

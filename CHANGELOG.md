@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.0] - 2025-03-01
+
+### Added
+
+- Added "Auto-Orbit" camera mode
+- Added "Auto-Orbit" camera controls to dat-gui settings
+- Added new gif recording of v2.2.0
+
+### Changed
+
+- Changed default environment variables prefix from `VITE_` to `SKIES_ADSB_`
+- Adjusted urban layer Y position
+- Updated automation + build scripts to use `SKIES_ADSB_` environment variables
+- Updated docs
+- Misc clean up
+
 ## [2.1.8] - 2025-02-24
 
 ### Changed

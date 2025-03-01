@@ -206,6 +206,9 @@ async function buildMapLayer(scene, layerName, fileName) {
     }
 
     switch (geoJson.name) {
+      case LAYER_URBAN_AREAS:
+        childGroup.position.set(0, -0.15, 0)
+        break
       case LAYER_AIRSPACE_CLASS_B:
         childGroup.position.set(0, 0, 0)
         break
@@ -358,8 +361,8 @@ async function buildOrigins(originsData) {
 
   // set default origin
   console.log("\tBuilding default origin...")
-  const defaultLat = import.meta.env.VITE_DEFAULT_ORIGIN_LATITUDE
-  const defaultLon = import.meta.env.VITE_DEFAULT_ORIGIN_LONGITUDE
+  const defaultLat = import.meta.env.SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE
+  const defaultLon = import.meta.env.SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE
 
   if (isNaN(parseFloat(defaultLat)) || isNaN(parseFloat(defaultLon))) {
     console.error("ERROR: Default Origin Latitude and/or Longitude not set in .env file")

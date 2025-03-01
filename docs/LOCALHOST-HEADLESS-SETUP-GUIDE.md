@@ -36,7 +36,7 @@ Please follow the steps in the install guide above before continuing.
 <!-- prettier-ignore -->
 | Variable Name | Explanation | Value | Default |
 | ------------- | ----------- | ------| ------- |
-| VITE_USE_EXISTING_ADSB | Specifies the IP address and port of your ADS-B receiver | `<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>` | None    |
+| SKIES_ADSB_USE_EXISTING_ADSB | Specifies the IP address and port of your ADS-B receiver | `<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>` | None    |
 
 **NOTE: typically SBS port is on 30003**
 
@@ -47,29 +47,29 @@ cd /path/to/skies-adsb/src
 add the following variables to the **.env** file:
 
 ```shells
-VITE_USE_EXISTING_ADSB=<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>
+SKIES_ADSB_USE_EXISTING_ADSB=<ADS-B RECEIVER IP ADDRESS>:<SBS PORT>
 ```
 
 ## Example .env file
 
-### NOTE: When VITE_USE_EXISTING_ADSB is defined, skies-adsb defaults to using localhost for both websocket and flask connections.
+### NOTE: When SKIES_ADSB_USE_EXISTING_ADSB is defined, skies-adsb defaults to using localhost for both websocket and flask connections.
 
 Example **.env** file with default origin centered on **KMIA** and ADS-B receiver at **192.168.1.123:30003**:
 
 ```shell
-VITE_DEFAULT_ORIGIN_LATITUDE=25.7955406
-VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
+SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE=25.7955406
+SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
 
-VITE_USE_EXISTING_ADSB=192.168.1.123:30003
+SKIES_ADSB_USE_EXISTING_ADSB=192.168.1.123:30003
 ```
 
 Example **.env** file with default origin centered on **KMIA** and ADS-B receiver at **localhost:30003**:
 
 ```shell
-VITE_DEFAULT_ORIGIN_LATITUDE=25.7955406
-VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
+SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE=25.7955406
+SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
 
-VITE_USE_EXISTING_ADSB=localhost:30003
+SKIES_ADSB_USE_EXISTING_ADSB=localhost:30003
 ```
 
 ## Check ADS-B SBS Port 30003 Connection

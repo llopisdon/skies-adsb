@@ -33,8 +33,8 @@ args = parser.parse_args()
 # setup default origin latitude and longitude
 #
 
-origin_lat = os.environ.get("VITE_DEFAULT_ORIGIN_LATITUDE") or args.origin_lat
-origin_lon = os.environ.get("VITE_DEFAULT_ORIGIN_LONGITUDE") or args.origin_lon
+origin_lat = os.environ.get("SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE") or args.origin_lat
+origin_lon = os.environ.get("SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE") or args.origin_lon
 
 if origin_lat is not None and origin_lon is not None:
     ORIGIN_LAT = float(origin_lat)

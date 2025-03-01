@@ -8,13 +8,13 @@ WEBROOT="/var/www/html/skies-adsb"
 
 source src/.env
 
-if [ -z "$VITE_SKIES_ADSB_RPI_USERNAME" ] || [ -z "$VITE_SKIES_ADSB_RPI_HOST" ]; then
+if [ -z "$SKIES_ADSB_RPI_USERNAME" ] || [ -z "$SKIES_ADSB_RPI_HOST" ]; then
   echo "Error: Required environment variables are not set"
-  echo "Please set VITE_SKIES_ADSB_RPI_USERNAME and VITE_SKIES_ADSB_RPI_HOST"
+  echo "Please set SKIES_ADSB_RPI_USERNAME and SKIES_ADSB_RPI_HOST"
   exit 1
 fi
 
-RPI_TARGET=$VITE_SKIES_ADSB_RPI_USERNAME@$VITE_SKIES_ADSB_RPI_HOST
+RPI_TARGET=$SKIES_ADSB_RPI_USERNAME@$SKIES_ADSB_RPI_HOST
 
 echo "Deploy to: $RPI_TARGET"
 echo "Creating dist.tar..."

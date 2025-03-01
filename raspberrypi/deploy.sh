@@ -6,19 +6,19 @@
 
 source ../src/.env
 
-if [ -z "$VITE_SKIES_ADSB_RPI_USERNAME" ] || [ -z "$VITE_SKIES_ADSB_RPI_HOST" ]; then
+if [ -z "$SKIES_ADSB_RPI_USERNAME" ] || [ -z "$SKIES_ADSB_RPI_HOST" ]; then
   echo "Error: Required environment variables are not set"
-  echo "Please set VITE_SKIES_ADSB_RPI_USERNAME and VITE_SKIES_ADSB_RPI_HOST"
+  echo "Please set SKIES_ADSB_RPI_USERNAME and SKIES_ADSB_RPI_HOST"
   exit 1
 fi
 
-if [ -z "$VITE_DEFAULT_ORIGIN_LATITUDE" ] || [ -z "$VITE_DEFAULT_ORIGIN_LONGITUDE" ]; then
+if [ -z "$SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE" ] || [ -z "$SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE" ]; then
   echo "Error: Required environment variables are not set"
-  echo "Please set VITE_DEFAULT_ORIGIN_LATITUDE and VITE_DEFAULT_ORIGIN_LONGITUDE"
+  echo "Please set SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE and SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE"
   exit 1
 fi
 
-RPI_TARGET=$VITE_SKIES_ADSB_RPI_USERNAME@$VITE_SKIES_ADSB_RPI_HOST
+RPI_TARGET=$SKIES_ADSB_RPI_USERNAME@$SKIES_ADSB_RPI_HOST
 
 #
 # create tar files for flask app

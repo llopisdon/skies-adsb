@@ -10,7 +10,6 @@ Follow each step carefully to set up the core dependencies and configuration nee
 # Table of Contents
 
 - [Introduction](#introduction)
-- [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
   - [Important Notes](#important-notes)
   - [Required Software](#required-software)
@@ -27,6 +26,8 @@ Follow each step carefully to set up the core dependencies and configuration nee
 - [Step 10 - Extract the Datasets](#step-10---extract-the-datasets)
 - [Step 11 - Build your map layers](#step-11---build-your-map-layers)
 - [Step 12 - Configure Visualization Settings](#step-12---configure-visualization-settings)
+- [Step 13 - Configure Auto Orbit Environment Variables](#step-13---configure-auto-orbit-environment-variables)
+- [Step 14 - Configure Default SkyBox, Aircraft Trails, and Which Map Layers Are Visible by Default](#step-14---configure-default-skybox-aircraft-trails-and-which-map-layers-are-visible-by-default)
 - [Next Steps](#next-steps)
 
 # Prerequisites
@@ -156,15 +157,15 @@ To get your coordinates:
 Add these coordinates to your **/path/to/skies-adsb/src/.env** file:
 
 ```shell
-VITE_DEFAULT_ORIGIN_LATITUDE=<DEFAULT ORIGIN LATITUDE>
-VITE_DEFAULT_ORIGIN_LONGITUDE=<DEFAULT ORIGIN LONGITUDE>
+SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE=<DEFAULT ORIGIN LATITUDE>
+SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE=<DEFAULT ORIGIN LONGITUDE>
 ```
 
 Example using Miami International Airport (KMIA):
 
 ```shell
-VITE_DEFAULT_ORIGIN_LATITUDE=25.7955406
-VITE_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
+SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE=25.7955406
+SKIES_ADSB_DEFAULT_ORIGIN_LONGITUDE=-80.2918816
 ```
 
 # Step 8 - Download Natural Earth Datasets
@@ -267,6 +268,7 @@ This will launch the Vite development HTTP server.
 
 The following table lists the default visualization settings in **src/utils.js**. These settings control various aspects of the 3D visualization including camera behavior, skybox dimensions, and aircraft tracking parameters.
 
+<!-- prettier-ignore -->
 | Constant                        | Default Value | Description                                            |
 | ------------------------------- | ------------- | ------------------------------------------------------ |
 | DEFAULT_SCALE                   | 1.0 / 250.0   | Default scale for geometry                             |
@@ -286,6 +288,49 @@ The following table lists the default visualization settings in **src/utils.js**
 | AIRCRAFT_MAX_TRAIL_POINTS       | 5000          | Maximum number of points in aircraft trail             |
 
 These values can be modified in the **src/util.js** file to adjust the visualization behavior to your preferences. Note that some values are interdependent (e.g., SKYBOX_RADIUS must be less than or equal to half of CAMERA_FAR).
+
+# Step 13 - Configure Auto Orbit Environment Variables
+
+The following variables in src/.env control the default automatic camera orbit behavior on app launch:
+
+<!-- prettier-ignore -->
+| Variable Name | Explanation | Value | Default |
+| ------------- | ----------- | ------| ------- |
+| SKIES_ADSB_DEFAULT_CAMERA_MODE                  | Initial camera mode at startup                 | string(ORBIT, or AUTO_ORBIT) | ORBIT   |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_MIN_RADIUS       | Minimum orbit radius in world units            | Number >= 0                  | 25      |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_MAX_RADIUS       | Maximum orbit radius in world units            | Number >= MIN_RADIUS         | 250     |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_RADIUS_SPEED     | Speed of radius changes                        | Number between 0-0.5         | 0.009   |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_VERTICAL_SPEED   | Speed of vertical movement                     | Number between 0.001-0.1     | 0.009   |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_HORIZONTAL_SPEED | Speed of horizontal rotation                   | Number between 0.001-0.1     | 0.009   |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_MIN_PHI          | Minimum camera phi angle (degrees from zenith) | Number >= 0                  | 0       |
+| SKIES_ADSB_SETTINGS_AUTO_ORBIT_MAX_PHI          | Maximum camera phi angle (degrees from zenith) | Number >= MIN_ALTITUDE       | 90      |
+
+![Auto Orbit Camera Controls](screenshot-auto-orbit-camera-controls.png)
+
+_Auto Orbit Camera Controls_
+
+# Step 14 - Configure Default SkyBox, Aircraft Trails, and Which Map Layers Are Visible by Default
+
+<!-- prettier-ignore -->
+| Variable Name | Explanation | Value | Default |
+|---------------|-------------|-------|---------|
+| SKIES_ADSB_SETTINGS_DEFAULT_SKYBOX        | Set Default Skybox Theme                                       | string (DAWN_DUSK, DAY, or NIGHT) | DAWN_DUSK |
+| SKIES_ADSB_SETTINGS_SHOW_ALL_TRAILS       | Controls visibility of aircraft trails for all tracked flights | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_AERODROMES       | Controls visibility of aerodrome and runways locations         | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_ORIGINS          | Controls display of origin name labels                         | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_AIRSPACE_CLASS_B | Controls visibility of Class B airspace boundaries             | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_AIRSPACE_CLASS_C | Controls visibility of Class C airspace boundaries             | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_AIRSPACE_CLASS_D | Controls visibility of Class D airspace boundaries             | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_URBAN_AREAS      | Controls display of urban area boundaries                      | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_ROADS            | Controls visibility of major roads and highways                | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_LAKES            | Controls visibility of lakes and large water bodies            | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_RIVERS           | Controls visibility of rivers and waterways                    | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_STATES_PROVINCES | Controls display of state/province boundaries                  | boolean                           | true      |
+| SKIES_ADSB_SETTINGS_SHOW_COUNTIES         | Controls visibility of county boundaries                       | boolean                           | true      |
+
+![Map Layers Controls](screenshot-map-layers-controls.png)
+
+_Map Layers Controls_
 
 # Next Steps
 
