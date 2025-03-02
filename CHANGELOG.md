@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.1] - 2025-03-01
+
+### Changed
+
+- Changed build-map-layer.sh default environment variables prefix from `VITE_` to `SKIES_ADSB_`
+
 ## [2.2.0] - 2025-03-01
 
 ### Added

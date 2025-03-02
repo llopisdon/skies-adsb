@@ -12,7 +12,7 @@ if [ -z "$SKIES_ADSB_DEFAULT_ORIGIN_LATITUDE" ] || [ -z "$SKIES_ADSB_DEFAULT_ORI
   exit 1
 fi
 
-export $(grep '^VITE_DEFAULT_ORIGIN' $ENV_FILE | xargs)
+export $(grep '^SKIES_ADSB_DEFAULT_ORIGIN' $ENV_FILE | xargs)
 
 # forward all command line arguments
 python3 build-map-layers.py "$@"
