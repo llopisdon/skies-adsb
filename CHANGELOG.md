@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.0] - 2025-03-02
+
+### Added
+
+- Added basic flight information to aircraft dialog using planespotters.net aircraft registration data
+
+### Changed
+
+- Hide FlightAware Flight info section in flight info dialog on empty JSON response
+- Adjusted aircraft flight info dialog header text
+- Fixed typo in update_flask_app.sh script
+- Updated Flask app to return empty json response for flightInfo on failure to find FlightAware AeroAPI key
+- Update docs with explanation of changes
+
 ## [2.2.1] - 2025-03-01
 
 ### Changed

@@ -36,8 +36,7 @@ ssh "$RPI_TARGET" 'bash -s' <<'EOF'
   # Move and extract files
   mv skies-adsb-flask-app.tar.gz skies-adsb
   echo "Setting up skies-adsb flask app..."
-  cd ~/skies-adsb
-  mv skies-*.tar.gz skies-adsb
+  cd ~/skies-adsb  
   tar zxvf skies-adsb-flask-app.tar.gz
   rm skies-adsb-flask-app.tar.gz
   cd

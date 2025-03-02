@@ -65,9 +65,8 @@ def flightinfo(callsign):
   }
 
   if "FLIGHTAWARE_API_KEY" not in app.config or not app.config["FLIGHTAWARE_API_KEY"]:
-    print("WARNING: FlightAware API key not found or empty in configuration")
-    data = create_flight_data(EMPTY_FLIGHT, EMPTY_AIRCRAFT_TYPE, EMPTY_AIRLINE)
-    return jsonify(data)
+    print("WARNING: FlightAware API key not found or empty in configuration")    
+    return jsonify()
   
   AERO_API_BASE_URL = 'https://aeroapi.flightaware.com/aeroapi/'
 

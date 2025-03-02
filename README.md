@@ -1,6 +1,6 @@
 # skies-adsb
 
-### ✈️ [Current Version: 2.2.1](CHANGELOG.md) 🚁
+### ✈️ [Current Version: 2.3.0](CHANGELOG.md) 🚁
 
 ![Screenshot](docs/screenshot.png)
 
@@ -26,7 +26,7 @@ Runs on all major modern browsers (Chrome, Firefox, Safari).
 - Deployable on a [Raspberry Pi](https://www.raspberrypi.org/) on your local network
 - Compatible with existing ADS-B installations on separate hosts
 - Enhanced flight data via [FlightAware AeroAPI v4](https://flightaware.com/commercial/aeroapi/)
-- Aircraft photos integration from [Planespotters.net](https://www.planespotters.net/)
+- Aircraft photos and additional information via [Planespotters.net](https://www.planespotters.net/)
 - Custom map layers powered by [Natural Earth Data](https://www.naturalearthdata.com/), [FAA Aeronautical Data Delivery Service](https://adds-faa.opendata.arcgis.com/), and [OpenStreetMap](https://www.openstreetmap.org/)
 
 - Touch-friendly mobile web interface
@@ -97,6 +97,8 @@ I would like to give special thanks to the following people who gave me valuable
 Andre Thais CFI
 
 [Frank E. Hernandez](https://github.com/CodeMinion)
+
+I would also like to thank the authors and creators of the hardware, libraries, tools, and datasets used to create this project. None of this would have been possible without their creations.
 
 # Attribution
 

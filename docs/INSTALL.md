@@ -136,6 +136,16 @@ For additional functionality like FlightAware AeroAPI integration to get flight 
 - It is required for flight status information
 - It is not needed for basic ADS-B data visualization
 
+![Reference Polar Grid](screenshot-flightaware-flightinfo.png)
+
+_Full FlightAware AeroAPI Output_
+
+If you do not have a FlightAware AeroAPI key, the app will use aircraft registration information from planespotters.net photo API by default.
+
+![Reference Polar Grid](screenshot-planespotters-aircraft-registration.png)
+
+_Basic planespotters.net Aircraft Registration Output_
+
 # Step 7 - Set Your Geolocation Coordinates
 
 The skies-adsb app uses geolocation coordinates as a reference point for:

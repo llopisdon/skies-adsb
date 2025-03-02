@@ -11,9 +11,6 @@ https://www.google.com/search?q=about American American Airlines Inc.
 https://www.google.com/search?q=aerodrome MROC
 */
 
-// TODO periodically clear out photos
-const aircraftPhotos = {}
-
 const HUD_DEFAULT_PHOTO = "./static/Pan_Am_747.jpg"
 const NOT_AVAILABLE = "n/a"
 
@@ -29,6 +26,10 @@ class _HUD {
 
   _getHud() {
     const dialog = document.getElementById("hud-dialog")
+    const flightAwareDiv = document.querySelector("#section_flightAware")
+    const planespottersDiv = document.querySelector("#section_planespotters")
+    const telemetryDiv = document.querySelector("#section_telemetry")
+
     return {
       leftButtonContainer: document.getElementById("hud-left"),
       rightButtonContainer: document.getElementById("hud-right"),
@@ -42,16 +43,24 @@ class _HUD {
       closeButton: document.getElementById("close"),
 
       dialog: dialog,
+
+      callsign: document.querySelector("#callsign"),
+
+      flightAwareDiv: flightAwareDiv,
+      airline: flightAwareDiv.querySelector("#airline"),
+      aircraftType: flightAwareDiv.querySelector("#aircraftType"),
+      origin_long: flightAwareDiv.querySelector("#origin_long"),
+      destination_long: flightAwareDiv.querySelector("#destination_long"),
+
+      planespottersDiv: planespottersDiv,
       photo: dialog.querySelector("#photo"),
-      photographer: dialog.querySelector("#photographer"),
-      callsign: dialog.querySelector("#callsign"),
-      airline: dialog.querySelector("#airline"),
-      aircraftType: dialog.querySelector("#aircraftType"),
-      origin_long: dialog.querySelector("#origin_long"),
-      destination_long: dialog.querySelector("#destination_long"),
-      telemetry_heading: dialog.querySelector("#telemetry_heading"),
-      telemetry_ground_speed: dialog.querySelector("#telemetry_ground_speed"),
-      telemetry_altitude: dialog.querySelector("#telemetry_altitude"),
+      aircraftRegistration: planespottersDiv.querySelector("#aircraftRegistration"),
+      photographer: planespottersDiv.querySelector("#photographer"),
+
+      telemetryDiv: telemetryDiv,
+      telemetry_heading: telemetryDiv.querySelector("#telemetry_heading"),
+      telemetry_ground_speed: telemetryDiv.querySelector("#telemetry_ground_speed"),
+      telemetry_altitude: telemetryDiv.querySelector("#telemetry_altitude"),
     }
   }
 
@@ -60,9 +69,20 @@ class _HUD {
     const aircraft = this.aircraft
     this.hud.photo.src =
       aircraft.photo?.["thumbnail_large"]["src"] ?? HUD_DEFAULT_PHOTO
-    this.hud.photographer.text = `Photographer: ${aircraft.photo?.["photographer"] ?? NOT_AVAILABLE
+    this.hud.photographer.text = `PHOTOGRAPHER: ${aircraft.photo?.["photographer"] ?? NOT_AVAILABLE
       }`
     this.hud.photographer.href = `${aircraft.photo?.["link"] ?? "#"}`
+
+    const link = aircraft.photo?.["link"]?.split("?")[0]
+    if (link !== undefined) {
+      const segments = link.split("/")
+      const registrationInfo = segments[segments.length - 1]?.replace(/-/g, ' ').toUpperCase()
+      if (registrationInfo !== undefined) {
+        this.hud.aircraftRegistration.text = `REG: ${registrationInfo}`
+        this.hud.aircraftRegistration.href = `https://www.google.com/search?q=about ${registrationInfo}`
+      }
+    }
+
     this.aircraftPhotoShown = true
   }
 
@@ -78,21 +98,31 @@ class _HUD {
 
   _clearPhoto() {
     this.hud.photo.src = HUD_DEFAULT_PHOTO
-    this.hud.photographer.text = `Photographer: ${NOT_AVAILABLE}`
+    this.hud.photographer.text = `PHOTOGRAPHER: ${NOT_AVAILABLE}`
   }
 
   _clearAircraftInfo() {
     if (!this.hud) return
-    this.hud.callsign.text = NOT_AVAILABLE
-    this.hud.callsign.href = ""
+
+    this.hud.flightAwareDiv.style.display = "none"
+
+    // flight aware info
     this.hud.airline.text = NOT_AVAILABLE
     this.hud.airline.href = ""
     this.hud.aircraftType.text = NOT_AVAILABLE
     this.hud.aircraftType.href = ""
-    this.hud.origin_long.text = `Origin: ${NOT_AVAILABLE}`
+    this.hud.origin_long.text = `ORG: ${NOT_AVAILABLE}`
     this.hud.origin_long.href = ""
-    this.hud.destination_long.text = `Dest: ${NOT_AVAILABLE}`
+    this.hud.destination_long.text = `DST: ${NOT_AVAILABLE}`
     this.hud.destination_long.href = ""
+
+    // planespotters info
+    this.hud.aircraftRegistration.text = `REG: ${NOT_AVAILABLE}`
+    this.hud.aircraftRegistration.href = ""
+
+    // ads-b telemetry
+    this.hud.callsign.text = `CALLSIGN: ${NOT_AVAILABLE}`
+    this.hud.callsign.href = ""
     this.hud.telemetry_heading.text = `H: ${NOT_AVAILABLE}`
     this.hud.telemetry_ground_speed.text = `GSPD: ${NOT_AVAILABLE}`
     this.hud.telemetry_altitude.text = `ALT: ${NOT_AVAILABLE}`
@@ -102,22 +132,23 @@ class _HUD {
     if (!this.hud || this.aircraftInfoShown) return
     const aircraft = this.aircraft
     console.table(aircraft?.flightInfo)
-    this.hud.callsign.text = `${aircraft?.flightInfo?.["ident"] ?? NOT_AVAILABLE
-      }`
-    this.hud.callsign.href = `https://www.google.com/search?q=flight status ${aircraft?.flightInfo?.["ident"] ?? NOT_AVAILABLE
-      }`
-    this.hud.airline.text = `${aircraft?.flightInfo?.["airlineCallsign"] ?? NOT_AVAILABLE
-      } | ${aircraft?.flightInfo?.["airline"] ?? NOT_AVAILABLE}`
+
+    if (Object.keys(aircraft?.flightInfo ?? {}).length === 0) {
+      this.hud.flightAwareDiv.style.display = "none"
+      return
+    }
+
+    this.hud.flightAwareDiv.style.display = "block"
+
+    this.hud.airline.text = `${aircraft?.flightInfo?.["airlineCallsign"] ?? NOT_AVAILABLE} | ${aircraft?.flightInfo?.["airline"] ?? NOT_AVAILABLE}`
     this.hud.airline.href = `https://www.google.com/search?q=about ${aircraft?.flightInfo?.["airlineCallsign"]} ${aircraft?.flightInfo?.["airline"]}`
-    this.hud.aircraftType.text = `Type: ${aircraft?.flightInfo?.["type"] ?? NOT_AVAILABLE
-      } | ${aircraft?.flightInfo?.["manufacturer"] ?? NOT_AVAILABLE}`
+    this.hud.aircraftType.text = `TYPE: ${aircraft?.flightInfo?.["type"] ?? NOT_AVAILABLE} | ${aircraft?.flightInfo?.["manufacturer"] ?? NOT_AVAILABLE}`
     this.hud.aircraftType.href = `https://www.google.com/search?q=about ${aircraft?.flightInfo?.["type"]} ${aircraft?.flightInfo?.["manufacturer"]}`
-    this.hud.origin_long.text = `Origin: ${aircraft?.flightInfo?.["origin"] ?? NOT_AVAILABLE
-      }, ${aircraft?.flightInfo?.["originName"] ?? NOT_AVAILABLE}`
+    this.hud.origin_long.text = `ORG: ${aircraft?.flightInfo?.["origin"] ?? NOT_AVAILABLE}, ${aircraft?.flightInfo?.["originName"] ?? NOT_AVAILABLE}`
     this.hud.origin_long.href = `https://www.google.com/search?q=aerodrome ${aircraft?.flightInfo?.["origin"]}`
-    this.hud.destination_long.text = `Dest: ${aircraft?.flightInfo?.["destination"] ?? NOT_AVAILABLE
-      }, ${aircraft?.flightInfo?.["destinationName"] ?? NOT_AVAILABLE}`
+    this.hud.destination_long.text = `DST: ${aircraft?.flightInfo?.["destination"] ?? NOT_AVAILABLE}, ${aircraft?.flightInfo?.["destinationName"] ?? NOT_AVAILABLE}`
     this.hud.destination_long.href = `https://www.google.com/search?q=aerodrome ${aircraft?.flightInfo?.["destination"]}`
+
     this.aircraftInfoShown = true
   }
 
@@ -125,6 +156,9 @@ class _HUD {
     if (!this.hud || !this.aircraft) return
 
     const aircraft = this.aircraft
+
+    this.hud.callsign.text = `CALLSIGN: ${aircraft?.callsign ?? NOT_AVAILABLE}`
+    this.hud.callsign.href = `https://www.google.com/search?q=flight status ${aircraft?.callsign ?? NOT_AVAILABLE}`
 
     const heading = aircraft?.hdg ? aircraft.hdg + "°" : NOT_AVAILABLE
     const groundSpeed = aircraft?.spd ? aircraft.spd + " kt" : NOT_AVAILABLE
@@ -294,12 +328,6 @@ class _HUD {
     if (aircraft.photoFuture) {
       if (aircraft.photo) {
         HUD._showPhoto()
-      } else {
-        const aircraftTypeKey = aircraft.getAircraftTypeKey()
-        if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
-          aircraft.photo = aircraftPhotos[aircraftTypeKey]
-          HUD._showPhoto()
-        }
       }
       this.needsFetchAircraftPhoto = false
       return
@@ -311,6 +339,7 @@ class _HUD {
       .then((response) => response.json())
       .then((data) => {
         console.table(data)
+        aircraft.photoData = data
         if (Array.isArray(data["photos"]) && data["photos"].length > 0) {
           const photo = data["photos"][0]
           if ("thumbnail" in photo) {
@@ -320,13 +349,7 @@ class _HUD {
           }
         }
         if (!aircraft?.photo) {
-          const aircraftTypeKey = aircraft.getAircraftTypeKey()
-          if (aircraftTypeKey !== null && aircraftTypeKey in aircraftPhotos) {
-            aircraft.photo = aircraftPhotos[aircraftTypeKey]
-            HUD._showPhoto()
-          } else {
-            HUD._clearPhoto()
-          }
+          HUD._clearPhoto()
         }
       })
 
@@ -354,15 +377,9 @@ class _HUD {
       .then((response) => response.json())
       .then((data) => {
         aircraft.flightInfo = data
-        const aircraftTypeKey = aircraft.getAircraftTypeKey()
-        const hasPhoto = aircraftTypeKey in aircraftPhotos
-        if (!hasPhoto && aircraftTypeKey !== undefined && aircraft?.photo) {
-          aircraftPhotos[aircraftTypeKey] = aircraft.photo
-        }
+        this.hud.flightAwareDiv.style.display = "block"
         HUD._showAircraftInfo()
       })
-
-
 
     this.needsFetchAircraftInfo = false
   }
